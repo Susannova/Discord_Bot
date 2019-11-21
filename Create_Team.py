@@ -18,10 +18,7 @@ async def on_message(message):
         return
 
     if message.content.startswith('!create_team'):
-        print("Create a team!")
         task = message.content
-
-        print(task)
 
         task_splitted = (task.split())
         task_splitted.pop(0)
