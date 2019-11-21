@@ -9,33 +9,45 @@ client = discord.Client()
 voice_channel_id = str(client_infos["voice_channel_id"])
 
 @client.event
+async def on_ready():
+    print('We have logged in as {0.user}'.format(client))
+
+@client.event
 async def on_message(message):
     if message.author == client.user:
         return
 
     if message.content.startswith('!create_team'):
+        print("Create a team!")
         task = message.content
-        #TODO mit + und - Namen hinzufügen oder entfernen
 
-        voice_channel = client.get_channel(voice_channel_id)
-        members = voice_channel.members
-        num_players = len(members)
+        print(task)
 
-        team1 = random.sample(members, int(num_players / 2))
+        task_splitted = (task.split())
+        task_splitted.pop(0)
+
+        players = task_splitted
+        num_players = len(players)
+
+        team1 = random.sample(players, int(num_players / 2))
+        team2 = players
 
         for player in team1:
-            members.remove(player)
+            team2.remove(player)
         
-        string_team1 = "Team1: "
+        teams_message = "Team1:\n"
         for player in team1:
-            string_team1 + str(player.name)
+            teams_message += player + "\n"
         
-        string_team2 = "Team2: "
+        teams_message += "\nTeam2:\n"
         for player in team2:
-            string_team2 + str(player.name)
+            teams_message += player + "\n"
         
-        await message.channel.send(string_team1)
-        await message.channel.send(string_team2)
+        await message.channel.send(teams_message)
+    
+    # elif message.content.startswith('!end'):
+    #     await message.channel.send('Bye!')
+    #     await client.logout()
 
 print("Start Client")
 client.run(str(client_infos["client_token"]))
