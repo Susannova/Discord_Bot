@@ -24,7 +24,7 @@ async def on_message(message):
     kraut9 = guildList.pop(0)
     if message.author == client.user:
         return
-    if message.content.startswith(COMMAND_CREATE_TEAM) and str(message.channel) == str(CREATE_TEAM_CHANNEL):
+    if message.content.startswith(COMMAND_CREATE_TEAM) and (str(message.channel) == str(CREATE_TEAM_CHANNEL) or str(message.channel) == 'bot'):
         for voiceChannel in kraut9.voice_channels:
             if voiceChannel.name == VOICE_CHANNEL_NAME:
                 bucht = voiceChannel
