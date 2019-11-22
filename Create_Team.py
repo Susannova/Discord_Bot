@@ -2,11 +2,13 @@ import discord
 import random
 import json
 
-client_infos = json.load(open('client_infos.json', 'r'))
+#constants
+VOICE_CHANNEL_NAME = "Bucht der Liebe"
 
+#init
+client_infos = json.load(open('client_infos.json', 'r'))
 client = discord.Client()
 
-voice_channel_id = str(client_infos["voice_channel_id"])
 
 @client.event
 async def on_ready():
@@ -17,13 +19,18 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('!create_team'):
-        task = message.content
+    if message.content.startswith('?create_team'):
+        guildList = client.guilds
+        kraut9 = guildList.pop(0)
+        
+        for voiceChannel in kraut9.voice_channels:
+            if voiceChannel.name == VOICE_CHANNEL_NAME:
+                bucht = voiceChannel
 
-        task_splitted = (task.split())
-        task_splitted.pop(0)
-
-        players = task_splitted
+        players = []
+        for mem in bucht.members:
+            players.append(mem.name)
+        
         num_players = len(players)
 
         team1 = random.sample(players, int(num_players / 2))
