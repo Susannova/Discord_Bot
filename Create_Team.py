@@ -4,6 +4,8 @@ import json
 
 #constants
 VOICE_CHANNEL_NAME = "Bucht der Liebe"
+COMMAND_CREATE_TEAM = '?create_team'
+AUTO_REACT_PATTERN = 'will League of Legnds spielen. Kommt gegen'
 
 #init
 client_infos = json.load(open('client_infos.json', 'r'))
@@ -19,7 +21,7 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    if message.content.startswith('?create_team'):
+    if message.content.startswith(COMMAND_CREATE_TEAM):
         guildList = client.guilds
         kraut9 = guildList.pop(0)
         
@@ -48,6 +50,35 @@ async def on_message(message):
             teams_message += player + "\n"
         
         await message.channel.send(teams_message)
+
+    if message.content.find(AUTO_REACT_PATTERN) > -1:
+        guildList = client.guilds
+        kraut9 = guildList.pop(0)
+        k9Emojis = kraut9.emojis
+
+        for emoj in k9Emojis:
+            if emoj.name == "fill":
+                await message.add_reaction(emoj)
+            if emoj.name == "jgl":
+                await message.add_reaction(emoj)
+            if emoj.name == "topp":
+                await message.add_reaction(emoj)
+            if emoj.name == "mid":
+                await message.add_reaction(emoj)
+            if emoj.name == "supp":
+                await message.add_reaction(emoj)
+            if emoj.name == "adc":
+                await message.add_reaction(emoj)
+            
+        
+        #await message.add_reaction(client.get_emoji(647439883022893067))
+
+      
+
+       
+
+
+        
     
     # elif message.content.startswith('!end'):
     #     await message.channel.send('Bye!')
