@@ -13,6 +13,27 @@ EMOJI_ID_LIST = [644252873672359946, 644254018377482255, 644252861827514388, 644
 #init
 client = discord.Client()
 
+#functions
+def create_team(players):
+    num_players = len(players)  
+
+    team1 = random.sample(players, int(num_players / 2))
+    team2 = players
+
+    for player in team1:
+        team2.remove(player)
+    
+    teams_message = "Blue Side:\n"
+    for player in team1:
+        teams_message += player + "\n"
+    
+    teams_message += "\nRed Side:\n"
+    for player in team2:
+        teams_message += player + "\n"
+    
+    return teams_message
+
+
 
 @client.event
 async def on_ready():
@@ -29,27 +50,11 @@ async def on_message(message):
             if voiceChannel.name == VOICE_CHANNEL_NAME:
                 bucht = voiceChannel
 
-        players = []
+        players_list = []
         for mem in bucht.members:
-            players.append(mem.name)
+            players_list.append(mem.name)
         
-        num_players = len(players)  
-
-        team1 = random.sample(players, int(num_players / 2))
-        team2 = players
-
-        for player in team1:
-            team2.remove(player)
-        
-        teams_message = "Blue Side:\n"
-        for player in team1:
-            teams_message += player + "\n"
-        
-        teams_message += "\nRed Side:\n"
-        for player in team2:
-            teams_message += player + "\n"
-        
-        await message.channel.send(teams_message)
+        await message.channel.send(create_team(players_list))
 
     if message.content.find(AUTO_REACT_PATTERN) > -1:
         for emoj in EMOJI_ID_LIST:
