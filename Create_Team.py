@@ -3,14 +3,14 @@ import random
 import json
 
 #constants
-VOICE_CHANNEL_NAME = "InHouse Planing"
-CREATE_TEAM_CHANNEL = 'intern-planing'
-COMMAND_CREATE_TEAM = '?create-team'
-AUTO_REACT_PATTERN = ' will League of Legends spielen. Kommt gegen '
+constants_input = json.load(open('client_infos.json', 'r'))
+VOICE_CHANNEL_NAME = constants_input["VOICE_CHANNEL_NAME"]
+CREATE_TEAM_CHANNEL = constants_input['CREATE_TEAM_CHANNEL']
+COMMAND_CREATE_TEAM = constants_input["COMMAND_CREATE_TEAM"]
+AUTO_REACT_PATTERN = constants_input["AUTO_REACT_PATTERN"]
 EMOJI_ID_LIST = [644252873672359946, 644254018377482255, 644252861827514388, 644252853644296227, 644252146023530506, 644575356908732437]
 
 #init
-client_infos = json.load(open('client_infos.json', 'r'))
 client = discord.Client()
 
 
@@ -62,5 +62,5 @@ async def on_message(message):
     #     await client.logout()
 
 print("Start Client")
-client.run(str(client_infos["client_token"]))
+client.run(str(constants_input["client_token"]))
 print("End")

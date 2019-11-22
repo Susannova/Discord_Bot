@@ -1,3 +1,7 @@
 {
-    "client_token": "NjQ0MjkzOTkxMTQzMzA5MzMz.XdgN9Q.Ruhno__WPc3XPhNZZ0RGV6qZMgw" 
+    "client_token": "",
+    "VOICE_CHANNEL_NAME": "InHouse Planing",
+    "CREATE_TEAM_CHANNEL": "intern-planing",
+    "COMMAND_CREATE_TEAM": "?create-team",
+    "AUTO_REACT_PATTERN": " will League of Legends spielen. Kommt gegen "
 }
