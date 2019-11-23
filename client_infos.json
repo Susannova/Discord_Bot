@@ -12,6 +12,7 @@
     "TOGGLE_AUTO_DELETE": true,
     "TOGGLE_COMMAND_ONLY": true,
     "TOGGLE_AUTO_REACT": true,
+    "TOGGLE_AUTO_DM": true,
 
     "MESSAGE_TEAM_1": "Blue Side:\n",
     "MESSAGE_TEAM_2": "\nRed Side:\n",

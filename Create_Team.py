@@ -17,6 +17,7 @@ CHANNEL_CREATE_PLAY_REQUEST = constants_input["CHANNEL_CREATE_PLAY_REQUEST"]
 TOGGLE_AUTO_DELETE = constants_input["TOGGLE_AUTO_DELETE"]
 TOGGLE_COMMAND_ONLY = constants_input["TOGGLE_COMMAND_ONLY"]
 TOGGLE_AUTO_REACT = constants_input["TOGGLE_AUTO_REACT"]
+TOGGLE_AUTO_DM = constants_input["TOGGLE_AUTO_DM"]
 #message
 MESSAGE_TEAM_1 = constants_input["MESSAGE_TEAM_1"]
 MESSAGE_TEAM_2 = constants_input["MESSAGE_TEAM_2"]
@@ -99,16 +100,16 @@ async def on_message(message):
 # automatically dms user if a reaction in NOTIFIY_ON_REACT_CHANNEL was added with a NOTIFY_ON_REACT_PURGE_TIMER delay
 @client.event
 async def on_reaction_add(reaction, user):
-    if user == client.user:
+    if user == client.user or user.name == "Secret Kraut9 Leader":
         return
     global user_cache
     scheduled_purge_for_notifiy_on_react()
     message_sender_id = int((reaction.message.content.split(None, 1)[1]).split(None,1)[0][3:-1])
     message_sender = client.get_user(message_sender_id)
-    if(str(reaction.message.channel) == CHANNEL_NOTIFY_ON_REACT or str(reaction.message.channel.name) == 'bot' and  message_sender != user and user not in user_cache and user.name != "Secret Kraut9 Leader"):
+    #or str(reaction.message.channel.name) == 'bot'
+    if(TOGGLE_AUTO_DM and str(reaction.message.channel.name) == CHANNEL_NOTIFY_ON_REACT and message_sender != user and user not in user_cache):
         if reaction.message.author.name == "Dyno":
             #only works for the specfied message format: '@everyone @user [rest of msg]'
-            
             await message_sender.send('{0} hat auf dein Play-Request reagiert: {1} '.format(user.name, str(reaction.emoji)))
     user_cache.append(user)
 
