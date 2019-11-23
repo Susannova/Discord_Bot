@@ -16,6 +16,7 @@ CHANNEL_CREATE_PLAY_REQUEST = constants_input["CHANNEL_CREATE_PLAY_REQUEST"]
 #toggle
 TOGGLE_AUTO_DELETE = constants_input["TOGGLE_AUTO_DELETE"]
 TOGGLE_COMMAND_ONLY = constants_input["TOGGLE_COMMAND_ONLY"]
+TOGGLE_AUTO_REACT = constants_input["TOGGLE_AUTO_REACT"]
 #message
 MESSAGE_TEAM_1 = constants_input["MESSAGE_TEAM_1"]
 MESSAGE_TEAM_2 = constants_input["MESSAGE_TEAM_2"]
@@ -62,7 +63,7 @@ async def on_message(message):
     if message.author == client.user:
         return
     # create team command
-    elif message.content.startswith(COMMAND_CREATE_TEAM) and (str(message.channel) == str(CHANNEL_CREATE_TEAM_TEXT) or str(message.channel) == 'bot'):
+    elif message.content.startswith(COMMAND_CREATE_TEAM) and (str(message.channel.name) == str(CHANNEL_CREATE_TEAM_TEXT) or str(message.channel.name) == 'bot'):
         for voice_channel_iterator in kraut9.voice_channels:
             if voice_channel_iterator.name == CHANNEL_CREATE_TEAM_VOICE:
                 voice_channel = voice_channel_iterator
@@ -76,14 +77,14 @@ async def on_message(message):
             await message.delete()
 
     # auto react command
-    elif message.content.find(AUTO_REACT_PATTERN) > -1:
+    elif message.content.find(AUTO_REACT_PATTERN) > -1 and TOGGLE_AUTO_REACT:
         for emoji_iterator in EMOJI_ID_LIST:
                 await message.add_reaction(client.get_emoji(emoji_iterator))
         
         await message.add_reaction(AUTO_REACT_PASS_EMOJI)
         
     # testmsg command for debugging; can be deleted
-    elif message.content.startswith("?testmsg"):
+    elif message.content.startswith("?testmsg") and message.channel.name == 'bot':
         await message.channel.send("test")
         await message.add_reaction(AUTO_REACT_PASS_EMOJI)
      
@@ -92,7 +93,7 @@ async def on_message(message):
         await message.delete()
     # elif message.content.startswith('!end'):
     #     await message.channel.send('Bye!')
-    #     await client.logout()
+    #     await  client.logout()
         
    
 # automatically dms user if a reaction in NOTIFIY_ON_REACT_CHANNEL was added with a NOTIFY_ON_REACT_PURGE_TIMER delay
@@ -102,8 +103,13 @@ async def on_reaction_add(reaction, user):
         return
     global user_cache
     scheduled_purge_for_notifiy_on_react()
-    if(str(reaction.message.channel) == CHANNEL_NOTIFY_ON_REACT  or str(reaction.message.channel) == 'bot' and user not in user_cache and reaction.message.author != user):
-        await reaction.message.author.send('{0} hat auf dein Play-Request reagiert: {1} '.format(user.name, str(reaction.emoji)))
+    message_sender_id = int((reaction.message.content.split(None, 1)[1]).split(None,1)[0][3:-1])
+    message_sender = client.get_user(message_sender_id)
+    if(str(reaction.message.channel) == CHANNEL_NOTIFY_ON_REACT or str(reaction.message.channel.name) == 'bot' and  message_sender != user and user not in user_cache and user.name != "Secret Kraut9 Leader"):
+        if reaction.message.author.name == "Dyno":
+            #only works for the specfied message format: '@everyone @user [rest of msg]'
+            
+            await message_sender.send('{0} hat auf dein Play-Request reagiert: {1} '.format(user.name, str(reaction.emoji)))
     user_cache.append(user)
 
 # NOTIFIY_ON_REACT Delay utility function
