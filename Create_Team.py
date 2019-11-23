@@ -87,10 +87,12 @@ async def on_message(message):
 # automatically dms user if a reaction in NOTIFIY_ON_REACT_CHANNEL was added with a NOTIFY_ON_REACT_PURGE_TIMER delay
 @client.event
 async def on_reaction_add(reaction, user):
+    if user == client.user:
+        return
     global user_cache
     scheduled_purge_for_notifiy_on_react()
-    if(str(reaction.message.channel) == NOTIFY_ON_REACT_CHANNEL and user not in user_cache and reaction.message.author != user):
-        await user.send('{0} hat auf dein Play-Request reagiert: {1} '.format(reaction.message.author.name, str(reaction.emoji)))
+    if(str(reaction.message.channel) == NOTIFY_ON_REACT_CHANNEL  or str(reaction.message.channel) == 'bot' and user not in user_cache and reaction.message.author != user):
+        await reaction.message.author.send('{0} hat auf dein Play-Request reagiert: {1} '.format(user.name, str(reaction.emoji)))
     user_cache.append(user)
 
 # NOTIFIY_ON_REACT Delay utility function
