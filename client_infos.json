@@ -1,15 +1,24 @@
 {
     "client_token": "",
 
-    "CREATE_TEAM_VOICE_CHANNEL": "InHouse Planing",
-    "CREATE_TEAM_TEXT_CHANNEL": "intern-planing",
     "COMMAND_CREATE_TEAM": "?create-team",
-    "AUTO_REACT_PATTERN": " will League of Legends spielen. Kommt gegen ",
-    "TEAM_1_MESSAGE": "Blue Side:\n",
-    "TEAM_2_MESSAGE": "\nRed Side:\n",
-    "NOTIFY_ON_REACT_CHANNEL": "play-requests",
-    "NOTIFY_ON_REACT_PURGE_TIMER": 15.0,
-    "AUTO_DELETE_COMMAND": true
+    "COMMAND_PLAY_LOL": "?play-lol",
+
+    "CHANNEL_CREATE_TEAM_VOICE": "InHouse Planing",
+    "CHANNEL_CREATE_TEAM_TEXT": "intern-planing",
+    "CHANNEL_NOTIFY_ON_REACT": "play-requests",
+    "CHANNEL_CREATE_PLAY_REQUEST": "create-play-requests",
+
+    "TOGGLE_AUTO_DELETE": true,
+    "TOGGLE_COMMAND_ONLY": true,
+
+    "MESSAGE_TEAM_1": "Blue Side:\n",
+    "MESSAGE_TEAM_2": "\nRed Side:\n",
+
+    "AUTO_REACT_PATTERN": " will League of Legends spielen. Kommt gegen "
+  
+
+
 
 
 }
