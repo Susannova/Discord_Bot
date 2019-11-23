@@ -1,9 +1,14 @@
 {
     "client_token": "",
 
-    "VOICE_CHANNEL_NAME": "InHouse Planing",
-    "CREATE_TEAM_CHANNEL": "intern-planing",
+    "CREATE_TEAM_VOICE_CHANNEL": "InHouse Planing",
+    "CREATE_TEAM_TEXT_CHANNEL": "intern-planing",
     "COMMAND_CREATE_TEAM": "?create-team",
-    "AUTO_REACT_PATTERN": " will League of Legends spielen. Kommt gegen "
+    "AUTO_REACT_PATTERN": " will League of Legends spielen. Kommt gegen ",
+    "TEAM_1_MESSAGE": "Blue Side:\n",
+    "TEAM_2_MESSAGE": "\nRed Side:\n",
+    "NOTIFY_ON_REACT_CHANNEL": "play-requests",
+    "NOTIFY_ON_REACT_PURGE_TIMER": 15.0
+
 
 }

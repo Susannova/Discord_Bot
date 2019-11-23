@@ -4,25 +4,26 @@ import json
 import time
 
 # constants
-CREATE_TEAM_VOICE_CHANNEL = "InHouse Planing"
-CREATE_TEAM_TEXT_CHANNEL = 'intern-planing'
-COMMAND_CREATE_TEAM = '?create-team'
-AUTO_REACT_PATTERN = ' will League of Legends spielen. Kommt gegen '
+constants_input = json.load(open('client_infos.json', 'r'))
+CREATE_TEAM_VOICE_CHANNEL =  constants_input["CREATE_TEAM_VOICE_CHANNEL"]
+CREATE_TEAM_TEXT_CHANNEL = constants_input["CREATE_TEAM_TEXT_CHANNEL"]
+COMMAND_CREATE_TEAM = constants_input["COMMAND_CREATE_TEAM"]
+AUTO_REACT_PATTERN = constants_input["AUTO_REACT_PATTERN"]
 AUTO_REACT_PASS_EMOJI = '❌'
-TEAM_1_MESSAGE = "Blue Side:\n"
-TEAM_2_MESSAGE = "Red Side:\n"
-NOTIFY_ON_REACT_CHANNEL= 'play-requests'
-NOTIFY_ON_REACT_PURGE_TIMER = 15.0
+TEAM_1_MESSAGE = constants_input["TEAM_1_MESSAGE"]
+TEAM_2_MESSAGE = constants_input["TEAM_2_MESSAGE"]
+NOTIFY_ON_REACT_CHANNEL= constants_input["NOTIFY_ON_REACT_CHANNEL"]
+NOTIFY_ON_REACT_PURGE_TIMER = constants_input["NOTIFY_ON_REACT_PURGE_TIMER"]
 # order: top, jgl, mid, adc, supp, fill
 EMOJI_ID_LIST = [644252873672359946, 644254018377482255, 644252861827514388, 644252853644296227, 644252146023530506, 644575356908732437]
 
 
-#init
+# init
 client = discord.Client()
 user_cache = []
 time_since_last_msg = 0
-
-#functions
+    
+# functions
 def create_team(players):
     num_players = len(players)  
 
@@ -32,11 +33,11 @@ def create_team(players):
     for player in team1:
         team2.remove(player)
     
-    teams_message = "Blue Side:\n"
+    teams_message = TEAM_1_MESSAGE
     for player in team1:
         teams_message += player + "\n"
     
-    teams_message += "\nRed Side:\n"
+    teams_message += TEAM_2_MESSAGE
     for player in team2:
         teams_message += player + "\n"
     
@@ -55,14 +56,14 @@ async def on_message(message):
         return
 
     # create team command
-    if message.content.startswith(COMMAND_CREATE_TEAM) and (str(message.channel) == str(CREATE_TEAM_CHANNEL) or str(message.channel) == 'bot'):
-        for voiceChannel in kraut9.voice_channels:
-            if voiceChannel.name == VOICE_CHANNEL_NAME:
-                bucht = voiceChannel
+    if message.content.startswith(COMMAND_CREATE_TEAM) and (str(message.channel) == str(CREATE_TEAM_TEXT_CHANNEL) or str(message.channel) == 'bot'):
+        for voice_channel_iterator in kraut9.voice_channels:
+            if voice_channel_iterator.name == CREATE_TEAM_VOICE_CHANNEL:
+                voice_channel = voice_channel_iterator
 
         players_list = []
-        for mem in bucht.members:
-            players_list.append(mem.name)
+        for member in voice_channel.members:
+            players_list.append(member.name)
 
         await message.channel.send(create_team(players_list))
 
