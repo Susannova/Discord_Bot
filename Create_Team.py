@@ -5,18 +5,27 @@ import time
 
 # constants
 constants_input = json.load(open('client_infos.json', 'r'))
-CREATE_TEAM_VOICE_CHANNEL =  constants_input["CREATE_TEAM_VOICE_CHANNEL"]
-CREATE_TEAM_TEXT_CHANNEL = constants_input["CREATE_TEAM_TEXT_CHANNEL"]
+#commands
 COMMAND_CREATE_TEAM = constants_input["COMMAND_CREATE_TEAM"]
+COMMAND_PLAY_LOL = constants_input["COMMAND_PLAY_LOL"]
+#channel
+CHANNEL_CREATE_TEAM_VOICE =  constants_input["CHANNEL_CREATE_TEAM_VOICE"]
+CHANNEL_CREATE_TEAM_TEXT = constants_input["CHANNEL_CREATE_TEAM_TEXT"]
+CHANNEL_NOTIFY_ON_REACT= constants_input["CHANNEL_NOTIFY_ON_REACT"]
+CHANNEL_CREATE_PLAY_REQUEST = constants_input["CHANNEL_CREATE_PLAY_REQUEST"]
+#toggle
+TOGGLE_AUTO_DELETE = constants_input["TOGGLE_AUTO_DELETE"]
+TOGGLE_COMMAND_ONLY = constants_input["TOGGLE_COMMAND_ONLY"]
+#message
+MESSAGE_TEAM_1 = constants_input["MESSAGE_TEAM_1"]
+MESSAGE_TEAM_2 = constants_input["MESSAGE_TEAM_2"]
+#misc
 AUTO_REACT_PATTERN = constants_input["AUTO_REACT_PATTERN"]
 AUTO_REACT_PASS_EMOJI = '❌'
-TEAM_1_MESSAGE = constants_input["TEAM_1_MESSAGE"]
-TEAM_2_MESSAGE = constants_input["TEAM_2_MESSAGE"]
-NOTIFY_ON_REACT_CHANNEL= constants_input["NOTIFY_ON_REACT_CHANNEL"]
+
 NOTIFY_ON_REACT_PURGE_TIMER = constants_input["NOTIFY_ON_REACT_PURGE_TIMER"]
 # order: top, jgl, mid, adc, supp, fill
 EMOJI_ID_LIST = [644252873672359946, 644254018377482255, 644252861827514388, 644252853644296227, 644252146023530506, 644575356908732437]
-
 
 # init
 client = discord.Client()
@@ -26,18 +35,17 @@ time_since_last_msg = 0
 # functions
 def create_team(players):
     num_players = len(players)  
-
     team1 = random.sample(players, int(num_players / 2))
     team2 = players
 
     for player in team1:
         team2.remove(player)
     
-    teams_message = TEAM_1_MESSAGE
+    teams_message = MESSAGE_TEAM_1
     for player in team1:
         teams_message += player + "\n"
     
-    teams_message += TEAM_2_MESSAGE
+    teams_message += MESSAGE_TEAM_2
     for player in team2:
         teams_message += player + "\n"
     
@@ -54,11 +62,10 @@ async def on_message(message):
     kraut9 = guild_list.pop(0)
     if message.author == client.user:
         return
-
     # create team command
-    if message.content.startswith(COMMAND_CREATE_TEAM) and (str(message.channel) == str(CREATE_TEAM_TEXT_CHANNEL) or str(message.channel) == 'bot'):
+    elif message.content.startswith(COMMAND_CREATE_TEAM) and (str(message.channel) == str(CHANNEL_CREATE_TEAM_TEXT) or str(message.channel) == 'bot'):
         for voice_channel_iterator in kraut9.voice_channels:
-            if voice_channel_iterator.name == CREATE_TEAM_VOICE_CHANNEL:
+            if voice_channel_iterator.name == CHANNEL_CREATE_TEAM_VOICE:
                 voice_channel = voice_channel_iterator
 
         players_list = []
@@ -66,6 +73,8 @@ async def on_message(message):
             players_list.append(member.name)
 
         await message.channel.send(create_team(players_list))
+        if(TOGGLE_AUTO_DELETE):
+            await message.delete()
 
     # auto react command
     elif message.content.find(AUTO_REACT_PATTERN) > -1:
@@ -78,12 +87,15 @@ async def on_message(message):
     elif message.content.startswith("?testmsg"):
         await message.channel.send("test")
         await message.add_reaction(AUTO_REACT_PASS_EMOJI)
-
+     
+     # deletes messages that are not commands in channel create-play-requests
+    elif message.content.startswith(COMMAND_PLAY_LOL) == False and (str(message.channel) == str(CHANNEL_CREATE_PLAY_REQUEST)):
+        await message.delete()
     # elif message.content.startswith('!end'):
     #     await message.channel.send('Bye!')
     #     await client.logout()
-
-
+        
+   
 # automatically dms user if a reaction in NOTIFIY_ON_REACT_CHANNEL was added with a NOTIFY_ON_REACT_PURGE_TIMER delay
 @client.event
 async def on_reaction_add(reaction, user):
@@ -91,7 +103,7 @@ async def on_reaction_add(reaction, user):
         return
     global user_cache
     scheduled_purge_for_notifiy_on_react()
-    if(str(reaction.message.channel) == NOTIFY_ON_REACT_CHANNEL  or str(reaction.message.channel) == 'bot' and user not in user_cache and reaction.message.author != user):
+    if(str(reaction.message.channel) == CHANNEL_NOTIFY_ON_REACT  or str(reaction.message.channel) == 'bot' and user not in user_cache and reaction.message.author != user):
         await reaction.message.author.send('{0} hat auf dein Play-Request reagiert: {1} '.format(user.name, str(reaction.emoji)))
     user_cache.append(user)
 

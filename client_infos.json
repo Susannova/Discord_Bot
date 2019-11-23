@@ -8,7 +8,8 @@
     "TEAM_1_MESSAGE": "Blue Side:\n",
     "TEAM_2_MESSAGE": "\nRed Side:\n",
     "NOTIFY_ON_REACT_CHANNEL": "play-requests",
-    "NOTIFY_ON_REACT_PURGE_TIMER": 15.0
+    "NOTIFY_ON_REACT_PURGE_TIMER": 15.0,
+    "AUTO_DELETE_COMMAND": true
 
 
 }
