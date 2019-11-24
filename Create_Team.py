@@ -3,36 +3,6 @@ import random
 import json
 import time
 
-# constants
-constants_input = json.load(open('configuration.json', 'r'))
-#commands
-COMMAND_CREATE_TEAM = constants_input["COMMAND_CREATE_TEAM"]
-COMMAND_PLAY_LOL = constants_input["COMMAND_PLAY_LOL"]
-#channel
-CHANNEL_CREATE_TEAM_VOICE =  constants_input["CHANNEL_CREATE_TEAM_VOICE"]
-CHANNEL_CREATE_TEAM_TEXT = constants_input["CHANNEL_CREATE_TEAM_TEXT"]
-CHANNEL_PLAY_REQUESTS= constants_input["CHANNEL_PLAY_REQUESTS"]
-#toggle
-TOGGLE_AUTO_DELETE = constants_input["TOGGLE_AUTO_DELETE"]
-TOGGLE_COMMAND_ONLY = constants_input["TOGGLE_COMMAND_ONLY"]
-TOGGLE_AUTO_REACT = constants_input["TOGGLE_AUTO_REACT"]
-TOGGLE_AUTO_DM = constants_input["TOGGLE_AUTO_DM"]
-#message
-MESSAGE_TEAM_1 = constants_input["MESSAGE_TEAM_1"]
-MESSAGE_TEAM_2 = constants_input["MESSAGE_TEAM_2"]
-#misc
-AUTO_REACT_PATTERN = constants_input["AUTO_REACT_PATTERN"]
-VERSION = constants_input["VERSION"]
-AUTO_REACT_PASS_EMOJI = '❌'
-NOTIFY_ON_REACT_PURGE_TIMER = 15.0
-# order: top, jgl, mid, adc, supp, fill
-EMOJI_ID_LIST = [644252873672359946, 644254018377482255, 644252861827514388, 644252853644296227, 644252146023530506, 644575356908732437]
-
-# init
-client = discord.Client()
-user_cache = []
-time_since_last_msg = 0
-    
 # functions
 def create_team(players):
     num_players = len(players)  
@@ -51,6 +21,66 @@ def create_team(players):
         teams_message += player + "\n"
     
     return teams_message
+ 
+def set_constants():
+    constants_input = json.load(open('configuration.json', 'r'))
+    #commands
+    global COMMAND_CREATE_TEAM
+    global COMMAND_PLAY_LOL
+    
+    #channel
+    global CHANNEL_CREATE_TEAM_VOICE
+    global CHANNEL_CREATE_TEAM_TEXT
+    global CHANNEL_PLAY_REQUESTS
+    
+    #toggle
+    global TOGGLE_AUTO_DELETE
+    global TOGGLE_COMMAND_ONLY
+    global TOGGLE_AUTO_REACT
+    global TOGGLE_AUTO_DM
+
+    #message
+    global MESSAGE_TEAM_1
+    global MESSAGE_TEAM_2
+
+    #misc
+    global AUTO_REACT_PATTERN
+    global VERSION
+    global AUTO_REACT_PASS_EMOJI
+    global NOTIFY_ON_REACT_PURGE_TIMER
+    
+    # order: top, jgl, mid, adc, supp, fill
+    global EMOJI_ID_LIST
+
+    COMMAND_CREATE_TEAM = constants_input["COMMAND_CREATE_TEAM"]
+    COMMAND_PLAY_LOL = constants_input["COMMAND_PLAY_LOL"]
+    
+    CHANNEL_CREATE_TEAM_VOICE =  constants_input["CHANNEL_CREATE_TEAM_VOICE"]
+    CHANNEL_CREATE_TEAM_TEXT = constants_input["CHANNEL_CREATE_TEAM_TEXT"]
+    CHANNEL_PLAY_REQUESTS= constants_input["CHANNEL_PLAY_REQUESTS"]
+
+    TOGGLE_AUTO_DELETE = constants_input["TOGGLE_AUTO_DELETE"]
+    TOGGLE_COMMAND_ONLY = constants_input["TOGGLE_COMMAND_ONLY"]
+    TOGGLE_AUTO_REACT = constants_input["TOGGLE_AUTO_REACT"]
+    TOGGLE_AUTO_DM = constants_input["TOGGLE_AUTO_DM"]
+
+    MESSAGE_TEAM_1 = constants_input["MESSAGE_TEAM_1"]
+    MESSAGE_TEAM_2 = constants_input["MESSAGE_TEAM_2"]
+
+    AUTO_REACT_PATTERN = constants_input["AUTO_REACT_PATTERN"]
+    VERSION = constants_input["VERSION"]
+    AUTO_REACT_PASS_EMOJI = '❌'
+    NOTIFY_ON_REACT_PURGE_TIMER = 15.0
+
+    EMOJI_ID_LIST = [644252873672359946, 644254018377482255, 644252861827514388, 644252853644296227, 644252146023530506, 644575356908732437]
+
+
+
+# init
+client = discord.Client()
+user_cache = []
+time_since_last_msg = 0
+set_constants()
 
 @client.event
 async def on_ready():
@@ -84,13 +114,20 @@ async def on_message(message):
         
         await message.add_reaction(AUTO_REACT_PASS_EMOJI)
         
-    # testmsg command for debugging; can be deleted
-    elif message.content.startswith("?testmsg") and message.channel.name == 'bot':
-        await message.channel.send("test")
-        await message.add_reaction(AUTO_REACT_PASS_EMOJI)
+    elif message.channel.name == 'bot':
+        # testmsg command for debugging; can be deleted
+        if message.content.startswith("?testmsg"):
+            await message.channel.send("test")
+            await message.add_reaction(AUTO_REACT_PASS_EMOJI)
 
-    elif message.content.startswith("?version") and message.channel.name == 'bot':
-        await message.channel.send(VERSION)
+        elif message.content.startswith("?version"):
+            await message.channel.send(VERSION)
+
+        elif message.content.startswith("?reload_config"):
+            await message.channel.send("Reload configuration.json:")
+            set_constants()
+            await message.channel.send("Done.")
+
      
      # deletes messages that are not commands in channel create-play-requests
     elif message.content.startswith(COMMAND_PLAY_LOL) == False and (str(message.channel) == str(CHANNEL_PLAY_REQUESTS)):
@@ -127,5 +164,5 @@ def scheduled_purge_for_notifiy_on_react():
 
 print("Start Client")
 bot = json.load(open('bot.json', 'r'))
-client.run(str(bot["debug_token"]))
+client.run(str(bot["token"]))
 print("End")
