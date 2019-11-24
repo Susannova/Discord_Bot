@@ -6,8 +6,7 @@
 
     "CHANNEL_CREATE_TEAM_VOICE": "InHouse Planing",
     "CHANNEL_CREATE_TEAM_TEXT": "intern-planing",
-    "CHANNEL_NOTIFY_ON_REACT": "play-requests",
-    "CHANNEL_CREATE_PLAY_REQUEST": "create-play-requests",
+    "CHANNEL_PLAY_REQUESTS": "play-requests",
 
     "TOGGLE_AUTO_DELETE": true,
     "TOGGLE_COMMAND_ONLY": true,
@@ -17,7 +16,8 @@
     "MESSAGE_TEAM_1": "Blue Side:\n",
     "MESSAGE_TEAM_2": "\nRed Side:\n",
 
-    "AUTO_REACT_PATTERN": " will League of Legends spielen. Kommt gegen "
+    "AUTO_REACT_PATTERN": " will League of Legends spielen. Kommt gegen ",
+    "VERSION": "1.0"
   
 
 

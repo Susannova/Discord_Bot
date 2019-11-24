@@ -11,8 +11,7 @@ COMMAND_PLAY_LOL = constants_input["COMMAND_PLAY_LOL"]
 #channel
 CHANNEL_CREATE_TEAM_VOICE =  constants_input["CHANNEL_CREATE_TEAM_VOICE"]
 CHANNEL_CREATE_TEAM_TEXT = constants_input["CHANNEL_CREATE_TEAM_TEXT"]
-CHANNEL_NOTIFY_ON_REACT= constants_input["CHANNEL_NOTIFY_ON_REACT"]
-CHANNEL_CREATE_PLAY_REQUEST = constants_input["CHANNEL_CREATE_PLAY_REQUEST"]
+CHANNEL_PLAY_REQUESTS= constants_input["CHANNEL_PLAY_REQUESTS"]
 #toggle
 TOGGLE_AUTO_DELETE = constants_input["TOGGLE_AUTO_DELETE"]
 TOGGLE_COMMAND_ONLY = constants_input["TOGGLE_COMMAND_ONLY"]
@@ -23,6 +22,7 @@ MESSAGE_TEAM_1 = constants_input["MESSAGE_TEAM_1"]
 MESSAGE_TEAM_2 = constants_input["MESSAGE_TEAM_2"]
 #misc
 AUTO_REACT_PATTERN = constants_input["AUTO_REACT_PATTERN"]
+VERSION = constants_input["VERSION"]
 AUTO_REACT_PASS_EMOJI = '❌'
 NOTIFY_ON_REACT_PURGE_TIMER = 15.0
 # order: top, jgl, mid, adc, supp, fill
@@ -88,9 +88,12 @@ async def on_message(message):
     elif message.content.startswith("?testmsg") and message.channel.name == 'bot':
         await message.channel.send("test")
         await message.add_reaction(AUTO_REACT_PASS_EMOJI)
+
+    elif message.content.startswith("?version") and message.channel.name == 'bot':
+        await message.channel.send(VERSION)
      
      # deletes messages that are not commands in channel create-play-requests
-    elif message.content.startswith(COMMAND_PLAY_LOL) == False and (str(message.channel) == str(CHANNEL_CREATE_PLAY_REQUEST)):
+    elif message.content.startswith(COMMAND_PLAY_LOL) == False and (str(message.channel) == str(CHANNEL_PLAY_REQUESTS)):
         await message.delete()
     # elif message.content.startswith('!end'):
     #     await message.channel.send('Bye!')
@@ -107,7 +110,7 @@ async def on_reaction_add(reaction, user):
     message_sender_id = int((reaction.message.content.split(None, 1)[1]).split(None,1)[0][3:-1])
     message_sender = client.get_user(message_sender_id)
     #or str(reaction.message.channel.name) == 'bot'
-    if(TOGGLE_AUTO_DM and str(reaction.message.channel.name) == CHANNEL_NOTIFY_ON_REACT and message_sender != user and user not in user_cache):
+    if(TOGGLE_AUTO_DM and str(reaction.message.channel.name) == CHANNEL_PLAY_REQUESTS and message_sender != user and user not in user_cache):
         if reaction.message.author.name == "Dyno":
             #only works for the specfied message format: '@everyone @user [rest of msg]'
             await message_sender.send('{0} hat auf dein Play-Request reagiert: {1} '.format(user.name, str(reaction.emoji)))
