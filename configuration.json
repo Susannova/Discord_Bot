@@ -1,6 +1,4 @@
 {
-    "client_token": "NjQ0MjkzOTkxMTQzMzA5MzMz.Xdj8hA.jYJxyOjvmVnI0xBq1Txc453WpYQ",
-
     "COMMAND_CREATE_TEAM": "?create-team",
     "COMMAND_PLAY_LOL": "?play-lol",
 
@@ -18,9 +16,4 @@
 
     "AUTO_REACT_PATTERN": " will League of Legends spielen. Kommt gegen ",
     "VERSION": "1.0"
-  
-
-
-
-
 }

@@ -126,5 +126,6 @@ def scheduled_purge_for_notifiy_on_react():
     time_since_last_msg =  time.time()
 
 print("Start Client")
-client.run(str(constants_input["client_token"]))
+bot = json.load(open('bot.json', 'r'))
+client.run(str(bot["debug_token"]))
 print("End")
