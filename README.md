@@ -11,6 +11,8 @@ TODO:
 - redo dyno functions in our bot
 - auto dm for people that reacted to play-request with anything else then :x:
 - automatically switch from play-request to internal-play-request if more than 5 people  react to a play-request
+- integrate riot api
+- create ?player command
 
 KNOWN BUGS:
 - dyno commands work in every channel - maybe its because i am admin => confirmed only works for admins
