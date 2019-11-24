@@ -4,7 +4,7 @@ import json
 import time
 
 # constants
-constants_input = json.load(open('client_infos.json', 'r'))
+constants_input = json.load(open('configuration.json', 'r'))
 #commands
 COMMAND_CREATE_TEAM = constants_input["COMMAND_CREATE_TEAM"]
 COMMAND_PLAY_LOL = constants_input["COMMAND_PLAY_LOL"]
