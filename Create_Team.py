@@ -2,6 +2,9 @@ import discord
 import random
 import json
 import time
+from riotwatcher import RiotWatcher, ApiError
+
+
 
 # functions
 def create_team(players):
@@ -76,8 +79,11 @@ def set_constants():
 
 
 
+
+
 # init
 client = discord.Client()
+bot = json.load(open('bot.json', 'r'))
 user_cache = []
 time_since_last_msg = 0
 set_constants()
@@ -113,6 +119,20 @@ async def on_message(message):
                 await message.add_reaction(client.get_emoji(emoji_iterator))
         
         await message.add_reaction(AUTO_REACT_PASS_EMOJI)
+
+    # player command
+    elif message.content.startswith('?player'):
+        riot_token = str(bot["riot_token"])
+        watcher = RiotWatcher(riot_token)
+        my_region = 'euw1'
+        me = watcher.summoner.by_name(my_region, message.content.split(None,1)[1])
+        # all objects are returned (by default) as a dict
+        # lets see if i got diamond yet (i probably didnt)
+        my_ranked_stats = watcher.league.by_summoner(my_region, me['id'])
+        games_played = int(my_ranked_stats[0]['wins']) + int(my_ranked_stats[0]['losses'])
+        winrate = round((int(my_ranked_stats[0]['wins'])/ games_played) *100,1)
+        await message.channel.send('Played: {4}, Rank: {0} {1} {2}LP, Winrate: {3}%'.format(my_ranked_stats[0]['tier'], my_ranked_stats[0]['rank'], my_ranked_stats[0]['leaguePoints'], winrate, games_played))
+
         
     elif message.channel.name == 'bot':
         # testmsg command for debugging; can be deleted
