@@ -190,9 +190,8 @@ async def on_reaction_add(reaction, user):
             for user_reacted in range(0,user_cache.count):
                 await user_reacted.send('{0} hat auch auf das Play-Request von {2} reagiert: {1} '.format(user.name, str(reaction.emoji),message_sender.name))
             await message_sender.send('{0} hat auf dein Play-Request reagiert: {1} '.format(user.name, str(reaction.emoji)))
-            if(str(reaction.emoji) != AUTO_REACT_PASS_EMOJI){
+            if(str(reaction.emoji) != AUTO_REACT_PASS_EMOJI):
                 user_cache.append(user)
-            }
     user_delay_cache.append(user)
 
 # NOTIFIY_ON_REACT Delay utility function
