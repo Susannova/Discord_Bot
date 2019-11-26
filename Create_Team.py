@@ -131,7 +131,7 @@ async def on_message(message):
         for emoji_iterator in EMOJI_ID_LIST:
                 await message.add_reaction(client.get_emoji(emoji_iterator))
         
-        await message.add_reaction("AUTO_REACT_PASS_EMOJI")
+        await message.add_reaction(AUTO_REACT_PASS_EMOJI)
 
     # player command
     elif message.content.startswith('?player'):
