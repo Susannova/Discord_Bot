@@ -2,7 +2,6 @@ import discord
 import random
 import json
 import time
-from riotwatcher import RiotWatcher, ApiError
 
 
 
@@ -91,6 +90,10 @@ time_since_last_msg = 0
 bot = json.load(open('bot.json', 'r'))
 constants = read_json()
 
+if constants["TOOGLE_RIOT_API"]:
+    from riotwatcher import RiotWatcher, ApiError
+
+
 # constants
 EMOJI_ID_LIST = [644252873672359946, 644254018377482255, 644252861827514388, 644252853644296227, 644252146023530506, 644575356908732437]
 AUTO_REACT_PASS_EMOJI = '❌'
@@ -132,16 +135,19 @@ async def on_message(message):
 
     # player command
     elif message.content.startswith('?player'):
-        riot_token = str(constants["riot_token"])
-        watcher = RiotWatcher(riot_token)
-        my_region = 'euw1'
-        me = watcher.summoner.by_name(my_region, message.content.split(None,1)[1])
-        # all objects are returned (by default) as a dict
-        # lets see if i got diamond yet (i probably didnt)
-        my_ranked_stats = watcher.league.by_summoner(my_region, me['id'])
-        games_played = int(my_ranked_stats[0]['wins']) + int(my_ranked_stats[0]['losses'])
-        winrate = round((int(my_ranked_stats[0]['wins'])/ games_played) *100,1)
-        await message.channel.send('Played: {4}, Rank: {0} {1} {2}LP, Winrate: {3}%'.format(my_ranked_stats[0]['tier'], my_ranked_stats[0]['rank'], my_ranked_stats[0]['leaguePoints'], winrate, games_played))
+        if constants["TOOGLE_RIOT_API"]:
+            riot_token = str(constants["riot_token"])
+            watcher = RiotWatcher(riot_token)
+            my_region = 'euw1'
+            me = watcher.summoner.by_name(my_region, message.content.split(None,1)[1])
+            # all objects are returned (by default) as a dict
+            # lets see if i got diamond yet (i probably didnt)
+            my_ranked_stats = watcher.league.by_summoner(my_region, me['id'])
+            games_played = int(my_ranked_stats[0]['wins']) + int(my_ranked_stats[0]['losses'])
+            winrate = round((int(my_ranked_stats[0]['wins'])/ games_played) *100,1)
+            await message.channel.send('Played: {4}, Rank: {0} {1} {2}LP, Winrate: {3}%'.format(my_ranked_stats[0]['tier'], my_ranked_stats[0]['rank'], my_ranked_stats[0]['leaguePoints'], winrate, games_played))
+        else:
+            await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
 
         
     elif message.channel.name == 'bot':
