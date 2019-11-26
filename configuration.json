@@ -11,8 +11,8 @@
     "TOGGLE_AUTO_REACT": true,
     "TOGGLE_AUTO_DM": true,
 
-    "MESSAGE_TEAM_1": "Blue Side:\n",
-    "MESSAGE_TEAM_2": "\nRed Side:\n",
+    "MESSAGE_TEAM_1": "Team 1:\n",
+    "MESSAGE_TEAM_2": "\nTeam 2:\n",
 
     "AUTO_REACT_PATTERN": " will League of Legends spielen. Kommt gegen ",
     "VERSION": "1.1"
