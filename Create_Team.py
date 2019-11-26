@@ -85,6 +85,7 @@ def read_json():
 # init
 client = discord.Client()
 bot = json.load(open('bot.json', 'r'))
+user_delay_cache = []
 user_cache = []
 time_since_last_msg = 0
 bot = json.load(open('bot.json', 'r'))
@@ -140,8 +141,6 @@ async def on_message(message):
             watcher = RiotWatcher(riot_token)
             my_region = 'euw1'
             me = watcher.summoner.by_name(my_region, message.content.split(None,1)[1])
-            # all objects are returned (by default) as a dict
-            # lets see if i got diamond yet (i probably didnt)
             my_ranked_stats = watcher.league.by_summoner(my_region, me['id'])
             games_played = int(my_ranked_stats[0]['wins']) + int(my_ranked_stats[0]['losses'])
             winrate = round((int(my_ranked_stats[0]['wins'])/ games_played) *100,1)
@@ -177,28 +176,33 @@ async def on_message(message):
 @client.event
 async def on_reaction_add(reaction, user):
     global constants
-
     if user == client.user or user.name == "Secret Kraut9 Leader":
         return
+    global user_delay_cache
     global user_cache
     scheduled_purge_for_notifiy_on_react()
     message_sender_id = int((reaction.message.content.split(None, 1)[1]).split(None,1)[0][3:-1])
     message_sender = client.get_user(message_sender_id)
     #or str(reaction.message.channel.name) == 'bot'
-    if(constants["TOGGLE_AUTO_DM"] and str(reaction.message.channel.name) == constants["CHANNEL_PLAY_REQUESTS"] and message_sender != user and user not in user_cache):
+    if(constants["TOGGLE_AUTO_DM"] and str(reaction.message.channel.name) == constants["CHANNEL_PLAY_REQUESTS"] and message_sender != user and user not in user_delay_cache):
         if reaction.message.author.name == "Dyno":
             #only works for the specfied message format: '@everyone @user [rest of msg]'
+            for user_reacted in range(0,user_cache.count):
+                await user_reacted.send('{0} hat auch auf das Play-Request von {2} reagiert: {1} '.format(user.name, str(reaction.emoji),message_sender.name))
             await message_sender.send('{0} hat auf dein Play-Request reagiert: {1} '.format(user.name, str(reaction.emoji)))
-    user_cache.append(user)
+            if(str(reaction.emoji) != AUTO_REACT_PASS_EMOJI){
+                user_cache.append(user)
+            }
+    user_delay_cache.append(user)
 
 # NOTIFIY_ON_REACT Delay utility function
 def scheduled_purge_for_notifiy_on_react():
     time_init = time.time()
     global constants
     global time_since_last_msg
-    global user_cache
+    global user_delay_cache
     if time_init - time_since_last_msg  >= constants["NOTIFY_ON_REACT_PURGE_TIMER"]:
-        user_cache = []
+        user_delay_cache = []
     time_since_last_msg =  time.time()
 
 print("Start Client")
