@@ -36,7 +36,7 @@ if constants["TOOGLE_RIOT_API"]:
 
 # functions
 def create_team(players):
-
+    global constants
     num_players = len(players)  
     team1 = random.sample(players, int(num_players / 2))
     team2 = players
@@ -55,6 +55,7 @@ def create_team(players):
     return teams_message
 
 def scheduled_purge_for_notifiy_on_react():
+    global constants
     time_init = time.time()
     global time_since_last_msg
     global user_delay_cache
@@ -80,6 +81,7 @@ async def on_ready():
 
 @client.event
 async def on_member_join(member):
+    global constants
     # auto role
     if not member.roles:
         for role in member.guild.roles:
@@ -88,6 +90,7 @@ async def on_member_join(member):
         
 @client.event
 async def on_message(message):
+    global constants
     if message.author == client.user:
         return
     # create team command
@@ -150,6 +153,7 @@ async def on_message(message):
 # automatically dms user if a reaction in NOTIFIY_ON_REACT_CHANNEL was added with a NOTIFY_ON_REACT_PURGE_TIMER delay
 @client.event
 async def on_reaction_add(reaction, user):
+    global constants
     if user == client.user or user.name == "Secret Kraut9 Leader":
         return
     global user_delay_cache
