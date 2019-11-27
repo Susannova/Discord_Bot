@@ -10,6 +10,7 @@ Features:
 - integrated riot api => waiting for API KEY
 - lol player information
 - reload config on command
+
 dev:
 - auto role
 
