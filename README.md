@@ -18,6 +18,8 @@ Dyno Features used:
 - play requests
 - play-now requests
 - internal play requests
+- auto role
+- join message (new users get a dm from dyno with some text)
 
 Commands:
 - ?create-team
