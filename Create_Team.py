@@ -2,7 +2,35 @@ import discord
 import random
 import json
 import time
-import subprocess
+
+# constants
+EMOJI_ID_LIST = [644252873672359946, 644254018377482255, 644252861827514388, 644252853644296227, 644252146023530506, 644575356908732437]
+AUTO_REACT_PASS_EMOJI = '❌'
+NOTIFY_ON_REACT_PURGE_TIMER = 15.0
+VERSION  = ""
+
+#init functions
+def setVersion():
+    global VERSION
+    version_file = open("./.git/refs/heads/master", "r")
+    VERSION = version_file.read()[:7]
+
+def read_json():
+    return json.load(open('configuration.json', 'r'))
+
+# init
+client = discord.Client()
+bot = json.load(open('bot.json', 'r'))
+user_delay_cache = []
+user_cache = []
+time_since_last_msg = 0
+bot = json.load(open('bot.json', 'r'))
+constants = read_json()
+setVersion()
+
+# riot api
+if constants["TOOGLE_RIOT_API"]:
+    from riotwatcher import RiotWatcher, ApiError
 
 
 # functions
@@ -26,27 +54,16 @@ def create_team(players):
     
     return teams_message
 
-def read_json():
-    return json.load(open('configuration.json', 'r'))
+def scheduled_purge_for_notifiy_on_react():
+    time_init = time.time()
+    global constants
+    global time_since_last_msg
+    global user_delay_cache
+    if time_init - time_since_last_msg  >= constants["NOTIFY_ON_REACT_PURGE_TIMER"]:
+        user_delay_cache = []
+    time_since_last_msg =  time.time()
 
-# init
-client = discord.Client()
-bot = json.load(open('bot.json', 'r'))
-user_delay_cache = []
-user_cache = []
-time_since_last_msg = 0
-bot = json.load(open('bot.json', 'r'))
-constants = read_json()
-
-if constants["TOOGLE_RIOT_API"]:
-    from riotwatcher import RiotWatcher, ApiError
-
-
-# constants
-EMOJI_ID_LIST = [644252873672359946, 644254018377482255, 644252861827514388, 644252853644296227, 644252146023530506, 644575356908732437]
-AUTO_REACT_PASS_EMOJI = '❌'
-NOTIFY_ON_REACT_PURGE_TIMER = 15.0
-
+# events
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -103,7 +120,7 @@ async def on_message(message):
             await message.add_reaction(constants["AUTO_REACT_PASS_EMOJI"])
 
         elif message.content.startswith("?version"):
-            await message.channel.send(constants["VERSION"])
+            await message.channel.send(VERSION)
 
         elif message.content.startswith("?reload_config"):
             await message.channel.send("Reload configuration.json:")
@@ -138,16 +155,8 @@ async def on_reaction_add(reaction, user):
                 user_cache.append(user)
     user_delay_cache.append(user)
 
-# NOTIFIY_ON_REACT Delay utility function
-def scheduled_purge_for_notifiy_on_react():
-    time_init = time.time()
-    global constants
-    global time_since_last_msg
-    global user_delay_cache
-    if time_init - time_since_last_msg  >= constants["NOTIFY_ON_REACT_PURGE_TIMER"]:
-        user_delay_cache = []
-    time_since_last_msg =  time.time()
 
+# run
 print("Start Client")
 client.run(str(bot["token"]))
 print("End")
