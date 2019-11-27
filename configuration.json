@@ -3,7 +3,7 @@
     "COMMAND_PLAY_LOL": "?play-lol",
 
     "CHANNEL_CREATE_TEAM_VOICE": "InHouse Planing",
-    "CHANNEL_CREATE_TEAM_TEXT": "intern-planing",
+    "CHANNEL_INTERN_PLANING": "intern-planing",
     "CHANNEL_PLAY_REQUESTS": "play-requests",
 
     "TOGGLE_AUTO_DELETE": true,
@@ -14,6 +14,8 @@
 
     "MESSAGE_TEAM_1": "Team 1:\n",
     "MESSAGE_TEAM_2": "\nTeam 2:\n",
+
+    "ROLE_SETZLING_ID": 643169161236840449,
 
     "AUTO_REACT_PATTERN": " will League of Legends spielen. Kommt gegen ",
     
