@@ -6,7 +6,7 @@ Features:
 - auto dm
 - auto delete non commands
 - version 
-- auto dm for people that reacted to play-request with anything else then :x:
+- auto dm for people that subscribed to play-request (reacted with non :x:)
 - integrated riot api => waiting for API KEY
 - lol player information
 - reload config on command
