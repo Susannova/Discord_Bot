@@ -18,19 +18,17 @@ Dyno Features used:
 - auto role
 
 Commands:
-?create-team
-?player
+- ?create-team
+- ?player
 
 DEBUG/DEV Commands:
-?testmsg
-?version
-?reload_config
+- ?testmsg
+- ?version
+- ?reload_config
 
 TODO:
-- 24h purge in #play-requests 
-- redo dyno functions in our bot
-- automatically switch from play-request to internal-play-request if more than 5 people  react to a play-request
-- reminder for play-request (notify when the time specified in play-requests is in 5min)
+https://github.com/Susannova/Create_Team/issues
 
 KNOWN BUGS:
 - dyno auto role doesnt work => create own version
+- dyno commands work in every channel as admin
