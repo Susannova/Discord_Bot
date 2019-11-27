@@ -59,7 +59,7 @@ def scheduled_purge_for_notifiy_on_react():
     time_init = time.time()
     global time_since_last_msg
     global user_delay_cache
-    if time_init - time_since_last_msg  >= constants["NOTIFY_ON_REACT_PURGE_TIMER"]:
+    if time_init - time_since_last_msg  >= NOTIFY_ON_REACT_PURGE_TIMER:
         user_delay_cache = []
     time_since_last_msg =  time.time()
 
@@ -67,8 +67,8 @@ def scheduled_purge_for_notifiy_on_react():
 def create_internal_play_request(play_request_creator, play_request_message):
     user_internal = user_subscribed
     user_internal.append(play_request_creator)
-    play_request_time = re.findall('\d\d:\d\d', play_request_message)
-    intern_message = '@everyone Das Play-Request von {0} hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!\n Es sind noch **__{1}__** Plätze frei. \n Uhrzeit: {2} Uhr \n Spieler: {3}\n'.format(play_request_creator.name, 10  - (user_subscribed.count + 1), play_request_time, play_request_creator.name)
+    play_request_time = re.findall('\d\d:\d\d', play_request_message)[2:-2]
+    intern_message = '@everyone Das Play-Request von {0} hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!\n Es sind noch **__{1}__** Plätze frei. \n Uhrzeit: {2} Uhr \n Spieler: {3}\n'.format(play_request_creator.name, 10  - (len(user_subscribed) + 1), play_request_time, play_request_creator.name)
     for user in user_subscribed:
         intern_message += user.name + '\n'
     return intern_message
@@ -164,13 +164,13 @@ async def on_reaction_add(reaction, user):
     if(constants["TOGGLE_AUTO_DM"] and str(reaction.message.channel.name) == constants["CHANNEL_PLAY_REQUESTS"] and message_sender != user and user not in user_delay_cache):
         if reaction.message.author.name == "Dyno":
             #only works for the specfied message format: '@everyone @user [rest of msg]' -untested
-            for user_reacted in range(0,user_subscribed.count):
+            for user_reacted in user_subscribed:
                 await user_reacted.send('{0} hat auch auf das Play-Request von {2} reagiert: {1} '.format(user.name, str(reaction.emoji),message_sender.name))
             await message_sender.send('{0} hat auf dein Play-Request reagiert: {1} '.format(user.name, str(reaction.emoji)))
             if(str(reaction.emoji) != AUTO_REACT_PASS_EMOJI):
                 user_subscribed.append(user)
                 #untested
-                if user_subscribed.count + 1 == 6:
+                if len(user_subscribed) + 1 == 6:
                     channel = discord.utils.get(client.get_all_channels(), guild__name='Kraut9', name=constants["CHANNEL_INTERN_PLANING"])
                     await channel.send(create_internal_play_request(message_sender, reaction.message.content))
             elif (str(reaction.emoji) == AUTO_REACT_PASS_EMOJI) and user in user_subscribed:
