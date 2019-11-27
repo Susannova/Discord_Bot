@@ -169,6 +169,8 @@ async def on_reaction_add(reaction, user):
                 if user_subscribed.count + 1 == 6:
                     channel = discord.utils.get(client.get_all_channels(), guild__name='Kraut9', name=constants["CHANNEL_INTERN_PLANING"])
                     await channel.send(create_internal_play_request(message_sender, reaction.message.content))
+            elif (str(reaction.emoji) == AUTO_REACT_PASS_EMOJI) and user in user_subscribed:
+                user_subscribed.remove(user)
     user_delay_cache.append(user)
 
 
