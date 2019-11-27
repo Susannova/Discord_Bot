@@ -22,7 +22,7 @@ def read_json():
 client = discord.Client()
 bot = json.load(open('bot.json', 'r'))
 user_delay_cache = []
-user_cache = []
+user_subscribed = []
 time_since_last_msg = 0
 bot = json.load(open('bot.json', 'r'))
 constants = read_json()
@@ -70,16 +70,21 @@ async def on_ready():
     time_since_last_msg = time.time()
 
 @client.event
+async def on_member_join(member):
+    # auto role
+    if not member.roles:
+        for role in member.guild.roles:
+            if role.id == constants["ROLE_SETZLING_ID"]:
+                await member.edit(role)
+        
+@client.event
 async def on_message(message):
-    global constants
-
-    guild_list = client.guilds
-    kraut9 = guild_list.pop(0)
+    global constants 
     if message.author == client.user:
         return
     # create team command
     elif message.content.startswith(constants["COMMAND_CREATE_TEAM"]) and (str(message.channel.name) == str(constants["CHANNEL_CREATE_TEAM_TEXT"]) or str(message.channel.name) == 'bot'):
-        for voice_channel_iterator in kraut9.voice_channels:
+        for voice_channel_iterator in message.guild.voice_channels:
             if voice_channel_iterator.name == constants["CHANNEL_CREATE_TEAM_VOICE"]:
                 voice_channel = voice_channel_iterator
 
@@ -141,18 +146,18 @@ async def on_reaction_add(reaction, user):
     if user == client.user or user.name == "Secret Kraut9 Leader":
         return
     global user_delay_cache
-    global user_cache
+    global user_subscribed
     scheduled_purge_for_notifiy_on_react()
     message_sender_id = int((reaction.message.content.split(None, 1)[1]).split(None,1)[0][3:-1])
     message_sender = client.get_user(message_sender_id)
     if(constants["TOGGLE_AUTO_DM"] and str(reaction.message.channel.name) == constants["CHANNEL_PLAY_REQUESTS"] and message_sender != user and user not in user_delay_cache):
         if reaction.message.author.name == "Dyno":
             #only works for the specfied message format: '@everyone @user [rest of msg]'
-            for user_reacted in range(0,user_cache.count):
+            for user_reacted in range(0,user_subscribed.count):
                 await user_reacted.send('{0} hat auch auf das Play-Request von {2} reagiert: {1} '.format(user.name, str(reaction.emoji),message_sender.name))
             await message_sender.send('{0} hat auf dein Play-Request reagiert: {1} '.format(user.name, str(reaction.emoji)))
             if(str(reaction.emoji) != AUTO_REACT_PASS_EMOJI):
-                user_cache.append(user)
+                user_subscribed.append(user)
     user_delay_cache.append(user)
 
 
