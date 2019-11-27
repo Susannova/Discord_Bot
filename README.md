@@ -10,12 +10,13 @@ Features:
 - integrated riot api => waiting for API KEY
 - lol player information
 - reload config on command
+dev:
+- auto role
 
 Dyno Features used:
 - play requests
 - play-now requests
 - internal play requests
-- auto role
 
 Commands:
 - ?create-team
@@ -30,5 +31,4 @@ TODO:
 https://github.com/Susannova/Create_Team/issues
 
 KNOWN BUGS:
-- dyno auto role doesnt work => create own version
 - dyno commands work in every channel as admin
