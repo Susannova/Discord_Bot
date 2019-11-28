@@ -35,3 +35,4 @@ https://github.com/Susannova/Create_Team/issues
 
 KNOWN BUGS:
 - dyno commands work in every channel as admin
+- multiple play-requests or switch from play-request to internal play-request all share same subscribers => map play-request message id to subscribers
