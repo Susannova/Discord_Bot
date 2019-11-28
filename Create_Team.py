@@ -139,12 +139,14 @@ async def on_message(message):
       #  if(config["TOGGLE_AUTO_DELETE"]):
        #     await message.delete()
 
-    # auto react command
-    elif message.content.find(config["AUTO_REACT_PATTERN"]) > -1 and config["TOGGLE_AUTO_REACT"]:
-        for emoji_iterator in EMOJI_ID_LIST:
-                await message.add_reaction(client.get_emoji(emoji_iterator))
-        
-        await message.add_reaction(consts.EMOJI_PASS)
+    # auto react command - reacts to all patterns in consts.PATTERN_LIST_AUTO_REACT
+    elif config["TOGGLE_AUTO_REACT"]:
+        for pattern in consts.PATTERN_LIST_AUTO_REACT:
+            if message.content.find(pattern) > -1:
+                for emoji_iterator in EMOJI_ID_LIST:
+                    await message.add_reaction(client.get_emoji(emoji_iterator))
+                await message.add_reaction(consts.EMOJI_PASS)
+          
 
     # player command
     elif message.content.startswith('?player'):
