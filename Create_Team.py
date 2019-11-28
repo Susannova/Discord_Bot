@@ -6,6 +6,19 @@ import re
 import consts
 from importlib import reload
 
+
+# work with time:
+#import datetime
+#import os
+#import time
+#os.environ['TZ'] = 'Europe/Amsterdam'
+#time.tzset()
+#this_morning = datetime.datetime.now()
+#last_night = datetime.datetime(2019, 11, 29, 20, 0)
+#print(this_morning.time() < last_night.time())
+
+
+
 #init functions
 def setVersion():
     global VERSION
@@ -21,6 +34,7 @@ bot = json.load(open('bot.json', 'r'))
 user_delay_cache = []
 user_subscribed = []
 time_since_last_msg = 0
+time_last_play_request = 0
 config = read_json()
 setVersion()
 
@@ -49,14 +63,6 @@ def create_team(players):
     
     return teams_message
 
-def scheduled_purge_for_notifiy_on_react():
-    global config
-    time_init = time.time()
-    global time_since_last_msg
-    global user_delay_cache
-    if time_init - time_since_last_msg  >= config["TIMER_NOTIFY_ON_REACT_PURGE"]:
-        user_delay_cache = []
-    time_since_last_msg =  time.time()
 
 def create_internal_play_request(play_request_creator, play_request_message):
     global consts
@@ -78,17 +84,25 @@ def is_purgeable_message(message, cmd, channel, *args):
         return True
     return False
 
+def scheduled_purge_for_notifiy_on_react():
+    global config
+    time_init = time.time()
+    global time_since_last_msg
+    global user_delay_cache
+    if time_init - time_since_last_msg  >= config["TIMER_NOTIFY_ON_REACT_PURGE"]:
+        user_delay_cache = []
+    time_since_last_msg =  time.time()
+
 # automatically dms user if a reaction in any channel of args was added with a config["TIMER_NOTIFY_ON_REACT_PURGE"] delay
-async def auto_dm_in_channel(reaction, user, *args):
+async def auto_dm_in_channel(reaction, user, user_delay_cache, user_subscribed, *args):
     global consts
     global config
     if user == client.user or user.name == "Secret Kraut9 Leader":
         return
-    global user_delay_cache
-    global user_subscribed
     scheduled_purge_for_notifiy_on_react()
     message_sender_id = int((reaction.message.content.split(None, 1)[1]).split(None,1)[0][3:-1])
     message_sender = client.get_user(message_sender_id)
+    message_id = reaction.message.id
     if(config["TOGGLE_AUTO_DM"] and str(reaction.message.channel.name) in args and message_sender != user and user not in user_delay_cache):
         if reaction.message.author.name == config["BOT_DYNO_NAME"]:
             #only works for the specfied message format: '@everyone @user [rest of msg]'
@@ -103,7 +117,9 @@ async def auto_dm_in_channel(reaction, user, *args):
             elif (str(reaction.emoji) == consts.EMOJI_PASS) and user in user_subscribed:
                 user_subscribed.remove(user)
     user_delay_cache.append(user)
-    
+    return message_id
+
+
 # events
 @client.event
 async def on_ready():
@@ -148,6 +164,13 @@ async def on_message(message):
                 await message.add_reaction(consts.EMOJI_PASS)
           
 
+
+    #delete subscriber if new request is created
+    elif message.config.startswith(config["COMMAND_PLAY_LOL"]) and message.channel.name == config["CHANNEL_PLAY_REQUESTS"]:
+        global user_subscribed
+        user_subscribed = []
+
+     
     # player command
     elif message.content.startswith('?player'):
         if config["TOOGLE_RIOT_API"]:
@@ -185,7 +208,14 @@ async def on_message(message):
     elif config["TOGGLE_AUTO_DELETE"] and is_purgeable_message(message, consts.COMMAND_LIST_INTERN_PLANING, config["CHANNEL_INTERN_PLANING"], config["BOT_DYNO_NAME"], client.user.name):
             await message.delete()
 
-  
+# delete subscribers if old play-request gets deleted
+@client.event
+async def on_message_delete(message):
+    global consts
+    global user_subscribed
+    for pattern in consts.PATTERN_LIST_AUTO_REACT:
+            if message.content.find(pattern) > -1:
+                user_subscribed = []
     
 @client.event
 async def on_reaction_add(reaction, user):
