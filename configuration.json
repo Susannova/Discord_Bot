@@ -6,6 +6,10 @@
     "CHANNEL_INTERN_PLANING": "intern-planing",
     "CHANNEL_PLAY_REQUESTS": "play-requests",
 
+    "BOT_DYNO_NAME": "Dyno",
+
+    "TIMER_NOTIFY_ON_REACT_PURGE": 15.0,
+
     "TOGGLE_AUTO_DELETE": true,
     "TOGGLE_COMMAND_ONLY": true,
     "TOGGLE_AUTO_REACT": true,

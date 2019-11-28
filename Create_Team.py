@@ -3,12 +3,8 @@ import random
 import json
 import time
 import re
-
-# constants
-EMOJI_ID_LIST = [644252873672359946, 644254018377482255, 644252861827514388, 644252853644296227, 644252146023530506, 644575356908732437]
-AUTO_REACT_PASS_EMOJI = '❌'
-NOTIFY_ON_REACT_PURGE_TIMER = 15.0
-VERSION  = ""
+import consts
+from importlib import reload
 
 #init functions
 def setVersion():
@@ -25,18 +21,17 @@ bot = json.load(open('bot.json', 'r'))
 user_delay_cache = []
 user_subscribed = []
 time_since_last_msg = 0
-bot = json.load(open('bot.json', 'r'))
-constants = read_json()
+config = read_json()
 setVersion()
 
 # riot api
-if constants["TOOGLE_RIOT_API"]:
+if config["TOOGLE_RIOT_API"]:
     from riotwatcher import RiotWatcher, ApiError
 
 
 # functions
 def create_team(players):
-    global constants
+    global config
     num_players = len(players)  
     team1 = random.sample(players, int(num_players / 2))
     team2 = players
@@ -44,34 +39,70 @@ def create_team(players):
     for player in team1:
         team2.remove(player)
     
-    teams_message = constants["MESSAGE_TEAM_1"]
+    teams_message = config["MESSAGE_TEAM_1"]
     for player in team1:
         teams_message += player + "\n"
     
-    teams_message += constants["MESSAGE_TEAM_2"]
+    teams_message += config["MESSAGE_TEAM_2"]
     for player in team2:
         teams_message += player + "\n"
     
     return teams_message
 
 def scheduled_purge_for_notifiy_on_react():
-    global constants
+    global config
     time_init = time.time()
     global time_since_last_msg
     global user_delay_cache
-    if time_init - time_since_last_msg  >= NOTIFY_ON_REACT_PURGE_TIMER:
+    if time_init - time_since_last_msg  >= config["TIMER_NOTIFY_ON_REACT_PURGE"]:
         user_delay_cache = []
     time_since_last_msg =  time.time()
 
-#untested
 def create_internal_play_request(play_request_creator, play_request_message):
+    global consts
     user_internal = user_subscribed
     user_internal.append(play_request_creator)
     play_request_time = re.findall('\d\d:\d\d', play_request_message)[2:-2]
-    intern_message = '@everyone Das Play-Request von {0} hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!\n Es sind noch **__{1}__** Plätze frei. \n Uhrzeit: {2} Uhr \n Spieler: {3}\n'.format(play_request_creator.name, 10  - (len(user_subscribed) + 1), play_request_time, play_request_creator.name)
+    intern_message = consts.CREATE_INTERN_PLAY_REQUEST_MESSAGE.format(play_request_creator.name, 10  - (len(user_subscribed) + 1), play_request_time, play_request_creator.name)
     for user in user_subscribed:
         intern_message += user.name + '\n'
     return intern_message
+
+# checks if message should be purged based on if it starts with a specified command cmd
+# and is send in a specfied channel name channel and is from a user excepted user
+# that should not be purged
+def is_purgeable_message(message, cmd, channel, *args):
+    if message.content.startswith(tuple(cmd)) == False and message.channel.name == channel:
+        if message.author.name in args:
+            return False
+        return True
+    return False
+
+# automatically dms user if a reaction in any channel of args was added with a config["TIMER_NOTIFY_ON_REACT_PURGE"] delay
+async def auto_dm_in_channel(reaction, user, *args):
+    global consts
+    global config
+    if user == client.user or user.name == "Secret Kraut9 Leader":
+        return
+    global user_delay_cache
+    global user_subscribed
+    scheduled_purge_for_notifiy_on_react()
+    message_sender_id = int((reaction.message.content.split(None, 1)[1]).split(None,1)[0][3:-1])
+    message_sender = client.get_user(message_sender_id)
+    if(config["TOGGLE_AUTO_DM"] and str(reaction.message.channel.name) in args and message_sender != user and user not in user_delay_cache):
+        if reaction.message.author.name == config["BOT_DYNO_NAME"]:
+            #only works for the specfied message format: '@everyone @user [rest of msg]'
+            for user_reacted in user_subscribed:
+                await user_reacted.send(consts.MESSAGE_AUTO_DM_SUBSCRIBER.format(user.name, str(reaction.emoji),message_sender.name))
+            await message_sender.send(consts.MESSAGE_AUTO_DM_CREATOR.format(user.name, str(reaction.emoji)))
+            if(str(reaction.emoji) != consts.EMOJI_PASS) and user not in user_subscribed:
+                user_subscribed.append(user)
+                if len(user_subscribed) + 1 == 6:
+                    channel = discord.utils.get(client.get_all_channels(), guild__name='Kraut9', name=config["CHANNEL_INTERN_PLANING"])
+                    await channel.send(create_internal_play_request(message_sender, reaction.message.content))
+            elif (str(reaction.emoji) == consts.EMOJI_PASS) and user in user_subscribed:
+                user_subscribed.remove(user)
+    user_delay_cache.append(user)
     
 # events
 @client.event
@@ -81,22 +112,23 @@ async def on_ready():
 
 @client.event
 async def on_member_join(member):
-    global constants
+    global config
     # auto role
     if not member.roles:
         for role in member.guild.roles:
-            if role.id == constants["ROLE_SETZLING_ID"]:
+            if role.id == config["ROLE_SETZLING_ID"]:
                 await member.edit(role)
         
 @client.event
 async def on_message(message):
-    global constants
+    global config
+    global consts
     if message.author == client.user:
         return
     # create team command
-    elif message.content.startswith(constants["COMMAND_CREATE_TEAM"]) and (str(message.channel.name) == str(constants["CHANNEL_INTERN_PLANING"]) or str(message.channel.name) == 'bot'):
+    elif message.content.startswith(config["COMMAND_CREATE_TEAM"]) and (str(message.channel.name) == str(config["CHANNEL_INTERN_PLANING"]) or str(message.channel.name) == 'bot'):
         for voice_channel_iterator in message.guild.voice_channels:
-            if voice_channel_iterator.name == constants["CHANNEL_CREATE_TEAM_VOICE"]:
+            if voice_channel_iterator.name == config["CHANNEL_CREATE_TEAM_VOICE"]:
                 voice_channel = voice_channel_iterator
 
         players_list = []
@@ -104,20 +136,20 @@ async def on_message(message):
             players_list.append(member.name)
 
         await message.channel.send("\nTeams:\n" + create_team(players_list))
-        if(constants["TOGGLE_AUTO_DELETE"]):
-            await message.delete()
+      #  if(config["TOGGLE_AUTO_DELETE"]):
+       #     await message.delete()
 
     # auto react command
-    elif message.content.find(constants["AUTO_REACT_PATTERN"]) > -1 and constants["TOGGLE_AUTO_REACT"]:
+    elif message.content.find(config["AUTO_REACT_PATTERN"]) > -1 and config["TOGGLE_AUTO_REACT"]:
         for emoji_iterator in EMOJI_ID_LIST:
                 await message.add_reaction(client.get_emoji(emoji_iterator))
         
-        await message.add_reaction(AUTO_REACT_PASS_EMOJI)
+        await message.add_reaction(consts.EMOJI_PASS)
 
     # player command
     elif message.content.startswith('?player'):
-        if constants["TOOGLE_RIOT_API"]:
-            riot_token = str(constants["riot_token"])
+        if config["TOOGLE_RIOT_API"]:
+            riot_token = str(config["riot_token"])
             watcher = RiotWatcher(riot_token)
             my_region = 'euw1'
             me = watcher.summoner.by_name(my_region, message.content.split(None,1)[1])
@@ -133,49 +165,36 @@ async def on_message(message):
         # testmsg command for debugging; can be deleted
         if message.content.startswith("?testmsg"):
             await message.channel.send("test")
-            await message.add_reaction(constants["AUTO_REACT_PASS_EMOJI"])
+            await message.add_reaction(config["consts.EMOJI_PASS"])
 
         elif message.content.startswith("?version"):
-            await message.channel.send(VERSION)
+            await message.channel.send(consts.VERSION)
 
         elif message.content.startswith("?reload_config"):
             await message.channel.send("Reload configuration.json:")
-            constants = read_json()
+            config = read_json()
+            consts = reload(consts)
             await message.channel.send("Done.")
 
      
-     # deletes all messages that are not commands(except bot responses) in channel create-play-requests
-    elif message.content.startswith(constants["COMMAND_PLAY_LOL"]) == False and (str(message.channel) == str(constants["CHANNEL_PLAY_REQUESTS"])):
-        if(message.author.name != "Dyno"):
+     # deletes all messages that are not commands (consts.COMMAND_LIST_ALL)  except bot responses in all cmd channels (consts.CHANNEL_LIST_COMMANDS)
+    elif config["TOGGLE_AUTO_DELETE"] and is_purgeable_message(message, consts.COMMAND_LIST_PLAY_REQUEST, config["CHANNEL_PLAY_REQUESTS"], config["BOT_DYNO_NAME"]):
             await message.delete()
-        
-   
-# automatically dms user if a reaction in NOTIFIY_ON_REACT_CHANNEL was added with a NOTIFY_ON_REACT_PURGE_TIMER delay
+    elif config["TOGGLE_AUTO_DELETE"] and is_purgeable_message(message, consts.COMMAND_LIST_INTERN_PLANING, config["CHANNEL_INTERN_PLANING"], config["BOT_DYNO_NAME"], client.user.name):
+            await message.delete()
+
+  
+    
 @client.event
 async def on_reaction_add(reaction, user):
-    global constants
+    global config
     if user == client.user or user.name == "Secret Kraut9 Leader":
         return
-    global user_delay_cache
-    global user_subscribed
-    scheduled_purge_for_notifiy_on_react()
-    message_sender_id = int((reaction.message.content.split(None, 1)[1]).split(None,1)[0][3:-1])
-    message_sender = client.get_user(message_sender_id)
-    if(constants["TOGGLE_AUTO_DM"] and str(reaction.message.channel.name) == constants["CHANNEL_PLAY_REQUESTS"] and message_sender != user and user not in user_delay_cache):
-        if reaction.message.author.name == "Dyno":
-            #only works for the specfied message format: '@everyone @user [rest of msg]' -untested
-            for user_reacted in user_subscribed:
-                await user_reacted.send('{0} hat auch auf das Play-Request von {2} reagiert: {1} '.format(user.name, str(reaction.emoji),message_sender.name))
-            await message_sender.send('{0} hat auf dein Play-Request reagiert: {1} '.format(user.name, str(reaction.emoji)))
-            if(str(reaction.emoji) != AUTO_REACT_PASS_EMOJI):
-                user_subscribed.append(user)
-                #untested
-                if len(user_subscribed) + 1 == 6:
-                    channel = discord.utils.get(client.get_all_channels(), guild__name='Kraut9', name=constants["CHANNEL_INTERN_PLANING"])
-                    await channel.send(create_internal_play_request(message_sender, reaction.message.content))
-            elif (str(reaction.emoji) == AUTO_REACT_PASS_EMOJI) and user in user_subscribed:
-                user_subscribed.remove(user)
-    user_delay_cache.append(user)
+    auto_dm_channels = []
+    auto_dm_channels.append(config["CHANNEL_PLAY_REQUESTS"])
+    auto_dm_channels.append(config["CHANNEL_INTERN_PLANING"])
+    auto_dm_in_channel(reaction, user, auto_dm_channels)
+    
 
 
 # run
