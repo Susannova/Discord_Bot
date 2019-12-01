@@ -141,8 +141,22 @@ async def on_message(message):
     global consts
     if message.author == client.user:
         return
+
+    # auto react command - reacts to all patterns in consts.PATTERN_LIST_AUTO_REACT
+    if config["TOGGLE_AUTO_REACT"]:
+        for pattern in consts.PATTERN_LIST_AUTO_REACT:
+            if message.content.find(pattern) > -1:
+                for emoji_iterator in consts.EMOJI_ID_LIST:
+                    await message.add_reaction(client.get_emoji(emoji_iterator))
+                await message.add_reaction(consts.EMOJI_PASS)
+
+    #delete subscriber if new request is created
+    if message.content.startswith(config["COMMAND_PLAY_LOL"]) and message.channel.name == config["CHANNEL_PLAY_REQUESTS"]:
+        global user_subscribed
+        user_subscribed = []
+
     # create team command
-    if message.content.startswith(config["COMMAND_CREATE_TEAM"]) and (str(message.channel.name) == str(config["CHANNEL_INTERN_PLANING"]) or str(message.channel.name) == 'bot'):
+    elif message.content.startswith(config["COMMAND_CREATE_TEAM"]) and (str(message.channel.name) == str(config["CHANNEL_INTERN_PLANING"]) or str(message.channel.name) == 'bot'):
         for voice_channel_iterator in message.guild.voice_channels:
             if voice_channel_iterator.name == config["CHANNEL_CREATE_TEAM_VOICE"]:
                 voice_channel = voice_channel_iterator
@@ -153,25 +167,10 @@ async def on_message(message):
 
         await message.channel.send("\nTeams:\n" + create_team(players_list))
       #  if(config["TOGGLE_AUTO_DELETE"]):
-       #     await message.delete()
+       #     await message.delete() 
 
-    # auto react command - reacts to all patterns in consts.PATTERN_LIST_AUTO_REACT
-    if config["TOGGLE_AUTO_REACT"]:
-        for pattern in consts.PATTERN_LIST_AUTO_REACT:
-            if message.content.find(pattern) > -1:
-                for emoji_iterator in consts.EMOJI_ID_LIST:
-                    await message.add_reaction(client.get_emoji(emoji_iterator))
-                await message.add_reaction(consts.EMOJI_PASS)
-          
-
-    #delete subscriber if new request is created
-    if message.content.startswith(config["COMMAND_PLAY_LOL"]) and message.channel.name == config["CHANNEL_PLAY_REQUESTS"]:
-        global user_subscribed
-        user_subscribed = []
-
-     
     # player command
-    if message.content.startswith('?player'):
+    elif message.content.startswith('?player'):
         if config["TOGGLE_RIOT_API"]:
             riot_token = str(config["riot_token"])
             watcher = RiotWatcher(riot_token)
