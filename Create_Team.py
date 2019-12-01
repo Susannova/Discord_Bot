@@ -21,9 +21,9 @@ from importlib import reload
 
 #init functions
 def setVersion():
-    global VERSION
+    global consts
     version_file = open("./.git/refs/heads/master", "r")
-    VERSION = version_file.read()[:7]
+    consts.VERSION = version_file.read()[:7]
 
 def read_json():
     return json.load(open('configuration.json', 'r'))
@@ -156,7 +156,7 @@ async def on_message(message):
        #     await message.delete()
 
     # auto react command - reacts to all patterns in consts.PATTERN_LIST_AUTO_REACT
-    elif config["TOGGLE_AUTO_REACT"]:
+    elif config["TOGGLE_AUTO_REACT"] and message.content in consts.PATTERN_LIST_AUTO_REACT:
         for pattern in consts.PATTERN_LIST_AUTO_REACT:
             if message.content.find(pattern) > -1:
                 for emoji_iterator in EMOJI_ID_LIST:
@@ -166,14 +166,14 @@ async def on_message(message):
 
 
     #delete subscriber if new request is created
-    elif message.config.startswith(config["COMMAND_PLAY_LOL"]) and message.channel.name == config["CHANNEL_PLAY_REQUESTS"]:
+    elif message.content.startswith(config["COMMAND_PLAY_LOL"]) and message.channel.name == config["CHANNEL_PLAY_REQUESTS"]:
         global user_subscribed
         user_subscribed = []
 
      
     # player command
     elif message.content.startswith('?player'):
-        if config["TOOGLE_RIOT_API"]:
+        if config["TOGGLE_RIOT_API"]:
             riot_token = str(config["riot_token"])
             watcher = RiotWatcher(riot_token)
             my_region = 'euw1'
@@ -185,21 +185,21 @@ async def on_message(message):
         else:
             await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
 
-        
-    elif message.channel.name == 'bot':
+    elif message.channel.name == "bot":
         # testmsg command for debugging; can be deleted
         if message.content.startswith("?testmsg"):
-            await message.channel.send("test")
-            await message.add_reaction(config["consts.EMOJI_PASS"])
+                await message.channel.send("test")
+                await message.add_reaction(consts.EMOJI_PASS)
 
         elif message.content.startswith("?version"):
-            await message.channel.send(consts.VERSION)
+                print("test:" + consts.VERSION)
+                await message.channel.send(consts.VERSION)
 
         elif message.content.startswith("?reload_config"):
-            await message.channel.send("Reload configuration.json:")
-            config = read_json()
-            consts = reload(consts)
-            await message.channel.send("Done.")
+                await message.channel.send("Reload configuration.json:")
+                config = read_json()
+                consts = reload(consts)
+                await message.channel.send("Done.")
 
      
      # deletes all messages that are not commands (consts.COMMAND_LIST_ALL)  except bot responses in all cmd channels (consts.CHANNEL_LIST_COMMANDS)
