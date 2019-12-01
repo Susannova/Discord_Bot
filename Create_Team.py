@@ -142,7 +142,7 @@ async def on_message(message):
     if message.author == client.user:
         return
     # create team command
-    elif message.content.startswith(config["COMMAND_CREATE_TEAM"]) and (str(message.channel.name) == str(config["CHANNEL_INTERN_PLANING"]) or str(message.channel.name) == 'bot'):
+    if message.content.startswith(config["COMMAND_CREATE_TEAM"]) and (str(message.channel.name) == str(config["CHANNEL_INTERN_PLANING"]) or str(message.channel.name) == 'bot'):
         for voice_channel_iterator in message.guild.voice_channels:
             if voice_channel_iterator.name == config["CHANNEL_CREATE_TEAM_VOICE"]:
                 voice_channel = voice_channel_iterator
@@ -156,23 +156,22 @@ async def on_message(message):
        #     await message.delete()
 
     # auto react command - reacts to all patterns in consts.PATTERN_LIST_AUTO_REACT
-    elif config["TOGGLE_AUTO_REACT"] and message.content in consts.PATTERN_LIST_AUTO_REACT:
+    if config["TOGGLE_AUTO_REACT"]:
         for pattern in consts.PATTERN_LIST_AUTO_REACT:
             if message.content.find(pattern) > -1:
-                for emoji_iterator in EMOJI_ID_LIST:
+                for emoji_iterator in consts.EMOJI_ID_LIST:
                     await message.add_reaction(client.get_emoji(emoji_iterator))
                 await message.add_reaction(consts.EMOJI_PASS)
           
 
-
     #delete subscriber if new request is created
-    elif message.content.startswith(config["COMMAND_PLAY_LOL"]) and message.channel.name == config["CHANNEL_PLAY_REQUESTS"]:
+    if message.content.startswith(config["COMMAND_PLAY_LOL"]) and message.channel.name == config["CHANNEL_PLAY_REQUESTS"]:
         global user_subscribed
         user_subscribed = []
 
      
     # player command
-    elif message.content.startswith('?player'):
+    if message.content.startswith('?player'):
         if config["TOGGLE_RIOT_API"]:
             riot_token = str(config["riot_token"])
             watcher = RiotWatcher(riot_token)
@@ -185,7 +184,7 @@ async def on_message(message):
         else:
             await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
 
-    elif message.channel.name == "bot":
+    if message.channel.name == "bot":
         # testmsg command for debugging; can be deleted
         if message.content.startswith("?testmsg"):
                 await message.channel.send("test")
@@ -203,9 +202,9 @@ async def on_message(message):
 
      
      # deletes all messages that are not commands (consts.COMMAND_LIST_ALL)  except bot responses in all cmd channels (consts.CHANNEL_LIST_COMMANDS)
-    elif config["TOGGLE_AUTO_DELETE"] and is_purgeable_message(message, consts.COMMAND_LIST_PLAY_REQUEST, config["CHANNEL_PLAY_REQUESTS"], config["BOT_DYNO_NAME"]):
+    if config["TOGGLE_AUTO_DELETE"] and is_purgeable_message(message, consts.COMMAND_LIST_PLAY_REQUEST, config["CHANNEL_PLAY_REQUESTS"], config["BOT_DYNO_NAME"]):
             await message.delete()
-    elif config["TOGGLE_AUTO_DELETE"] and is_purgeable_message(message, consts.COMMAND_LIST_INTERN_PLANING, config["CHANNEL_INTERN_PLANING"], config["BOT_DYNO_NAME"], client.user.name):
+    if config["TOGGLE_AUTO_DELETE"] and is_purgeable_message(message, consts.COMMAND_LIST_INTERN_PLANING, config["CHANNEL_INTERN_PLANING"], config["BOT_DYNO_NAME"], client.user.name):
             await message.delete()
 
 # delete subscribers if old play-request gets deleted
