@@ -165,7 +165,7 @@ async def on_message(message):
         for member in voice_channel.members:
             players_list.append(member.name)
 
-        await message.channel.send("\nTeams:\n" + create_team(players_list))
+        await message.channel.send("\n**__===Teams===__**\n" + create_team(players_list))
       #  if(config["TOGGLE_AUTO_DELETE"]):
        #     await message.delete() 
 
