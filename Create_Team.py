@@ -146,6 +146,10 @@ async def on_message(message):
                 config = read_json()
                 consts = reload(consts)
                 await message.channel.send("Done.")
+        #Killswitch
+        elif message.content.startswith('!end'):
+            await message.channel.send('Bot is shut down!')
+            await client.logout()
 
      
      # deletes all messages that are not commands (consts.COMMAND_LIST_ALL)  except bot responses in all cmd channels (consts.CHANNEL_LIST_COMMANDS)
