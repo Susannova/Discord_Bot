@@ -195,8 +195,10 @@ async def on_reaction_add(reaction, user):
                 if time.time - player.players_known[user.name]["time_since_last_msg"] < config["TIMER_NOTIFY_ON_REACT_PURGE"]:
                     player.players_known[user.name]["wait_for_notification"]: "True"
                     time.sleep(player.players_known[user.name]["time_since_last_msg"] + config["TIMER_NOTIFY_ON_REACT_PURGE"] - time.time())
+            else:
+                return
                 
-            if user.name == message_author_name:
+            if player.discord_user.name == message_author_name:
                 await player.discord_user.send(consts.MESSAGE_AUTO_DM_CREATOR.format(user.name, str(reaction.emoji)))
             else:
                 await player.discord_user.send(consts.MESSAGE_AUTO_DM_SUBSCRIBER.format(user.name, str(reaction.emoji), message_author_name))
