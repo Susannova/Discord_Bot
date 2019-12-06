@@ -82,13 +82,14 @@ def is_purgeable_message(message, cmd, channel, *args):
 
 
 #creates a internal play_request message
-def create_internal_play_request_message(play_request_message):
-    play_request_time = re.findall('\d\d:\d\d', play_request_message.content)
-    intern_message = consts.MESSAGE_CREATE_INTERN_PLAY_REQUEST.format(play_request_message.author.name, 10  - len(play_requests[str(play_request_message.id)]), play_request_time, play_request_message.author.name)
-    for player in play_requests[play_requests[str(play_request_message.id)]]:
+def create_internal_play_request_message(message):
+    play_request_time = re.findall('\d\d:\d\d', message.content)
+    intern_message = consts.MESSAGE_CREATE_INTERN_PLAY_REQUEST.format(message.author.name, 9  - len(play_requests[str(message.id)][0].players_known), play_request_time, message.author.name)
+    for player in play_requests[play_requests[str(message.id)]]:
         intern_message += player.players_known.keys() + '\n'
     return intern_message
-    
+
+#TODO: implement this
 def switch_to_internal_play_request(message):
     print(create_internal_play_request_message(message))
 
@@ -247,8 +248,9 @@ async def on_reaction_add(reaction, user):
         player.players_known[user.name]["time_since_last_msg"] = time.time()
         player.players_known[user.name]["wait_for_notification"] = False
 
- 
-    switch_to_internal_play_request(reaction.message)
+        #switch to internal play request if more than 6 players(author + 5 players_known) are subscribed
+        if len(player.players_known) == 5:
+            switch_to_internal_play_request(reaction.message)
 
 # run
 print("Start Client")
