@@ -85,14 +85,23 @@ def is_purgeable_message(message, cmd, channel, *args):
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
+# auto role
 @client.event
 async def on_member_join(member):
     global config
-    # auto role
-    if not member.roles:
-        for role in member.guild.roles:
-            if role.id == config["ROLE_SETZLING_ID"]:
-                await member.edit(role)
+    
+    # if member already has a role => do nothing
+    if len(member.roles) >= 2:
+        return
+
+    # fill role_list with the default role(@everyone) and the lowest role(Setzling)
+    role_list = []
+    for role in member.guild.roles:
+        if role.id == config["ROLE_EVERYONE_ID"] or role.id == config["ROLE_SETZLING_ID"]:
+            role_list.append(role)
+
+    # replace the members role list with the new role list
+    await member.edit(roles=role_list)
         
 @client.event
 async def on_message(message):
@@ -100,20 +109,18 @@ async def on_message(message):
     global consts
     global play_requests
 
-    if message.author == client.user:
-        return
-
     # auto react command - reacts to all patterns in consts.PATTERN_LIST_AUTO_REACT
     # and creates a new play_request
+    # only reacts with EMOJI_ID_LIST[5] == :fill:
     if config["TOGGLE_AUTO_REACT"]:
         for pattern in consts.PATTERN_LIST_AUTO_REACT:
             if message.content.find(pattern) > -1:
-                await message.add_reaction(client.get_emoji(consts.EMOJI_ID_LIST[0]))
+                await message.add_reaction(client.get_emoji(consts.EMOJI_ID_LIST[5]))
                 await message.add_reaction(consts.EMOJI_PASS)
         play_requests[str(message.id)] = [player_in_play_request(message.author)]
 
     # create team command
-    elif message.content.startswith(config["COMMAND_CREATE_TEAM"]) and (str(message.channel.name) == str(config["CHANNEL_INTERN_PLANING"]) or str(message.channel.name) == 'bot'):
+    if message.content.startswith(config["COMMAND_CREATE_TEAM"]) and (str(message.channel.name) == str(config["CHANNEL_INTERN_PLANING"]) or str(message.channel.name) == 'bot'):
         for voice_channel_iterator in message.guild.voice_channels:
             if voice_channel_iterator.name == config["CHANNEL_CREATE_TEAM_VOICE"]:
                 voice_channel = voice_channel_iterator
@@ -127,7 +134,7 @@ async def on_message(message):
        #     await message.delete() 
 
     # player command
-    elif message.content.startswith('?player'):
+    if message.content.startswith('?player'):
         if config["TOGGLE_RIOT_API"]:
             riot_token = str(config["riot_token"])
             watcher = RiotWatcher(riot_token)
@@ -147,7 +154,6 @@ async def on_message(message):
             await message.add_reaction(consts.EMOJI_PASS)
 
         elif message.content.startswith("?version"):
-            print("test:" + consts.VERSION)
             await message.channel.send(consts.VERSION)
 
         elif message.content.startswith("?reload_config"):
@@ -176,38 +182,51 @@ async def on_message_delete(message):
             if message.content.find(pattern) > -1:
                 del play_requests[str(message.id)]
 
+# auto dm
 @client.event
 async def on_reaction_add(reaction, user):
     global config
     global play_requests
+    # if bot reacts or channel is wrong => dont do anything
     if user == client.user or user.name == "Secret Kraut9 Leader" or reaction.channel != config["intern-planing"]:
         return
     
     message_id = reaction.message.id
 
-    if str(reaction.emoji) != consts.EMOJI_PASS:
-        message_author_name = reaction.message.author.name
-        for player in play_requests[str(message_id)]:
-            if user.name not in player.players_known.keys():
-                player.players_known[user.name] = {"time_since_last_msg": time.time(), "wait_for_notification": False}
-            elif player.players_known[user.name]["wait_for_notification"] == False:
-                if time.time - player.players_known[user.name]["time_since_last_msg"] < config["TIMER_NOTIFY_ON_REACT_PURGE"]:
-                    player.players_known[user.name]["wait_for_notification"]: "True"
-                    time.sleep(player.players_known[user.name]["time_since_last_msg"] + config["TIMER_NOTIFY_ON_REACT_PURGE"] - time.time())
-            else:
-                return
-                
-            if player.discord_user.name == message_author_name:
-                await player.discord_user.send(consts.MESSAGE_AUTO_DM_CREATOR.format(user.name, str(reaction.emoji)))
-            else:
-                await player.discord_user.send(consts.MESSAGE_AUTO_DM_SUBSCRIBER.format(user.name, str(reaction.emoji), message_author_name))
-            player.players_known[user.name]["time_since_last_msg"] = time.time()
-            player.players_known[user.name]["wait_for_notification"] = False
-
-    elif str(message_id) in play_requests:
+    # if reaction is 'EMOJI_PASS' delete player from play_request and return
+    if str(reaction.emoji) == consts.EMOJI_PASS:
+        if str(message_id) not in play_requests:
+            return
         for player in play_requests[str(message_id)]:
             del player.players_known[user.name]
-    
+        return
+  
+    # if player didnt react with EMOJI_PASS
+    # if user that reacted is already in play_request => dont do anything
+    for player in play_requests[str(message_id)]:
+        if user.name in player.players_known.keys():
+            return
+
+        # add new user that reacted to play_request
+        player.players_known[user.name] = {"time_since_last_msg": time.time(), "wait_for_notification": False}
+
+        if player.players_known[user.name]["wait_for_notification"] == False:
+            if time.time - player.players_known[user.name]["time_since_last_msg"] < config["TIMER_NOTIFY_ON_REACT_PURGE"]:
+                player.players_known[user.name]["wait_for_notification"]: "True"
+                time.sleep(player.players_known[user.name]["time_since_last_msg"] + config["TIMER_NOTIFY_ON_REACT_PURGE"] - time.time())
+   
+        message_author_name = reaction.message.author.name
+
+        # sends message to play_request creator
+        if player.discord_user.name == message_author_name:
+            await player.discord_user.send(consts.MESSAGE_AUTO_DM_CREATOR.format(user.name, str(reaction.emoji)))
+        # sends message to play_request subscriber
+        else:
+            await player.discord_user.send(consts.MESSAGE_AUTO_DM_SUBSCRIBER.format(user.name, str(reaction.emoji), message_author_name))
+        player.players_known[user.name]["time_since_last_msg"] = time.time()
+        player.players_known[user.name]["wait_for_notification"] = False
+
+ 
 
 
 # run
