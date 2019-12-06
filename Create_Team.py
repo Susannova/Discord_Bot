@@ -108,8 +108,7 @@ async def on_message(message):
     if config["TOGGLE_AUTO_REACT"]:
         for pattern in consts.PATTERN_LIST_AUTO_REACT:
             if message.content.find(pattern) > -1:
-                for emoji_iterator in consts.EMOJI_ID_LIST:
-                    await message.add_reaction(client.get_emoji(emoji_iterator))
+                await message.add_reaction(client.get_emoji(consts.EMOJI_ID_LIST[0]))
                 await message.add_reaction(consts.EMOJI_PASS)
         play_requests[str(message.id)] = [player_in_play_request(message.author)]
 

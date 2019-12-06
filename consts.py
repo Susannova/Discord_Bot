@@ -8,6 +8,6 @@ MESSAGE_AUTO_DM_SUBSCRIBER ='{0} hat auch auf das Play-Request von {2} reagiert:
 VERSION = ""
 
 COMMAND_LIST_INTERN_PLANING = ["?create-team", "?play-internal"]
-COMMAND_LIST_PLAY_REQUEST = ["?play-lol", "?play-lol-now"]
+COMMAND_LIST_PLAY_REQUEST = ["?play-lol", "?play-now"]
 
-PATTERN_LIST_AUTO_REACT = [" will League of Legends spielen. Kommt gegen ", "hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!"]
+PATTERN_LIST_AUTO_REACT = [" will League of Legends spielen. Kommt gegen ", "hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!", "Wir spielen **__jetzt gerade__** League of Legends und suchen noch nach"]
