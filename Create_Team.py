@@ -80,6 +80,19 @@ def is_purgeable_message(message, cmd, channel, *args):
         return True
     return False
 
+
+#creates a internal play_request message
+def create_internal_play_request_message(play_request_message):
+    play_request_time = re.findall('\d\d:\d\d', play_request_message.content)
+    intern_message = consts.MESSAGE_CREATE_INTERN_PLAY_REQUEST.format(play_request_message.author.name, 10  - len(play_requests[str(play_request_message.id)]), play_request_time, play_request_message.author.name)
+    for player in play_requests[play_requests[str(play_request_message.id)]]:
+        intern_message += player.players_known.keys() + '\n'
+    return intern_message
+    
+def switch_to_internal_play_request(message):
+    print(create_internal_play_request_message(message))
+
+
 # events
 @client.event
 async def on_ready():
@@ -117,7 +130,7 @@ async def on_message(message):
             if message.content.find(pattern) > -1:
                 await message.add_reaction(client.get_emoji(consts.EMOJI_ID_LIST[5]))
                 await message.add_reaction(consts.EMOJI_PASS)
-        play_requests[str(message.id)] = [player_in_play_request(message.author)]
+                play_requests[str(message.id)] = [player_in_play_request(message.author)]
 
     # create team command
     if message.content.startswith(config["COMMAND_CREATE_TEAM"]) and (str(message.channel.name) == str(config["CHANNEL_INTERN_PLANING"]) or str(message.channel.name) == 'bot'):
@@ -187,16 +200,20 @@ async def on_message_delete(message):
 async def on_reaction_add(reaction, user):
     global config
     global play_requests
+
+   
     # if bot reacts or channel is wrong => dont do anything
-    if user == client.user or user.name == "Secret Kraut9 Leader" or reaction.channel != config["intern-planing"]:
+    if user == client.user or user.name == "Secret Kraut9 Leader" or reaction.message.channel.name != config["CHANNEL_INTERN_PLANING"] or reaction.message.channel.name != config["CHANNEL_PLAY_REQUESTS"] or reaction.message.channel.name != "bot":
         return
     
     message_id = reaction.message.id
 
+    #if message_id is not a play_request => dont do anything
+    if str(message_id) not in play_requests:
+        return
+    
     # if reaction is 'EMOJI_PASS' delete player from play_request and return
     if str(reaction.emoji) == consts.EMOJI_PASS:
-        if str(message_id) not in play_requests:
-            return
         for player in play_requests[str(message_id)]:
             del player.players_known[user.name]
         return
@@ -204,16 +221,18 @@ async def on_reaction_add(reaction, user):
     # if player didnt react with EMOJI_PASS
     # if user that reacted is already in play_request => dont do anything
     for player in play_requests[str(message_id)]:
-        if user.name in player.players_known.keys():
-            return
+        if user.name not in player.players_known.keys():
+            # add new user that reacted to play_request
+            player.players_known[user.name] = {"time_since_last_msg": time.time(), "wait_for_notification": False}
 
-        # add new user that reacted to play_request
-        player.players_known[user.name] = {"time_since_last_msg": time.time(), "wait_for_notification": False}
-
+        
+        #TODO: fix delay timer - dont use time.sleep
         if player.players_known[user.name]["wait_for_notification"] == False:
             if time.time - player.players_known[user.name]["time_since_last_msg"] < config["TIMER_NOTIFY_ON_REACT_PURGE"]:
                 player.players_known[user.name]["wait_for_notification"]: "True"
-                time.sleep(player.players_known[user.name]["time_since_last_msg"] + config["TIMER_NOTIFY_ON_REACT_PURGE"] - time.time())
+
+                # time.sleep() is not a good idea in a single threaded bot
+                #time.sleep(player.players_known[user.name]["time_since_last_msg"] + config["TIMER_NOTIFY_ON_REACT_PURGE"] - time.time())
    
         message_author_name = reaction.message.author.name
 
@@ -223,11 +242,13 @@ async def on_reaction_add(reaction, user):
         # sends message to play_request subscriber
         else:
             await player.discord_user.send(consts.MESSAGE_AUTO_DM_SUBSCRIBER.format(user.name, str(reaction.emoji), message_author_name))
+
+        #reset delay timer
         player.players_known[user.name]["time_since_last_msg"] = time.time()
         player.players_known[user.name]["wait_for_notification"] = False
 
  
-
+    switch_to_internal_play_request(reaction.message)
 
 # run
 print("Start Client")

@@ -5,9 +5,11 @@ EMOJI_PASS = '❌'
 MESSAGE_CREATE_INTERN_PLAY_REQUEST ='@everyone Das Play-Request von {0} hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!\n Es sind noch **__{1}__** Plätze frei. \n Uhrzeit: {2} Uhr \n Spieler:\n {3}\n'
 MESSAGE_AUTO_DM_CREATOR = '{0} hat auf dein Play-Request reagiert: {1} '
 MESSAGE_AUTO_DM_SUBSCRIBER ='{0} hat auch auf das Play-Request von {2} reagiert: {1} '
+
 VERSION = ""
 
 COMMAND_LIST_INTERN_PLANING = ["?create-team", "?play-internal"]
 COMMAND_LIST_PLAY_REQUEST = ["?play-lol", "?play-now"]
 
 PATTERN_LIST_AUTO_REACT = [" will League of Legends spielen. Kommt gegen ", "hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!", "Wir spielen **__jetzt gerade__** League of Legends und suchen noch nach"]
+
