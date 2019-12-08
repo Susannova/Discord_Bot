@@ -2,10 +2,12 @@ import discord
 import random
 import json
 import time
+from datetime import datetime, timedelta, date
 import re
 import consts
 from importlib import reload
-
+from riotwatcher import RiotWatcher, ApiError
+import riot
 
 # work with time:
 #import datetime
@@ -28,6 +30,8 @@ def setVersion():
 def read_json():
     return json.load(open('configuration.json', 'r'))
 
+
+
 # init
 client = discord.Client()
 bot = json.load(open('bot.json', 'r'))
@@ -36,6 +40,7 @@ time_since_last_msg = 0
 time_last_play_request = 0
 config = read_json()
 setVersion()
+timers = []
 
 # riot api
 if config["TOOGLE_RIOT_API"]:
@@ -50,6 +55,13 @@ class player_in_play_request:
         self.discord_user = user
 
 # functions
+def start_timer(delay):
+    return datetime.now() + timedelta(seconds=delay)
+
+def is_timer_done(timer):
+    _time = datetime.fromtimestamp(time.time())  
+    return _time > timer
+    
 def create_team(players):
     global config
     num_players = len(players)  
@@ -92,6 +104,41 @@ def create_internal_play_request_message(message):
 #TODO: implement this
 def switch_to_internal_play_request(message):
     print(create_internal_play_request_message(message))
+
+
+def addSummoners(message):
+    global config
+    riot_token = str(bot["riot_token"])
+    watcher = RiotWatcher(riot_token)
+    my_region = 'euw1'
+    for player in message.content.split(' ')[1:]:
+        data_summoner = watcher.summoner.by_name(my_region, player)
+        data_league = watcher.league.by_summoner(my_region, data_summoner['id'])
+        data_mastery = watcher.champion_mastery.by_summoner(my_region, data_summoner['id'])
+        riot.populate_player(player, data_mastery, data_summoner, data_league)
+
+def remove_finished_timers():
+  for timer in timers:
+        if is_timer_done(timer):
+            timers.remove(timer)
+
+def riot_command(message, cmd):
+    remove_finished_timers()
+    if len(timers) != 0:
+        return "Please wait a few seconds before using Riot API commands again!"
+
+    timers.append(start_timer(5))
+    addSummoners(message)
+    if(cmd == "PLAYER"):
+        winrate, rank = riot.get_soloq_data(0)
+        riot.removeAllPlayers()
+        return 'Rank: {} , Winrate: {}%'.format(rank , winrate)
+    elif(cmd == "BANS"):
+        output = riot.get_best_bans_for_team()
+        riot.removeAllPlayers()
+        return "Best Bans for Team:\n" + riot.pretty_print_list(output)
+    return 'this shouldnt happen'
+    
 
 
 # events
@@ -148,24 +195,19 @@ async def on_message(message):
        #     await message.delete() 
 
     # player command
-<<<<<<< HEAD
     if message.content.startswith('?player'):
-        if config["TOGGLE_RIOT_API"]:
-            riot_token = str(config["riot_token"])
-=======
-    elif message.content.startswith('?player'):
         if config["TOOGLE_RIOT_API"]:
-            riot_token = str(bot["riot_token"])
->>>>>>> a5fa2bb11e6511c83c51059450625ff5182786af
-            watcher = RiotWatcher(riot_token)
-            my_region = 'euw1'
-            me = watcher.summoner.by_name(my_region, message.content.split(None,1)[1])
-            my_ranked_stats = watcher.league.by_summoner(my_region, me['id'])
-            games_played = int(my_ranked_stats[0]['wins']) + int(my_ranked_stats[0]['losses'])
-            winrate = round((int(my_ranked_stats[0]['wins'])/ games_played) *100,1)
-            await message.channel.send('Played: {4}, Rank: {0} {1} {2}LP, Winrate: {3}%'.format(my_ranked_stats[0]['tier'], my_ranked_stats[0]['rank'], my_ranked_stats[0]['leaguePoints'], winrate, games_played))
+            await message.channel.send(riot_command(message, "PLAYER"))
         else:
             await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
+
+    # bans command
+    if message.content.startswith('?bans'):
+        if config["TOOGLE_RIOT_API"]:
+            await message.channel.send(riot_command(message, "BANS"))
+        else:
+            await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
+
 
     if message.channel.name == "bot":
         # testmsg command for debugging; can be deleted
