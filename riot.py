@@ -7,41 +7,13 @@ from collections import OrderedDict
 # === IMPORTS END === #
 
 # === INIT === #
+def load_json(file_name):
+    with open(f'{file_name}.json',  encoding="utf8") as all_data:
+        return json.load(all_data)
+
 players = []
-data_champ = []
-
-rank_dict = {
-    "IRON-IV": 0,
-    "IRON-III": 0,
-    "IRON-II": 0,
-    "IRON-I": 0,
-    "BRONZE-IV": 1,
-    "BRONZE-III": 1,
-    "BRONZE-II": 1,
-    "BRONZE-I": 1,
-    "SILVER-IV": 2,
-    "SILVER-III": 2,
-    "SILVER-II": 2,
-    "SILVER-I": 3,
-    "GOLD-IV": 4,
-    "GOLD-III": 4,
-    "GOLD-II": 4,
-    "GOLD-I": 4,
-    "PLATINUM-IV": 5,
-    "PLATINUM-III": 6,
-    "PLATINUM-II": 6,
-    "PLATINUM-I": 6,
-    "DIAMOND-IV": 7,
-    "DIAMOND-III": 8,
-    "DIAMOND-II": 9,
-    "DIAMOND-I": 9,
-    "MASTER-I": 10,
-    "GRANDMASTER-I": 15,
-    "CHALLENGER-I": 20
-}
-
-with open('champion.json',  encoding="utf8") as all_data:
-    data_champ = json.load(all_data)
+data_champ = load_json("champion")
+dict_rank = load_json("rank")
 # === INIT END === #
 
 # === PLAYER LIST MANAGEMENT === #
@@ -127,7 +99,7 @@ def get_soloq_data(idx):
     return 'no rank found'    
 
 def get_soloq_rank_weight(rank):
-    return rank_dict[rank]
+    return dict_rank[rank]
 # === DATA TRANSFORMATION END === #
 
 # === UTILITY FUNCTIONS === #
