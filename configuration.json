@@ -15,7 +15,7 @@
     "TOGGLE_COMMAND_ONLY": true,
     "TOGGLE_AUTO_REACT": true,
     "TOGGLE_AUTO_DM": true,
-    "TOOGLE_RIOT_API": false,
+    "TOOGLE_RIOT_API": true,
 
     "MESSAGE_TEAM_1": "Team 1:\n",
     "MESSAGE_TEAM_2": "\nTeam 2:\n",
