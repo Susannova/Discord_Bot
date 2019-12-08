@@ -15,13 +15,17 @@
     "TOGGLE_COMMAND_ONLY": true,
     "TOGGLE_AUTO_REACT": true,
     "TOGGLE_AUTO_DM": true,
-    "TOOGLE_RIOT_API": false,
+    "TOOGLE_RIOT_API": true,
 
     "MESSAGE_TEAM_1": "Team 1:\n",
     "MESSAGE_TEAM_2": "\nTeam 2:\n",
 
+<<<<<<< HEAD
     "ROLE_SETZLING_ID": 643169161236840449,
     "ROLE_EVERYONE_ID": 564481310417092629,
 
     "riot_token": ""
+=======
+    "ROLE_SETZLING_ID": 643169161236840449
+>>>>>>> a5fa2bb11e6511c83c51059450625ff5182786af
 }

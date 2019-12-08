@@ -143,14 +143,20 @@ async def on_message(message):
         for member in voice_channel.members:
             players_list.append(member.name)
 
-        await message.channel.send("\nTeams:\n" + create_team(players_list))
+        await message.channel.send("\n@here\n**__===Teams===__**\n" + create_team(players_list))
       #  if(config["TOGGLE_AUTO_DELETE"]):
        #     await message.delete() 
 
     # player command
+<<<<<<< HEAD
     if message.content.startswith('?player'):
         if config["TOGGLE_RIOT_API"]:
             riot_token = str(config["riot_token"])
+=======
+    elif message.content.startswith('?player'):
+        if config["TOOGLE_RIOT_API"]:
+            riot_token = str(bot["riot_token"])
+>>>>>>> a5fa2bb11e6511c83c51059450625ff5182786af
             watcher = RiotWatcher(riot_token)
             my_region = 'euw1'
             me = watcher.summoner.by_name(my_region, message.content.split(None,1)[1])
