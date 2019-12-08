@@ -171,8 +171,8 @@ async def on_message(message):
 
     # player command
     elif message.content.startswith('?player'):
-        if config["TOGGLE_RIOT_API"]:
-            riot_token = str(config["riot_token"])
+        if config["TOOGLE_RIOT_API"]:
+            riot_token = str(bot["riot_token"])
             watcher = RiotWatcher(riot_token)
             my_region = 'euw1'
             me = watcher.summoner.by_name(my_region, message.content.split(None,1)[1])
