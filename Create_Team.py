@@ -8,7 +8,8 @@ import consts
 from importlib import reload
 from riotwatcher import RiotWatcher, ApiError
 import riot
-
+from concurrent.futures import ThreadPoolExecutor
+import image_transformation
 # work with time:
 #import datetime
 #import os
@@ -28,13 +29,13 @@ def setVersion():
     consts.VERSION = version_file.read()[:7]
 
 def read_json():
-    return json.load(open('configuration.json', 'r'))
+    return json.load(open('./config/configuration.json', 'r'))
 
 
 
 # init
 client = discord.Client()
-bot = json.load(open('bot.json', 'r'))
+bot = json.load(open('./config/bot.json', 'r'))
 play_requests = {}
 time_since_last_msg = 0
 time_last_play_request = 0
@@ -105,17 +106,21 @@ def create_internal_play_request_message(message):
 def switch_to_internal_play_request(message):
     print(create_internal_play_request_message(message))
 
-
-def addSummoners(message):
+def fetch_summoner(player, watcher):
+       my_region = 'euw1'
+       data_summoner = watcher.summoner.by_name(my_region, player)
+       data_league = watcher.league.by_summoner(my_region, data_summoner['id'])
+       data_mastery = watcher.champion_mastery.by_summoner(my_region, data_summoner['id'])
+       return [data_mastery, data_summoner, data_league]
+       
+def add_summoners(message):
     global config
     riot_token = str(bot["riot_token"])
     watcher = RiotWatcher(riot_token)
-    my_region = 'euw1'
     for player in message.content.split(' ')[1:]:
-        data_summoner = watcher.summoner.by_name(my_region, player)
-        data_league = watcher.league.by_summoner(my_region, data_summoner['id'])
-        data_mastery = watcher.champion_mastery.by_summoner(my_region, data_summoner['id'])
-        riot.populate_player(player, data_mastery, data_summoner, data_league)
+        with ThreadPoolExecutor() as executor:
+            future = executor.submit(fetch_summoner, player, watcher)
+            riot.populate_player(player, future.result()[0], future.result()[1], future.result()[2])
 
 def remove_finished_timers():
   for timer in timers:
@@ -128,13 +133,14 @@ def riot_command(message, cmd):
         return "Please wait a few seconds before using Riot API commands again!"
 
     timers.append(start_timer(5))
-    addSummoners(message)
+    add_summoners(message)
     if(cmd == "PLAYER"):
         winrate, rank = riot.get_soloq_data(0)
         riot.removeAllPlayers()
         return 'Rank: {} , Winrate: {}%'.format(rank , winrate)
     elif(cmd == "BANS"):
         output = riot.get_best_bans_for_team()
+        image_transformation.create_new_image(output)
         riot.removeAllPlayers()
         return "Best Bans for Team:\n" + riot.pretty_print_list(output)
     return 'this shouldnt happen'
@@ -204,7 +210,7 @@ async def on_message(message):
     # bans command
     if message.content.startswith('?bans'):
         if config["TOOGLE_RIOT_API"]:
-            await message.channel.send(riot_command(message, "BANS"))
+            await message.channel.send(riot_command(message, "BANS"), file=discord.File('./champ-spliced/image.jpg'))
         else:
             await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
 

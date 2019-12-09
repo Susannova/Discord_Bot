@@ -8,7 +8,7 @@ from collections import OrderedDict
 
 # === INIT === #
 def load_json(file_name):
-    with open(f'{file_name}.json',  encoding="utf8") as all_data:
+    with open(f'./config/{file_name}.json',  encoding="utf8") as all_data:
         return json.load(all_data)
 
 players = []
