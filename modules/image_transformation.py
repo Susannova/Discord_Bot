@@ -14,7 +14,6 @@ def get_files(champs):
             files.append(f'./{config["FOLDER_CHAMP_ICON"]}/{champ}.png')
         else:
             files.append(f'./{config["FOLDER_CHAMP_ICON"]}/-1.png')
-        
     return files
 
 def create_new_image(champs):
@@ -37,6 +36,7 @@ def testModule():
     assert(config["TOGGLE_AUTO_DELETE"] == True)
     assert(len(get_files(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Nautilus'])) == 5)
     assert(create_new_image(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Nunu']) == 0)
+    assert(create_new_image(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Pingu']) == 0)
 
 #testModule()
 # === TEST END === #
