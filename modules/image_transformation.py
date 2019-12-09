@@ -10,7 +10,11 @@ config = read_json()
 def get_files(champs):
     files = []
     for champ in champs:
-        files.append(f'./{config["FOLDER_CHAMP_ICON"]}/{champ}.png')
+        if os.path.isfile(f'./{config["FOLDER_CHAMP_ICON"]}/{champ}.png'):
+            files.append(f'./{config["FOLDER_CHAMP_ICON"]}/{champ}.png')
+        else:
+            files.append(f'./{config["FOLDER_CHAMP_ICON"]}/-1.png')
+        
     return files
 
 def create_new_image(champs):
