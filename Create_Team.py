@@ -4,12 +4,13 @@ import json
 import time
 from datetime import datetime, timedelta, date
 import re
-import consts
+import modules.consts
 from importlib import reload
 from riotwatcher import RiotWatcher, ApiError
-import riot
+import modules.riot
 from concurrent.futures import ThreadPoolExecutor
-import image_transformation
+import modules.image_transformation
+
 # work with time:
 #import datetime
 #import os

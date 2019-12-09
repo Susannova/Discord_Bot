@@ -23,5 +23,8 @@
     "ROLE_SETZLING_ID": 643169161236840449,
     "ROLE_EVERYONE_ID": 564481310417092629,
 
+    "FOLDER_CHAMP_ICON" : "./data/champ-icon/",
+    "FOLDER_CHAMP_SPLICED" : "./data/champ-spliced/",
+
     "riot_token": ""
 }
