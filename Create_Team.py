@@ -2,53 +2,32 @@ import discord
 import random
 import json
 import time
-from datetime import datetime, timedelta, date
 import re
 import modules.consts as consts
 from importlib import reload
-from riotwatcher import RiotWatcher, ApiError
 import modules.riot as riot
-from concurrent.futures import ThreadPoolExecutor
-import modules.image_transformation as image_transformation
+import modules.timers as timers
 
-# work with time:
-#import datetime
-#import os
-#import time
-#os.environ['TZ'] = 'Europe/Amsterdam'
-#time.tzset()
-#this_morning = datetime.datetime.now()
-#last_night = datetime.datetime(2019, 11, 29, 20, 0)
-#print(this_morning.time() < last_night.time())
-
-
-
-#init functions
+# === init functions === #
 def setVersion():
     global consts
     version_file = open("./.git/refs/heads/master", "r")
     consts.VERSION = version_file.read()[:7]
 
-def read_json():
-    return json.load(open('./config/configuration.json', 'r'))
+def read_json(filename):
+    return json.load(open(f'./config/{filename}.json', 'r'))
 
-
-
-# init
+# === init === #
 client = discord.Client()
-bot = json.load(open('./config/bot.json', 'r'))
+bot =  read_json('bot')
 play_requests = {}
 time_since_last_msg = 0
 time_last_play_request = 0
-config = read_json()
+config = read_json('configuration')
 setVersion()
-timers = []
+message_cache =  []
 
-# riot api
-if config["TOOGLE_RIOT_API"]:
-    from riotwatcher import RiotWatcher, ApiError
-
-# classes
+# === classes ===
 class player_in_play_request:
     discord_user = discord.user
     players_known = {}
@@ -56,14 +35,7 @@ class player_in_play_request:
     def __init__(self, user):
         self.discord_user = user
 
-# functions
-def start_timer(delay):
-    return datetime.now() + timedelta(seconds=delay)
-
-def is_timer_done(timer):
-    _time = datetime.fromtimestamp(time.time())  
-    return _time > timer
-    
+# === functions === #
 def create_team(players):
     global config
     num_players = len(players)  
@@ -95,7 +67,7 @@ def is_purgeable_message(message, cmd, channel, *args):
     return False
 
 
-#creates a internal play_request message
+# creates an internal play_request message
 def create_internal_play_request_message(message):
     play_request_time = re.findall('\d\d:\d\d', message.content)
     intern_message = consts.MESSAGE_CREATE_INTERN_PLAY_REQUEST.format(message.author.name, 9  - len(play_requests[str(message.id)][0].players_known), play_request_time, message.author.name)
@@ -107,57 +79,29 @@ def create_internal_play_request_message(message):
 def switch_to_internal_play_request(message):
     print(create_internal_play_request_message(message))
 
-def fetch_summoner(player, watcher):
-       my_region = 'euw1'
-       data_summoner = watcher.summoner.by_name(my_region, player)
-       data_league = watcher.league.by_summoner(my_region, data_summoner['id'])
-       data_mastery = watcher.champion_mastery.by_summoner(my_region, data_summoner['id'])
-       return [data_mastery, data_summoner, data_league]
-       
-def add_summoners(message):
-    global config
-    riot_token = str(bot["riot_token"])
-    watcher = RiotWatcher(riot_token)
-    for player in message.content.split(' ')[1:]:
-        with ThreadPoolExecutor() as executor:
-            future = executor.submit(fetch_summoner, player, watcher)
-            riot.populate_player(player, future.result()[0], future.result()[1], future.result()[2])
 
-def remove_finished_timers():
-  for timer in timers:
-        if is_timer_done(timer):
-            timers.remove(timer)
-
-def riot_command(message, cmd):
-    remove_finished_timers()
-    if len(timers) != 0:
-        return "Please wait a few seconds before using Riot API commands again!"
-
-    timers.append(start_timer(5))
-    add_summoners(message)
-    if(cmd == "PLAYER"):
-        winrate, rank = riot.get_soloq_data(0)
-        riot.removeAllPlayers()
-        return 'Rank: {} , Winrate: {}%'.format(rank , winrate)
-    elif(cmd == "BANS"):
-        output = riot.get_best_bans_for_team()
-        image_transformation.create_new_image(output)
-        riot.removeAllPlayers()
-        player_names = []
-        for player in message.content.split(' ')[1:]:
-            player_names.append(player)
-        op_url = f'https://euw.op.gg/multi/query={player_names[0]}%2C{player_names[1]}%2C{player_names[2]}%2C{player_names[3]}%2C{player_names[4]}'
-        return "Team OP.GG: " + op_url + "\nBest Bans for Team:\n" + riot.pretty_print_list(output) 
-    return 'this shouldnt happen'
-    
+# BUG: collides with play_requests and manual deletes
+# def get_purgeable_messages(message):
+#     message_cache.append((message, start_timer(secs=10)))
+#     deleteable_messages = []
+#     for msg in message_cache:
+#         if is_timer_done(msg[1]):
+#             deleteable_messages.append(msg[0])
+#             message_cache.remove(msg)
+#     return deleteable_messages
 
 
-# events
+def has_pattern(message):
+    for pattern in consts.PATTERN_LIST_AUTO_REACT:
+        if message.content.find(pattern) > -1:
+            return True
+    return False
+# === events === #
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
-# auto role
+# === auto role === #
 @client.event
 async def on_member_join(member):
     global config
@@ -184,12 +128,12 @@ async def on_message(message):
     # auto react command - reacts to all patterns in consts.PATTERN_LIST_AUTO_REACT
     # and creates a new play_request
     # only reacts with EMOJI_ID_LIST[5] == :fill:
-    if config["TOGGLE_AUTO_REACT"]:
-        for pattern in consts.PATTERN_LIST_AUTO_REACT:
-            if message.content.find(pattern) > -1:
-                await message.add_reaction(client.get_emoji(consts.EMOJI_ID_LIST[5]))
-                await message.add_reaction(consts.EMOJI_PASS)
-                play_requests[str(message.id)] = [player_in_play_request(message.author)]
+    if config["TOGGLE_AUTO_REACT"] and has_pattern(message):
+        await message.add_reaction(client.get_emoji(654044309615804443))
+        await message.add_reaction(consts.EMOJI_PASS)
+        # for msg in get_purgeable_messages(message):
+        #     await msg.delete()
+        play_requests[str(message.id)] = [player_in_play_request(message.author)]
 
     # create team command
     if message.content.startswith(config["COMMAND_CREATE_TEAM"]) and (str(message.channel.name) == str(config["CHANNEL_INTERN_PLANING"]) or str(message.channel.name) == 'bot'):
@@ -208,17 +152,15 @@ async def on_message(message):
     # player command
     if message.content.startswith('?player'):
         if config["TOOGLE_RIOT_API"]:
-            await message.channel.send(riot_command(message, "PLAYER"))
+            await message.channel.send(riot.riot_command(message))
         else:
             await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
 
-    # bans command
-    if message.content.startswith('?bans'):
+     if message.content.startswith('?bans') :
         if config["TOOGLE_RIOT_API"]:
             await message.channel.send(riot_command(message, "BANS"), file=discord.File(f'./{config["FOLDER_CHAMP_SPLICED"]}/image.jpg'))
         else:
             await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
-
 
     if message.channel.name == "bot":
         # testmsg command for debugging; can be deleted
@@ -231,7 +173,7 @@ async def on_message(message):
 
         elif message.content.startswith("?reload_config"):
             await message.channel.send("Reload configuration.json:")
-            config = read_json()
+            config = read_json('configuration')
             consts = reload(consts)
             await message.channel.send("Done.")
         #Killswitch
@@ -251,9 +193,8 @@ async def on_message(message):
 async def on_message_delete(message):
     global consts
     global play_requests
-    for pattern in consts.PATTERN_LIST_AUTO_REACT:
-            if message.content.find(pattern) > -1:
-                del play_requests[str(message.id)]
+    if has_pattern(message):
+        del play_requests[str(message.id)]
 
 # auto dm
 @client.event

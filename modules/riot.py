@@ -4,6 +4,9 @@ import time
 from datetime import datetime, timedelta, date
 from riotwatcher import RiotWatcher, ApiError
 from collections import OrderedDict
+from modules import image_transformation
+from modules import timers
+from concurrent.futures import ThreadPoolExecutor
 # === IMPORTS END === #
 
 # === INIT === #
@@ -14,6 +17,8 @@ def load_json(file_name):
 players = []
 data_champ = load_json("champion")
 dict_rank = load_json("rank")
+bot = load_json("bot")
+_timers = []
 # === INIT END === #
 
 # === PLAYER LIST MANAGEMENT === #
@@ -36,6 +41,15 @@ def removePlayer(player):
 
 def removeAllPlayers():
     players = []
+
+def add_player_and_data(summoner_names):
+    riot_token = str(bot["riot_token"])
+    watcher = RiotWatcher(riot_token)
+    for player in summoner_names:
+        with ThreadPoolExecutor() as executor:
+            future = executor.submit(fetch_summoner, player, watcher)
+            populate_player(player, future.result()[0], future.result()[1], future.result()[2])
+
 # === PLAYER LIST MANAGEMENT END === #
 
 # === DATA TRANSFORMATION === #
@@ -121,7 +135,47 @@ def pretty_print_list(_list):
 
 def format_last_time_played(time):
     return time.strftime('%d-%m-%Y')
+
+
+def fetch_summoner(player, watcher):
+       my_region = 'euw1'
+       data_summoner = watcher.summoner.by_name(my_region, player)
+       data_league = watcher.league.by_summoner(my_region, data_summoner['id'])
+       data_mastery = watcher.champion_mastery.by_summoner(my_region, data_summoner['id'])
+       return [data_mastery, data_summoner, data_league]     
+
+def get_summoner_name_list(message):
+    player_names = []
+    for player in message.content.split(' ')[1:]:
+        player_names.append(player)
+    return player_names
+  
 # === UTILITY FUNCTIONS END === #
+
+# === INTERFACE === #
+
+def riot_command(message):
+    timers.remove_finished_timers(_timers)
+    if len(_timers) != 0:
+        return "Please wait a few seconds before using Riot API commands again!"
+
+    _timers.append(timers.start_timer(secs=5))
+    summoner_names = get_summoner_name_list(message)
+    add_player_and_data(summoner_names)
+    if(message.content.split(' ')[0] == "?player"):
+        winrate, rank = get_soloq_data(0)
+        removeAllPlayers()
+        return 'Rank: {} , Winrate: {}%'.format(rank , winrate)
+    elif(message.content.split(' ')[0] == "?bans"):
+        output = get_best_bans_for_team()
+        image_transformation.create_new_image(output)
+        removeAllPlayers()
+        op_url = f'https://euw.op.gg/multi/query={summoner_names[0]}%2C{summoner_names[1]}%2C{summoner_names[2]}%2C{summoner_names[3]}%2C{summoner_names[4]}'
+        return "Team OP.GG: " + op_url + "\nBest Bans for Team:\n" + pretty_print_list(output) 
+    return 'this shouldnt happen'
+    
+
+# === INTERFACE END === #
 
 # === TESTS === #
 def populate_with_debug_data():
