@@ -4,12 +4,12 @@ import json
 import time
 from datetime import datetime, timedelta, date
 import re
-import modules.consts
+import modules.consts as consts
 from importlib import reload
 from riotwatcher import RiotWatcher, ApiError
-import modules.riot
+import modules.riot as riot
 from concurrent.futures import ThreadPoolExecutor
-import modules.image_transformation
+import modules.image_transformation as image_transformation
 
 # work with time:
 #import datetime
@@ -143,7 +143,11 @@ def riot_command(message, cmd):
         output = riot.get_best_bans_for_team()
         image_transformation.create_new_image(output)
         riot.removeAllPlayers()
-        return "Best Bans for Team:\n" + riot.pretty_print_list(output)
+        player_names = []
+        for player in message.content.split(' ')[1:]:
+            player_names.append(player)
+        op_url = f'https://euw.op.gg/multi/query={player_names[0]}%2C{player_names[1]}%2C{player_names[2]}%2C{player_names[3]}%2C{player_names[4]}'
+        return "Team OP.GG: " + op_url + "\nBest Bans for Team:\n" + riot.pretty_print_list(output) 
     return 'this shouldnt happen'
     
 
@@ -211,7 +215,7 @@ async def on_message(message):
     # bans command
     if message.content.startswith('?bans'):
         if config["TOOGLE_RIOT_API"]:
-            await message.channel.send(riot_command(message, "BANS"), file=discord.File('./champ-spliced/image.jpg'))
+            await message.channel.send(riot_command(message, "BANS"), file=discord.File(f'./{config["FOLDER_CHAMP_SPLICED"]}/image.jpg'))
         else:
             await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
 
