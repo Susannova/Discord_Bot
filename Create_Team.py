@@ -129,7 +129,7 @@ async def on_message(message):
     # and creates a new play_request
     # only reacts with EMOJI_ID_LIST[5] == :fill:
     if config["TOGGLE_AUTO_REACT"] and has_pattern(message):
-        await message.add_reaction(client.get_emoji(654044309615804443))
+        await message.add_reaction(client.get_emoji(consts.EMOJI_ID_LIST[5])))
         await message.add_reaction(consts.EMOJI_PASS)
         # for msg in get_purgeable_messages(message):
         #     await msg.delete()
@@ -156,7 +156,7 @@ async def on_message(message):
         else:
             await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
 
-     if message.content.startswith('?bans') :
+    if message.content.startswith('?bans') :
         if config["TOOGLE_RIOT_API"]:
             await message.channel.send(riot_command(message, "BANS"), file=discord.File(f'./{config["FOLDER_CHAMP_SPLICED"]}/image.jpg'))
         else:
