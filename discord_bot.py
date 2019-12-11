@@ -1,12 +1,10 @@
+import sys, os
+sys.path.append(os.path.join(sys.path[0],'modules'))
 import discord
-import random
 import json
 import time
-import re
-import modules.consts as consts
 from importlib import reload
-import modules.riot as riot
-import modules.timers as timers
+from modules import consts, riot, timers, bot_utility as utility
 
 # === init functions === #
 def setVersion():
@@ -25,9 +23,9 @@ time_since_last_msg = 0
 time_last_play_request = 0
 config = read_json('configuration')
 setVersion()
-message_cache =  []
+message_cache = []
 
-# === classes ===
+# === classes === #
 class player_in_play_request:
     discord_user = discord.user
     players_known = {}
@@ -35,170 +33,83 @@ class player_in_play_request:
     def __init__(self, user):
         self.discord_user = user
 
-# === functions === #
-def create_team(players):
-    global config
-    num_players = len(players)  
-    team1 = random.sample(players, int(num_players / 2))
-    team2 = players
-
-    for player in team1:
-        team2.remove(player)
-    
-    teams_message = config["MESSAGE_TEAM_1"]
-    for player in team1:
-        teams_message += player + "\n"
-    
-    teams_message += config["MESSAGE_TEAM_2"]
-    for player in team2:
-        teams_message += player + "\n"
-    
-    return teams_message
-
-
-# checks if message should be purged based on if it starts with a specified command cmd
-# and is send in a specfied channel name channel and is from a user excepted user
-# that should not be purged
-def is_purgeable_message(message, cmd, channel, *args):
-    if message.content.startswith(tuple(cmd)) == False and message.channel.name == channel:
-        if message.author.name in args:
-            return False
-        return True
-    return False
-
-
-# creates an internal play_request message
-def create_internal_play_request_message(message):
-    play_request_time = re.findall('\d\d:\d\d', message.content)
-    intern_message = consts.MESSAGE_CREATE_INTERN_PLAY_REQUEST.format(message.author.name, 9  - len(play_requests[str(message.id)][0].players_known), play_request_time, message.author.name)
-    for player in play_requests[play_requests[str(message.id)]]:
-        intern_message += player.players_known.keys() + '\n'
-    return intern_message
-
-#TODO: implement this
-def switch_to_internal_play_request(message):
-    print(create_internal_play_request_message(message))
-
-
-# BUG: collides with play_requests and manual deletes
-# def get_purgeable_messages(message):
-#     message_cache.append((message, start_timer(secs=10)))
-#     deleteable_messages = []
-#     for msg in message_cache:
-#         if is_timer_done(msg[1]):
-#             deleteable_messages.append(msg[0])
-#             message_cache.remove(msg)
-#     return deleteable_messages
-
-
-def has_pattern(message):
-    for pattern in consts.PATTERN_LIST_AUTO_REACT:
-        if message.content.find(pattern) > -1:
-            return True
-    return False
 # === events === #
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
-# === auto role === #
 @client.event
 async def on_member_join(member):
-    global config
-    
-    # if member already has a role => do nothing
-    if len(member.roles) >= 2:
-        return
-
-    # fill role_list with the default role(@everyone) and the lowest role(Setzling)
-    role_list = []
-    for role in member.guild.roles:
-        if role.id == config["ROLE_EVERYONE_ID"] or role.id == config["ROLE_SETZLING_ID"]:
-            role_list.append(role)
-
-    # replace the members role list with the new role list
-    await member.edit(roles=role_list)
+    # auto role
+    await member.edit(roles=utility.get_auto_role_list())
         
 @client.event
 async def on_message(message):
     global config
     global consts
     global play_requests
+    utility.set_message(message)
 
-    # auto react command - reacts to all patterns in consts.PATTERN_LIST_AUTO_REACT
+    # auto react - reacts to all patterns in consts.PATTERN_LIST_AUTO_REACT
     # and creates a new play_request
     # only reacts with EMOJI_ID_LIST[5] == :fill:
     if config["TOGGLE_AUTO_REACT"] and has_pattern(message):
-        await message.add_reaction(client.get_emoji(654044309615804443))
+        await message.add_reaction(client.get_emoji(consts.EMOJI_ID_LIST[5]))
         await message.add_reaction(consts.EMOJI_PASS)
-        # for msg in get_purgeable_messages(message):
-        #     await msg.delete()
         play_requests[str(message.id)] = [player_in_play_request(message.author)]
 
     # create team command
-    if message.content.startswith(config["COMMAND_CREATE_TEAM"]) and (str(message.channel.name) == str(config["CHANNEL_INTERN_PLANING"]) or str(message.channel.name) == 'bot'):
-        for voice_channel_iterator in message.guild.voice_channels:
-            if voice_channel_iterator.name == config["CHANNEL_CREATE_TEAM_VOICE"]:
-                voice_channel = voice_channel_iterator
+    if utility.contains_command(consts.COMMAND_CREATE_TEAM) and utility.is_in_channels([consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_BOT]):
+        voice_channel = utility.get_voice_channel(consts.CHANNEL_CREATE_TEAM_VOICE)
+        players_list = utility.get_players_in_channel(voice_channel)
+        await message.channel.send(utility.create_team(players_list))
 
-        players_list = []
-        for member in voice_channel.members:
-            players_list.append(member.name)
-
-        await message.channel.send("\n@here\n**__===Teams===__**\n" + create_team(players_list))
-      #  if(config["TOGGLE_AUTO_DELETE"]):
-       #     await message.delete() 
-
-    # player command
-    if message.content.startswith('?player'):
-        if config["TOOGLE_RIOT_API"]:
+    # riot commands
+    if config["TOOGLE_RIOT_API"] == False:
+        await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
+    else:
+        if message.content.startswith('?player'):
             await message.channel.send(riot.riot_command(message))
-        else:
-            await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
+        elif message.content.startswith('?bans'):
+            await message.channel.send(riot.riot_command(message), file=discord.File(f'./{config["FOLDER_CHAMP_SPLICED"]}/image.jpg'))
 
-     if message.content.startswith('?bans') :
-        if config["TOOGLE_RIOT_API"]:
-            await message.channel.send(riot_command(message, "BANS"), file=discord.File(f'./{config["FOLDER_CHAMP_SPLICED"]}/image.jpg'))
-        else:
-            await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
-
+    # debug commands
     if message.channel.name == "bot":
-        # testmsg command for debugging; can be deleted
         if message.content.startswith("?testmsg"):
             await message.channel.send("test")
             await message.add_reaction(consts.EMOJI_PASS)
-
         elif message.content.startswith("?version"):
             await message.channel.send(consts.VERSION)
-
         elif message.content.startswith("?reload_config"):
             await message.channel.send("Reload configuration.json:")
             config = read_json('configuration')
-            consts = reload(consts)
+            #consts = reload(modules.consts)
             await message.channel.send("Done.")
-        #Killswitch
+        # killswitch
         elif message.content.startswith('!end'):
             await message.channel.send('Bot is shut down!')
             await client.logout()
 
-     
      # deletes all messages that are not commands (consts.COMMAND_LIST_ALL)  except bot responses in all cmd channels (consts.CHANNEL_LIST_COMMANDS)
-    if config["TOGGLE_AUTO_DELETE"] and is_purgeable_message(message, consts.COMMAND_LIST_PLAY_REQUEST, config["CHANNEL_PLAY_REQUESTS"], config["BOT_DYNO_NAME"]):
+    if config["TOGGLE_AUTO_DELETE"]:
+        if utility.is_purgeable_message(consts.COMMAND_LIST_PLAY_REQUEST, consts.CHANNEL_PLAY_REQUESTS, [consts.BOT_DYNO_NAME]):
             await message.delete()
-    if config["TOGGLE_AUTO_DELETE"] and is_purgeable_message(message, consts.COMMAND_LIST_INTERN_PLANING, config["CHANNEL_INTERN_PLANING"], config["BOT_DYNO_NAME"], client.user.name):
+        elif utility.is_purgeable_message(consts.COMMAND_LIST_INTERN_PLANING, consts.CHANNEL_INTERN_PLANING, [consts.BOT_DYNO_NAME, client.user.name]):
             await message.delete()
 
-# delete play_request if old play-request gets deleted
+
 @client.event
 async def on_message_delete(message):
     global consts
     global play_requests
+    # delete play_request if old play-request gets deleted
     if has_pattern(message):
         del play_requests[str(message.id)]
 
-# auto dm
+
 @client.event
 async def on_reaction_add(reaction, user):
+    # auto dm
     global config
     global play_requests
 

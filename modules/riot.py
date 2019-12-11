@@ -4,8 +4,8 @@ import time
 from datetime import datetime, timedelta, date
 from riotwatcher import RiotWatcher, ApiError
 from collections import OrderedDict
-from modules import image_transformation
-from modules import timers
+import image_transformation
+import timers
 from concurrent.futures import ThreadPoolExecutor
 # === IMPORTS END === #
 
