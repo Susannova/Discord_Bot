@@ -130,7 +130,7 @@ async def on_message(message):
     # and creates a new play_request
     # only reacts with EMOJI_ID_LIST[5] == :fill:
     if config["TOGGLE_AUTO_REACT"] and has_pattern(message):
-        await message.add_reaction(client.get_emoji(consts.EMOJI_ID_LIST[5])))
+        await message.add_reaction(client.get_emoji(consts.EMOJI_ID_LIST[5]))
         await message.add_reaction(consts.EMOJI_PASS)
         # for msg in get_purgeable_messages(message):
         #     await msg.delete()
