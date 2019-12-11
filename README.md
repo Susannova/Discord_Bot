@@ -2,7 +2,7 @@
 
 Features:
 - create a team 
-- role planning with auto react
+- commit/reject play request with auto react
 - auto dm
 - auto delete non commands
 - version 
@@ -10,18 +10,19 @@ Features:
 - integrated riot api => waiting for API KEY
 - lol player information
 - reload config on command
-
-dev:
 - auto role
 
 Dyno Features used:
 - play requests
 - play-now requests
 - internal play requests
-- auto role
 - join message (new users get a dm from dyno with some text)
 
 Commands:
+- ?play-lol [Uhrzeit]
+- ?play-now
+
+Our Bot:
 - ?create-team
 - ?player
 
@@ -29,10 +30,14 @@ DEBUG/DEV Commands:
 - ?testmsg
 - ?version
 - ?reload_config
+- !end
 
 TODO:
-https://github.com/Susannova/Create_Team/issues
+[issues](https://github.com/Susannova/Create_Team/issues)
 
 KNOWN BUGS:
 - dyno commands work in every channel as admin
 - multiple play-requests or switch from play-request to internal play-request all share same subscribers => map play-request message id to subscribers
+
+Wiki:
+-  [player_request](https://drive.google.com/file/d/1hMAPciHA2Yc0a6dnL9igTXTL4uWULiSC/view?usp=sharing)
