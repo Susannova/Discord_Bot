@@ -7,6 +7,7 @@ import modules.consts as consts
 from importlib import reload
 import modules.riot as riot
 import modules.timers as timers
+import asyncio
 
 # === init functions === #
 def setVersion():
@@ -227,13 +228,12 @@ async def on_reaction_add(reaction, user):
             player.players_known[user.name] = {"time_since_last_msg": time.time(), "wait_for_notification": False}
 
         
-        #TODO: fix delay timer - dont use time.sleep
         if player.players_known[user.name]["wait_for_notification"] == False:
             if time.time - player.players_known[user.name]["time_since_last_msg"] < config["TIMER_NOTIFY_ON_REACT_PURGE"]:
                 player.players_known[user.name]["wait_for_notification"]: "True"
 
-                # time.sleep() is not a good idea in a single threaded bot
-                #time.sleep(player.players_known[user.name]["time_since_last_msg"] + config["TIMER_NOTIFY_ON_REACT_PURGE"] - time.time())
+                await asyncio.sleep(player.players_known[user.name]["time_since_last_msg"] + config["TIMER_NOTIFY_ON_REACT_PURGE"] - time.time())
+
    
         message_author_name = reaction.message.author.name
 
