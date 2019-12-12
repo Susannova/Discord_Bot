@@ -18,10 +18,9 @@ def read_json(filename):
 # === init === #
 client = discord.Client()
 bot =  read_json('bot')
-play_requests = {}
-time_since_last_msg = 0
-time_last_play_request = 0
 config = read_json('configuration')
+play_requests = {}
+tmp_message_author = None
 setVersion()
 message_cache = []
 
@@ -48,21 +47,45 @@ async def on_message(message):
     global config
     global consts
     global play_requests
+    global tmp_message_author
+
     utility.set_message(message)
+
+    if message.channel == discord.DMChannel:
+        return
 
     # auto react - reacts to all patterns in consts.PATTERN_LIST_AUTO_REACT
     # and creates a new play_request
     # only reacts with EMOJI_ID_LIST[5] == :fill:
-    if config["TOGGLE_AUTO_REACT"] and has_pattern(message):
+    if config["TOGGLE_AUTO_REACT"] and utility.has_pattern(message):
         await message.add_reaction(client.get_emoji(consts.EMOJI_ID_LIST[5]))
         await message.add_reaction(consts.EMOJI_PASS)
-        play_requests[str(message.id)] = [player_in_play_request(message.author)]
+    
+        play_requests[message.id] = [[tmp_message_author, time.time()]]
+        global message_cache
+        message_cache.append((message, timers.start_timer(hrs=18)))
+        message_cache, deleteable_messages = utility.get_purgeable_messages(message_cache)
+        for message in deleteable_messages:
+            await message.delete()
 
     # create team command
     if utility.contains_command(consts.COMMAND_CREATE_TEAM) and utility.is_in_channels([consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_BOT]):
         voice_channel = utility.get_voice_channel(consts.CHANNEL_CREATE_TEAM_VOICE)
         players_list = utility.get_players_in_channel(voice_channel)
         await message.channel.send(utility.create_team(players_list))
+
+    #play-now command
+    if utility.contains_command(consts.COMMAND_PLAY_NOW) and utility.is_in_channels([consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT]):
+        tmp_message_author = message.author
+        await message.channel.send((consts.MESSAGE_PLAY_NOW).format(message.author.mention))
+       
+    #play-lol command
+    elif utility.contains_command(consts.COMMAND_PLAY_LOL) and utility.is_in_channels([consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT]):
+        if len(message.content.split(' ')) == 2:
+            tmp_message_author = message.author
+            await message.channel.send((consts.MESSAGE_PLAY_LOL).format(message.author.mention, message.content.split(' ')[1]))
+        else:
+            await message.channel.send(f'Wrong format: {message.cotent}')
 
     # riot commands
     if config["TOOGLE_RIOT_API"] == False:
@@ -71,7 +94,7 @@ async def on_message(message):
         if message.content.startswith('?player'):
             await message.channel.send(riot.riot_command(message))
         elif message.content.startswith('?bans'):
-            await message.channel.send(riot.riot_command(message), file=discord.File(f'./{config["FOLDER_CHAMP_SPLICED"]}/image.jpg'))
+            await message.channel.send(riot.riot_command(message), file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))
 
     # debug commands
     if message.channel.name == "bot":
@@ -89,6 +112,9 @@ async def on_message(message):
         elif message.content.startswith('!end'):
             await message.channel.send('Bot is shut down!')
             await client.logout()
+        # exploit the pi through this - glhf!
+        elif message.content.startswith('?print'):
+            print(eval(message.content.split(' ')[1]))
 
      # deletes all messages that are not commands (consts.COMMAND_LIST_ALL)  except bot responses in all cmd channels (consts.CHANNEL_LIST_COMMANDS)
     if config["TOGGLE_AUTO_DELETE"]:
@@ -103,8 +129,8 @@ async def on_message_delete(message):
     global consts
     global play_requests
     # delete play_request if old play-request gets deleted
-    if has_pattern(message):
-        del play_requests[str(message.id)]
+    if utility.has_pattern(message):
+        del play_requests[message.id]
 
 
 @client.event
@@ -112,57 +138,34 @@ async def on_reaction_add(reaction, user):
     # auto dm
     global config
     global play_requests
+    utility.set_message(reaction.message)
 
-   
-    # if bot reacts or channel is wrong => dont do anything
-    if user == client.user or user.name == "Secret Kraut9 Leader" or reaction.message.channel.name != config["CHANNEL_INTERN_PLANING"] or reaction.message.channel.name != config["CHANNEL_PLAY_REQUESTS"] or reaction.message.channel.name != "bot":
+    if not config["TOGGLE_AUTO_DM"]:
         return
-    
-    message_id = reaction.message.id
+    if not utility.is_auto_dm_subscriber(client, user, play_requests):
+        return
 
-    #if message_id is not a play_request => dont do anything
-    if str(message_id) not in play_requests:
-        return
-    
+    message_id = message.id
+    play_request_author = play_requests[message_id][0][0]
+
     # if reaction is 'EMOJI_PASS' delete player from play_request and return
     if str(reaction.emoji) == consts.EMOJI_PASS:
-        for player in play_requests[str(message_id)]:
-            del player.players_known[user.name]
+        for player in play_requests[message_id]:
+            if user == player[0]:
+                play_requests[message_id].remove(player)
         return
-  
-    # if player didnt react with EMOJI_PASS
-    # if user that reacted is already in play_request => dont do anything
-    for player in play_requests[str(message_id)]:
-        if user.name not in player.players_known.keys():
-            # add new user that reacted to play_request
-            player.players_known[user.name] = {"time_since_last_msg": time.time(), "wait_for_notification": False}
-
-        
-        #TODO: fix delay timer - dont use time.sleep
-        if player.players_known[user.name]["wait_for_notification"] == False:
-            if time.time - player.players_known[user.name]["time_since_last_msg"] < config["TIMER_NOTIFY_ON_REACT_PURGE"]:
-                player.players_known[user.name]["wait_for_notification"]: "True"
-
-                # time.sleep() is not a good idea in a single threaded bot
-                #time.sleep(player.players_known[user.name]["time_since_last_msg"] + config["TIMER_NOTIFY_ON_REACT_PURGE"] - time.time())
-   
-        message_author_name = reaction.message.author.name
-
-        # sends message to play_request creator
-        if player.discord_user.name == message_author_name:
-            await player.discord_user.send(consts.MESSAGE_AUTO_DM_CREATOR.format(user.name, str(reaction.emoji)))
-        # sends message to play_request subscriber
-        else:
-            await player.discord_user.send(consts.MESSAGE_AUTO_DM_SUBSCRIBER.format(user.name, str(reaction.emoji), message_author_name))
-
-        #reset delay timer
-        player.players_known[user.name]["time_since_last_msg"] = time.time()
-        player.players_known[user.name]["wait_for_notification"] = False
-
-        #switch to internal play request if more than 6 players(author + 5 players_known) are subscribed
-        if len(player.players_known) == 5:
-            switch_to_internal_play_request(reaction.message)
-
+    
+    #send auto dms to subscribers and author
+    for player in play_requests[message_id]:
+        if player[0] == play_request_author and player[0] != user:
+            await play_request_author.send(consts.MESSAGE_AUTO_DM_CREATOR.format(user.name, str(reaction.emoji)))
+        elif player[0] != user:
+            await player[0].send(consts.MESSAGE_AUTO_DM_SUBSCRIBER.format(user.name, play_request_author.name, str(reaction.emoji)))
+       
+    #switch to internal play request if more than 6 players(author + 5 players_known) are subscribed
+    if len(play_requests[message_id]) == 6:
+        await reaction.channel.send(utility.switch_to_internal_play_request(play_requests))
+    
 # run
 print("Start Client")
 client.run(str(bot["token"]))

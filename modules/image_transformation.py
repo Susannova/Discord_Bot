@@ -1,19 +1,16 @@
 import os
 from PIL import Image
 import json
+import consts
 
-def read_json():
-    return json.load(open('./config/configuration.json', 'r'))
-
-config = read_json()
 
 def get_files(champs):
     files = []
     for champ in champs:
-        if os.path.isfile(f'./{config["FOLDER_CHAMP_ICON"]}/{champ}.png'):
-            files.append(f'./{config["FOLDER_CHAMP_ICON"]}/{champ}.png')
+        if os.path.isfile(f'./{consts.FOLDER_CHAMP_ICON}/{champ}.png'):
+            files.append(f'./{consts.FOLDER_CHAMP_ICON}/{champ}.png')
         else:
-            files.append(f'./{config["FOLDER_CHAMP_ICON"]}/-1.png')
+            files.append(f'./{consts.FOLDER_CHAMP_ICON}/-1.png')
     return files
 
 def create_new_image(champs):
@@ -27,16 +24,16 @@ def create_new_image(champs):
         y = index %  120
         w, h = img.size
         result.paste(img, (x, y, x + w, y + h))
-    result.save(os.path.expanduser(f'./{config["FOLDER_CHAMP_SPLICED"]}/image.jpg'))
+    result.save(os.path.expanduser(f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))
     return 0
 
 
 # === TEST === #
 def testModule():
-    assert(config["TOGGLE_AUTO_DELETE"] == True)
     assert(len(get_files(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Nautilus'])) == 5)
     assert(create_new_image(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Nunu']) == 0)
     assert(create_new_image(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Pingu']) == 0)
+    return "Tests succeded."
 
-#testModule()
+#print(testModule())
 # === TEST END === #
