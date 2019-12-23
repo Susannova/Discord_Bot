@@ -145,7 +145,7 @@ async def on_reaction_add(reaction, user):
     if not utility.is_auto_dm_subscriber(client, user, play_requests):
         return
 
-    message_id = message.id
+    message_id = reaction.message.id
     play_request_author = play_requests[message_id][0][0]
 
     # if reaction is 'EMOJI_PASS' delete player from play_request and return
