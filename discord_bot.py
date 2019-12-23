@@ -40,7 +40,7 @@ async def on_ready():
 @client.event
 async def on_member_join(member):
     # auto role
-    await member.edit(roles=utility.get_auto_role_list())
+    await member.edit(roles=utility.get_auto_role_list(member))
         
 @client.event
 async def on_message(message):
