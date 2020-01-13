@@ -16,7 +16,7 @@ COMMAND_LIST_ALL = ["?create-team", "?play-internal", "?play-lol", "?play-now", 
 
 
 PATTERN_LIST_AUTO_REACT = [" will League of Legends spielen. Kommt gegen ", "hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!", " spielt **__jetzt gerade__** League of Legends und sucht noch nach weiteren Spielern!"]
-
+PATTERN_PLAY_REQUEST = " will League of Legends spielen. Kommt gegen "
 
 COMMAND_CREATE_TEAM = '?create-team'
 COMMAND_PLAY_LOL = '?play-lol'

@@ -1,6 +1,6 @@
 {
     "TOGGLE_AUTO_DELETE": true,
-    "TOGGLE_COMMAND_ONLY": true,
+    "TOGGLE_COMMAND_ONLY": false,
     "TOGGLE_AUTO_REACT": true,
     "TOGGLE_AUTO_DM": true,
     "TOOGLE_RIOT_API": true
