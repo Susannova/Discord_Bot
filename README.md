@@ -44,6 +44,7 @@ KNOWN BUGS:
 - dyno commands work in every channel as admin
 
 Wiki:
-{outdate
+
+{outdated
 -  [player_request](https://drive.google.com/file/d/1hMAPciHA2Yc0a6dnL9igTXTL4uWULiSC/view?usp=sharing)
 }
