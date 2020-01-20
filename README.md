@@ -7,29 +7,34 @@ Features:
 - auto delete non commands
 - version 
 - auto dm for people that subscribed to play-request (reacted with non :x:)
-- integrated riot api => waiting for API KEY
+- integrated riot api
 - lol player information
 - reload config on command
 - auto role
-
-Dyno Features used:
 - play requests
 - play-now requests
+- purges play_requests after 18h if new play_request is made
+- calculate best bans for a given lol team
+
+Dyno Features used:
 - internal play requests
 - join message (new users get a dm from dyno with some text)
 
 Commands:
-- ?play-lol [Uhrzeit]
-- ?play-now
+- ?play-internal
 
 Our Bot:
+- ?play-lol [Uhrzeit]
+- ?play-now
 - ?create-team
 - ?player
+- ?bans
 
 DEBUG/DEV Commands:
 - ?testmsg
 - ?version
 - ?reload_config
+- ?print
 - !end
 
 TODO:
@@ -37,7 +42,9 @@ TODO:
 
 KNOWN BUGS:
 - dyno commands work in every channel as admin
-- multiple play-requests or switch from play-request to internal play-request all share same subscribers => map play-request message id to subscribers
 
 Wiki:
+
+{outdated
 -  [player_request](https://drive.google.com/file/d/1hMAPciHA2Yc0a6dnL9igTXTL4uWULiSC/view?usp=sharing)
+}
