@@ -102,9 +102,7 @@ def is_in_channels(message, channels):
     return False
 
 def is_in_channel(message, channel):
-    if message.channel.name == channel:
-        return True
-    return False
+    return message.channel.name == channel
 
 def get_voice_channel(message, name):
     voice_channel = None
