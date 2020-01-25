@@ -76,6 +76,9 @@ async def on_message(message):
     elif config["TOGGLE_AUTO_DELETE"] and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
         message_cache = utility.update_message_cache(message, message_cache)
 
+        if not utility.contains_any_command(message, consts.COMMAND_LIST_PLAY_REQUEST) and message.author != client.user:
+            await message.delete()
+
     # create team command
     if utility.contains_command(message, consts.COMMAND_CREATE_TEAM) and utility.is_in_channels(message, [consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_BOT]):
         voice_channel = utility.get_voice_channel(message, consts.CHANNEL_CREATE_TEAM_VOICE)
