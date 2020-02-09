@@ -5,6 +5,7 @@ import json
 import time
 from importlib import reload
 from modules import consts, riot, timers, bot_utility as utility, reminder
+import asyncio
 
 # === init functions === #
 def setVersion():
@@ -23,6 +24,7 @@ play_requests = {}
 tmp_message_author = None
 setVersion()
 message_cache = []
+debug_bool = False
 
 # === classes === #
 class player_in_play_request:
@@ -49,6 +51,7 @@ async def on_message(message):
     global play_requests
     global tmp_message_author
     global message_cache
+    global debug_bool
 
 
     if type(message.channel) is discord.DMChannel:
@@ -119,13 +122,27 @@ async def on_message(message):
             config = read_json('configuration')
             #consts = reload(modules.consts)
             await message.channel.send("Done.")
+            if config["TOOGLE_DEBUG"]:
+                debug_bool = True
+                await message.channel.send("Debugging is activated for one hour.")
+                await asyncio.sleep(3600)
+                debug_bool = False
+                await message.channel.send("Debugging is deactivated.")
+            elif debug_bool:
+                    debug_bool = False
+                    await message.channel.send("Debugging is deactivated.")
         # killswitch
         elif message.content.startswith('!end'):
             await message.channel.send('Bot is shut down!')
             await client.logout()
         # exploit the pi through this - glhf!
         elif message.content.startswith('?print'):
-            print(eval(message.content.split(' ')[1]))
+            if debug_bool:
+                return_string = eval(message.content.split(' ')[1])
+                await message.channel.send(return_string)
+                print(return_string)
+            else:
+                await message.channel.send("Debugging is not activated.")
 
      # deletes all messages that are not commands (consts.COMMAND_LIST_ALL)  except bot responses in all cmd channels (consts.CHANNEL_LIST_COMMANDS)
     # if config["TOGGLE_AUTO_DELETE"]:
