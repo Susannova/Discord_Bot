@@ -103,7 +103,7 @@ async def on_message(message):
 
 
     # clash ocr command test
-    if utility.contains_command(message, '!ocr') and utility.is_in_channels(message, [consts.CHANNEL_BOT, consts.CHANNEL_MEMBER_ONLY]):
+    if utility.contains_command(message, '!ocr') and len(message.attachments) == 1 and utility.is_in_channels(message, [consts.CHANNEL_BOT, consts.CHANNEL_MEMBER_ONLY]):
         attached_image = message.attachments[0]
         attached_image_file_name = attached_image.filename
         await attached_image.save(attached_image_file_name)
