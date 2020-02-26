@@ -102,14 +102,15 @@ async def on_message(message):
             await message.channel.send(f'Wrong format: {message.cotent}')
 
 
-    # clash ocr command test
-    if utility.contains_command(message, '!ocr') and len(message.attachments) == 1 and utility.is_in_channels(message, [consts.CHANNEL_BOT, consts.CHANNEL_MEMBER_ONLY]):
+    # clash ocr command
+    if utility.contains_command(message, consts.COMMAND_CLASH) and len(message.attachments) == 1 and utility.is_in_channels(message, [consts.CHANNEL_BOT, consts.CHANNEL_MEMBER_ONLY]):
         attached_image = message.attachments[0]
         attached_image_file_name = attached_image.filename
         await attached_image.save(attached_image_file_name)
         ocr.set_image_file_name(attached_image_file_name)
         await message.channel.send(ocr.run_ocr())
         ocr.clean_up_image(attached_image_file_name)
+        await message.delete()
 
     # riot commands
     if config["TOOGLE_RIOT_API"] == False:

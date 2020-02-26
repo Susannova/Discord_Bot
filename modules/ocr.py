@@ -1,7 +1,6 @@
 from PIL import Image
 import PIL.ImageOps    
 import sys
-import subprocess
 import os
 import pytesseract
 
@@ -27,7 +26,7 @@ def get_opgg_link(summoners):
     return opgg.format(summoners[0], summoners[1], summoners[2], summoners[3], summoners[4])
 
 def clean_up_image(name):
-    subprocess.run(["rm", f'{name}'])
+    os.remove(name)
 
 def replace_spaces(summoners):
     new_summoners = []
@@ -45,5 +44,6 @@ def run_ocr():
     for i in range(0, 5):
         crop_and_invert_image(i)
         summoners.append(run_ocr_on_image(i))
+        clean_up_image(f'{i}.png')
     summoners = replace_spaces(summoners)
     return get_opgg_link(summoners)

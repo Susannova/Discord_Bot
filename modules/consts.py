@@ -22,6 +22,7 @@ COMMAND_CREATE_TEAM = '?create-team'
 COMMAND_PLAY_LOL = '?play-lol'
 COMMAND_PLAY_NOW = '?play-now'
 COMMAND_INDICATOR = '?'
+COMMAND_CLASH = f'{COMMAND_INDICATOR}clash'
 
 CHANNEL_CREATE_TEAM_VOICE = 'InHouse Planing'
 CHANNEL_INTERN_PLANING = 'intern-planing'
