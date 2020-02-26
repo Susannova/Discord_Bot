@@ -8,6 +8,12 @@ opgg = 'https://euw.op.gg/multi/query={}%2C{}%2C{}%2C{}%2C{}'
 
 image_file_name = ''
 
+START_WIDTH_BASE  = 0
+END_WIDTH_BASE = 175
+START_HEIGHT_RATIO = .3
+END_HEIGHT_RATIO = .38
+WIDTH_RATIO = .16
+
 def set_image_file_name(name):
     global image_file_name
     image_file_name = name
@@ -15,7 +21,7 @@ def set_image_file_name(name):
 def crop_and_invert_image(i):
     image = Image.open(f'{image_file_name}')
     width, height = image.size
-    image = image.crop((0+(i*int(width*.16)),int(height*.3),175+(i*int(width*.16)),int(height*.38)))
+    image = image.crop((START_WIDTH_BASE+(i*int(width*WIDTH_RATIO)),int(height*START_HEIGHT_RATIO),END_WIDTH_BASE+(i*int(width*WIDTH_RATIO)),int(height*END_HEIGHT_RATIO)))
     inverted_image = PIL.ImageOps.invert(image)
     inverted_image.save(f'{i}.png')
 
