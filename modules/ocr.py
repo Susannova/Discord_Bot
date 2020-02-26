@@ -3,6 +3,7 @@ import PIL.ImageOps
 import sys
 import subprocess
 import os
+import pytesseract
 
 opgg = 'https://euw.op.gg/multi/query={}%2C{}%2C{}%2C{}%2C{}'
 
@@ -19,25 +20,11 @@ def crop_and_invert_image(i):
     inverted_image = PIL.ImageOps.invert(image)
     inverted_image.save(f'{i}.png')
 
-def run_ocr_on_image(name):
-    FNULL = open(os.devnull, 'w')
-    subprocess.run(["tesseract", f'{name}.png', f'{name}'], stdout=FNULL, stderr=subprocess.STDOUT)
-
-def get_summoner_name(i):
-    text = ''
-    with open(f'{i}.txt', 'r') as f:
-        text = f.readlines()
-    text2 = ''
-    for line in text:
-        if line != '':
-            return line[:-1]
+def run_ocr_on_image(i):
+    return pytesseract.image_to_string(Image.open(f'{i}.png'))
 
 def get_opgg_link(summoners):
     return opgg.format(summoners[0], summoners[1], summoners[2], summoners[3], summoners[4])
-
-def clean_up_tmp_files(name):
-        subprocess.run(["rm", f'{name}.png'])
-        subprocess.run(["rm", f'{name}.txt'])
 
 def clean_up_image(name):
     subprocess.run(["rm", f'{name}'])
@@ -57,8 +44,6 @@ def run_ocr():
     summoners = []
     for i in range(0, 5):
         crop_and_invert_image(i)
-        run_ocr_on_image(i)
-        summoners.append(get_summoner_name(i))
-        clean_up_tmp_files(i)
+        summoners.append(run_ocr_on_image(i))
     summoners = replace_spaces(summoners)
     return get_opgg_link(summoners)
