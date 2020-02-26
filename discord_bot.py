@@ -4,7 +4,7 @@ import discord
 import json
 import time
 from importlib import reload
-from modules import consts, riot, timers, bot_utility as utility, reminder
+from modules import consts, riot, timers, bot_utility as utility, reminder, ocr
 import asyncio
 
 # === init functions === #
@@ -100,6 +100,16 @@ async def on_message(message):
             await message.channel.send((consts.MESSAGE_PLAY_LOL).format(message.author.mention, message.content.split(' ')[1]))
         else:
             await message.channel.send(f'Wrong format: {message.cotent}')
+
+
+    # clash ocr command test
+    if utility.contains_command(message, '!ocr') and utility.is_in_channels(message, [consts.CHANNEL_BOT, consts.CHANNEL_MEMBER_ONLY]):
+        attached_image = message.attachments[0]
+        attached_image_file_name = attached_image.filename
+        await attached_image.save(attached_image_file_name)
+        ocr.set_image_file_name(attached_image_file_name)
+        await message.channel.send(ocr.run_ocr())
+        ocr.clean_up_image(attached_image_file_name)
 
     # riot commands
     if config["TOOGLE_RIOT_API"] == False:

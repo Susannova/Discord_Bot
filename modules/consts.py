@@ -27,6 +27,7 @@ CHANNEL_CREATE_TEAM_VOICE = 'InHouse Planing'
 CHANNEL_INTERN_PLANING = 'intern-planing'
 CHANNEL_PLAY_REQUESTS = 'play-requests'
 CHANNEL_BOT = 'bot'
+CHANNEL_MEMBER_ONLY='member-only'
 
 BOT_DYNO_NAME = 'Dyno'
 
