@@ -7,6 +7,7 @@ import pytesseract
 opgg = 'https://euw.op.gg/multi/query={}%2C{}%2C{}%2C{}%2C{}'
 
 image_file_name = ''
+summoners = []
 
 START_WIDTH_BASE  = 0
 END_WIDTH_BASE = 175
@@ -42,7 +43,7 @@ def replace_spaces(summoners):
         new_summoners.append(summoner)
     return new_summoners
 
-def run_ocr():
+def get_summoner_names():
     if image_file_name == '':
         print("No image file found.")
         return -1
@@ -52,4 +53,21 @@ def run_ocr():
         summoners.append(run_ocr_on_image(i))
         clean_up_image(f'{i}.png')
     summoners = replace_spaces(summoners)
+    return summoners
+
+def get_formatted_summoner_names():
+    if len(summoners) == 0:
+        print("Did not run ocr yet.")
+        return
+    formatted_summoner_names = ''
+    for name in summoners:
+        if name.find('%20') > 0:
+            name = name.replace('%20', '%')
+        formatted_summoner_names += f'{name} '
+    return formatted_summoner_names[:-1]
+
+
+def run_ocr():
+    global summoners
+    summoners = get_summoner_names()
     return get_opgg_link(summoners)

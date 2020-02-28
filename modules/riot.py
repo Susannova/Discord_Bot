@@ -148,6 +148,8 @@ def fetch_summoner(player, watcher):
 def get_summoner_name_list(message):
     player_names = []
     for player in message.content.split(' ')[1:]:
+        if player.find('%') > 0:
+            player = player.replace('%', '%20')
         player_names.append(player)
     return player_names
   

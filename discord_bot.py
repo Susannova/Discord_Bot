@@ -66,7 +66,6 @@ async def on_message(message):
 
         play_requests[message.id] = [[tmp_message_author, time.time()]]
         if config["TOGGLE_AUTO_DELETE"]:
-            
             message_cache = utility.update_message_cache(message, message_cache)
             message_cache, deleteable_messages = utility.get_purgeable_messages(message_cache)
             for message in deleteable_messages:
@@ -110,19 +109,20 @@ async def on_message(message):
         ocr.set_image_file_name(attached_image_file_name)
         await message.channel.send(ocr.run_ocr())
         ocr.clean_up_image(attached_image_file_name)
+        await message.channel.send(f'If you want to receive the best bans for the scoutet team copy the following Command:\n?bans {ocr.get_formatted_summoner_names()}')
         await message.delete()
 
     # riot commands
-    if config["TOOGLE_RIOT_API"] == False:
+    if config["TOGGLE_RIOT_API"] == False:
         await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
     else:
-        if message.content.startswith('?player'):
+        if utility.contains_command(message, consts.COMMAND_PLAYER):
             await message.channel.send(riot.riot_command(message))
-        elif message.content.startswith('?bans'):
+        elif utility.contains_command(message, consts.COMMAND_BANS):
             await message.channel.send(riot.riot_command(message), file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))
 
     # debug commands
-    if message.channel.name == "bot":
+    if utility.is_in_channel(message, consts.CHANNEL_BOT):
         if message.content.startswith("?testmsg"):
             await message.channel.send("test")
             await message.add_reaction(consts.EMOJI_PASS)
@@ -133,15 +133,15 @@ async def on_message(message):
             config = read_json('configuration')
             #consts = reload(modules.consts)
             await message.channel.send("Done.")
-            if config["TOOGLE_DEBUG"]:
+            if config["TOGGLE_DEBUG"]:
                 debug_bool = True
                 await message.channel.send("Debugging is activated for one hour.")
                 await asyncio.sleep(3600)
                 debug_bool = False
                 await message.channel.send("Debugging is deactivated.")
             elif debug_bool:
-                    debug_bool = False
-                    await message.channel.send("Debugging is deactivated.")
+                debug_bool = False
+                await message.channel.send("Debugging is deactivated.")
         # killswitch
         elif message.content.startswith('!end'):
             await message.channel.send('Bot is shut down!')

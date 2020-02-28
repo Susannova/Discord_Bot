@@ -3,6 +3,6 @@
     "TOGGLE_COMMAND_ONLY": false,
     "TOGGLE_AUTO_REACT": true,
     "TOGGLE_AUTO_DM": true,
-    "TOOGLE_RIOT_API": true,
-    "TOOGLE_DEBUG": false
+    "TOGGLE_RIOT_API": true,
+    "TOGGLE_DEBUG": false
 }
