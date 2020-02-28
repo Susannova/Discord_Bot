@@ -116,7 +116,7 @@ async def on_message(message):
     if config["TOGGLE_RIOT_API"] == False:
         await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
     else:
-        if utility.contains_command(message, consts.COMMAND_PLAYER):
+        if utility.contains_any_command(message, consts.COMMAND_LIST_RIOT):
             await message.channel.send(riot.riot_command(message))
         elif utility.contains_command(message, consts.COMMAND_BANS):
             await message.channel.send(riot.riot_command(message), file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))

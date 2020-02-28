@@ -41,6 +41,7 @@ def removePlayer(player):
             players.remove(_player)
 
 def removeAllPlayers():
+    global players
     players = []
 
 def add_player_and_data(summoner_names):
@@ -91,14 +92,15 @@ def get_best_bans_for_team():
     ban_list = []
     for i in range(0,len(players)):
         _, rank = get_soloq_data(i)
-        ban_list += get_best_ban(i)[:-4]
+        ban_list.append(get_best_ban(i)[0])
     return list(OrderedDict.fromkeys(ban_list))
 
 def get_level(idx):
     return int(players[idx]["summoner"]['summonerLevel'])
 
-def isSmurf(idx):
+def is_smurf(idx):
     winrate, rank = get_soloq_data(idx)
+    print(get_level(idx))
     if get_level(idx) < 40 and winrate >= 58 and get_soloq_rank_weight(rank) < 7:
         return True
     else:
@@ -111,7 +113,8 @@ def get_soloq_data(idx):
             games_played = int(soloq_stats['wins']) + int(soloq_stats['losses'])
             winrate = round((int(soloq_stats['wins'])/ games_played) *100,1)
             return winrate, '{}-{}'.format(soloq_stats['tier'], soloq_stats['rank'])
-    return 'no rank found'    
+    # if player is not ranked return default value
+    return 50.0, 'SILVER-II'
 
 def get_soloq_rank_weight(rank):
     return dict_rank[rank]
@@ -152,6 +155,11 @@ def get_summoner_name_list(message):
             player = player.replace('%', '%20')
         player_names.append(player)
     return player_names
+
+def format_summoner_name(name):
+    if name.find('%20') > 0:
+            return name.replace('%20', ' ')
+    return name
   
 def update_champion_json():
     patch = ''
@@ -177,17 +185,22 @@ def riot_command(message):
     _timers.append(timers.start_timer(secs=5))
     summoner_names = get_summoner_name_list(message)
     add_player_and_data(summoner_names)
+    return_value = ''
     if(message.content.split(' ')[0] == "?player"):
         winrate, rank = get_soloq_data(0)
-        removeAllPlayers()
-        return 'Rank: {} , Winrate: {}%'.format(rank , winrate)
+        return_value = 'Rank: {} , Winrate: {}%'.format(rank , winrate)
     elif(message.content.split(' ')[0] == "?bans"):
         output = get_best_bans_for_team()
         image_transformation.create_new_image(output)
-        removeAllPlayers()
         op_url = f'https://euw.op.gg/multi/query={summoner_names[0]}%2C{summoner_names[1]}%2C{summoner_names[2]}%2C{summoner_names[3]}%2C{summoner_names[4]}'
-        return "Team OP.GG: " + op_url + "\nBest Bans for Team:\n" + pretty_print_list(output) 
-    return 'this shouldnt happen'
+        return_value = "Team OP.GG: " + op_url + "\nBest Bans for Team:\n" + pretty_print_list(output) 
+    elif (message.content.split(' ')[0] == "?smurf"):
+        is_smurf_word = 'kein'
+        if is_smurf(0):
+            is_smurf_word = 'ein'
+        return_value = f'Der Spieler **{format_summoner_name(summoner_names[0])}** ist sehr wahrscheinlich **{is_smurf_word}** Smurf.'
+    removeAllPlayers()
+    return return_value
     
 
 # === INTERFACE END === #
@@ -219,12 +232,18 @@ def testModule():
     assert(winrate == 52.8)
     assert(rank == 'DIAMOND-IV')
     assert(get_soloq_rank_weight(rank) == 7)
-    assert(isSmurf(0) == False)
-    assert(get_level(0)== 119)
-    assert(get_best_ban(0) == ['Pyke', 'Blitzcrank', 'Azir', 'Caitlyn', 'Zoe'])
-    populate_with_debug_data()
-    assert(get_best_bans_for_team() == ['Pyke'])
+    # assert(is_smurf(0) == False)
+    # assert(get_level(0)== 119)
+    # assert(get_best_ban(0) == ['Pyke', 'Blitzcrank', 'Azir', 'Caitlyn', 'Zoe'])
+    # populate_with_debug_data()
+    # assert(get_best_bans_for_team() == ['Pyke'])
+    removeAllPlayers()  
+    add_player_and_data(["Susannova"])
+    print(get_soloq_data(0))
 
+    removeAllPlayers()
+    add_player_and_data(["Thyanin"])
+    print(get_best_ban(0)[0])
 
 #testModule()
 # === TESTS END === #
