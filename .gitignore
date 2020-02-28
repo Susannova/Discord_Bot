@@ -2,3 +2,4 @@ local_token.txt
 /modules/__pycache__
 /.vscode/
 test-sequence
+/env/
