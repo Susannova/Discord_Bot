@@ -3,6 +3,8 @@ import requests
 import urllib
 import concurrent.futures
 import json
+import riot
+import consts
 
 url = 'https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/champion-icons/'
 urls = []
@@ -14,16 +16,16 @@ def read_json():
 config = read_json()
 
 def fill_urls():
+    count = 0
     for value in riot.data_champ['data'].values():
         urls.append(url + value['key'] + '.png')
-
 
 def download_image(url):
     img_bytes = requests.get(url).content
     name = riot.get_champion_name_by_id(int(url[101:-4]))
-    with open(f'./{config["FOLDER_CHAMP_ICON"]}/{name}.png', 'wb') as img_file:
+    with open(f'./{consts.FOLDER_CHAMP_ICON}/{name}.png', 'wb') as img_file:
         img_file.write(img_bytes)
-        print(f'{url[101:]} was downloaded...')
+        print(f'{name} Icon was downloaded...')
 
 
 def start_download():

@@ -7,6 +7,7 @@ from collections import OrderedDict
 import image_transformation
 import timers
 from concurrent.futures import ThreadPoolExecutor
+import urllib.request
 # === IMPORTS END === #
 
 # === INIT === #
@@ -150,11 +151,23 @@ def get_summoner_name_list(message):
         player_names.append(player)
     return player_names
   
+def update_champion_json():
+    patch = ''
+    with urllib.request.urlopen("https://ddragon.leagueoflegends.com/api/versions.json") as url:
+        data = json.loads(url.read().decode())
+        patch = data[0]
+    with urllib.request.urlopen(f'https://ddragon.leagueoflegends.com/cdn/{patch}/data/en_US/champion.json') as url:
+        data = json.loads(url.read().decode())
+        with open('./config/champion.json', 'w', encoding='utf-8') as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
+
+
 # === UTILITY FUNCTIONS END === #
 
 # === INTERFACE === #
 
 def riot_command(message):
+    update_champion_json()
     timers.remove_finished_timers(_timers)
     if len(_timers) != 0:
         return "Please wait a few seconds before using Riot API commands again!"
@@ -199,14 +212,14 @@ def testModule():
     assert(list(get_most_played_champs(0, 2)) == ['Pyke', 'Blitzcrank'])
     assert(format_last_time_played(get_last_time_played_by_id(0, 555)) == "20-11-2019")
     assert(format_last_time_played(get_last_time_played_by_name(0, "Pyke")) == "20-11-2019")
-    assert(has_played_champ_by_name_in_last_n_days(0, "Pyke",30) == True)
+    assert(has_played_champ_by_name_in_last_n_days(0, "Pyke",30) == False)
     winrate, rank = get_soloq_data(0)
     assert(winrate == 52.8)
     assert(rank == 'DIAMOND-IV')
     assert(get_soloq_rank_weight(rank) == 7)
     assert(isSmurf(0) == False)
     assert(get_level(0)== 119)
-    assert(get_best_ban(0) == ['Pyke', 'Blitzcrank', 'Caitlyn', 'Zoe', 'Kaisa'])
+    assert(get_best_ban(0) == ['Pyke', 'Blitzcrank', 'Azir', 'Caitlyn', 'Zoe'])
     populate_with_debug_data()
     assert(get_best_bans_for_team() == ['Pyke'])
 
