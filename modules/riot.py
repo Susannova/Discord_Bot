@@ -100,7 +100,6 @@ def get_level(idx):
 
 def is_smurf(idx):
     winrate, rank = get_soloq_data(idx)
-    print(get_level(idx))
     if get_level(idx) < 40 and winrate >= 58 and get_soloq_rank_weight(rank) < 7:
         return True
     else:
