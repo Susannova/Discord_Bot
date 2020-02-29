@@ -1,3 +1,8 @@
+
+####################################################################
+#                        === imports ===                           #
+####################################################################
+
 import sys, os
 sys.path.append(os.path.join(sys.path[0],'modules'))
 import discord
@@ -7,8 +12,11 @@ from importlib import reload
 from modules import consts, riot, timers, bot_utility as utility, reminder, ocr
 import asyncio
 
-# === init functions === #
-def setVersion():
+####################################################################
+#                   === init functions ===                         #
+####################################################################
+
+def set_version():
     global consts
     version_file = open("./.git/refs/heads/master", "r")
     consts.VERSION = version_file.read()[:7]
@@ -16,34 +24,40 @@ def setVersion():
 def read_json(filename):
     return json.load(open(f'./config/{filename}.json', 'r'))
 
-# === init === #
+####################################################################
+#                    === init variables ===                        #
+####################################################################
 client = discord.Client()
 bot =  read_json('bot')
 config = read_json('configuration')
 play_requests = {}
 tmp_message_author = None
-setVersion()
+set_version()
 message_cache = []
 debug_bool = False
 
-# === classes === #
-class player_in_play_request:
-    discord_user = discord.user
-    players_known = {}
+####################################################################
+#                        === classes ===                           #
+####################################################################
 
-    def __init__(self, user):
-        self.discord_user = user
-
-# === events === #
+####################################################################
+#                        === events ===                            #
+####################################################################
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
+####################################################################
+#                        === auto role ===                         #
+####################################################################
 @client.event
 async def on_member_join(member):
     # auto role
     await member.edit(roles=utility.get_auto_role_list(member))
-        
+
+####################################################################
+#               === on_message event / Dispatcher ===              #
+####################################################################        
 @client.event
 async def on_message(message):
     global config
@@ -53,13 +67,15 @@ async def on_message(message):
     global message_cache
     global debug_bool
 
-
     if type(message.channel) is discord.DMChannel:
         return
 
-    # auto react - reacts to all patterns in consts.PATTERN_LIST_AUTO_REACT
-    # and creates a new play_request
-    # only reacts with EMOJI_ID_LIST[5] == :fill:
+####################################################################
+#                        === auto react ===                        #
+#   reacts to all patterns in consts.PATTERN_LIST_AUTO_REACT       #
+#   and creates a new play_request                                 #
+####################################################################
+
     if config["TOGGLE_AUTO_REACT"] and utility.has_any_pattern(message):
         await message.add_reaction(client.get_emoji(consts.EMOJI_ID_LIST[5]))
         await message.add_reaction(consts.EMOJI_PASS)
@@ -81,18 +97,24 @@ async def on_message(message):
         if not utility.contains_any_command(message, consts.COMMAND_LIST_PLAY_REQUEST) and message.author != client.user:
             await message.delete()
 
-    # create team command
+###################################################################
+#                  === Command: ?create-team ===                  #
+###################################################################
     if utility.contains_command(message, consts.COMMAND_CREATE_TEAM) and utility.is_in_channels(message, [consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_BOT]):
         voice_channel = utility.get_voice_channel(message, consts.CHANNEL_CREATE_TEAM_VOICE)
         players_list = utility.get_players_in_channel(voice_channel)
         await message.channel.send(utility.create_team(players_list))
 
-    #play-now command
+###################################################################
+#                  === Command: ?play-now ===                     #
+###################################################################
     if utility.contains_command(message, consts.COMMAND_PLAY_NOW) and utility.is_in_channels(message, [consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT]):
         tmp_message_author = message.author
         await message.channel.send((consts.MESSAGE_PLAY_NOW).format(message.author.mention))
        
-    #play-lol command
+###################################################################
+#                  === Command: ?play-lol ===                     #
+###################################################################
     if utility.contains_command(message, consts.COMMAND_PLAY_LOL) and utility.is_in_channels(message, [consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT]):
         if len(message.content.split(' ')) == 2:
             tmp_message_author = message.author
@@ -100,8 +122,9 @@ async def on_message(message):
         else:
             await message.channel.send(f'Wrong format: {message.cotent}')
 
-
-    # clash ocr command
+###################################################################
+#                  === Command: ?clash ===                        #
+###################################################################
     if utility.contains_command(message, consts.COMMAND_CLASH) and len(message.attachments) == 1 and utility.is_in_channels(message, [consts.CHANNEL_BOT, consts.CHANNEL_MEMBER_ONLY]):
         attached_image = message.attachments[0]
         attached_image_file_name = attached_image.filename
@@ -112,7 +135,9 @@ async def on_message(message):
         await message.channel.send(f'If you want to receive the best bans for the scoutet team copy the following Command:\n?bans {ocr.get_formatted_summoner_names()}')
         await message.delete()
 
-    # riot commands
+###################################################################
+#                     === Riot API Commands ===                   #
+###################################################################
     if config["TOGGLE_RIOT_API"] == False:
         await message.channel.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
     else:
@@ -121,7 +146,9 @@ async def on_message(message):
         elif utility.contains_command(message, consts.COMMAND_BANS):
             await message.channel.send(riot.riot_command(message), file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))
 
-    # debug commands
+###################################################################
+#                  === Debug Commands ===                         #
+###################################################################
     if utility.is_in_channel(message, consts.CHANNEL_BOT):
         if message.content.startswith("?testmsg"):
             await message.channel.send("test")
@@ -131,7 +158,8 @@ async def on_message(message):
         elif message.content.startswith("?reload_config"):
             await message.channel.send("Reload configuration.json:")
             config = read_json('configuration')
-            #consts = reload(modules.consts)
+            consts = reload(consts)
+            set_version()
             await message.channel.send("Done.")
             if config["TOGGLE_DEBUG"]:
                 debug_bool = True
@@ -155,17 +183,9 @@ async def on_message(message):
             else:
                 await message.channel.send("Debugging is not activated.")
 
-     # deletes all messages that are not commands (consts.COMMAND_LIST_ALL)  except bot responses in all cmd channels (consts.CHANNEL_LIST_COMMANDS)
-    # if config["TOGGLE_AUTO_DELETE"]:
-    #     if utility.is_purgeable_message(message, consts.COMMAND_LIST_PLAY_REQUEST, consts.CHANNEL_PLAY_REQUESTS, [consts.BOT_DYNO_NAME]):
-    #         await message.delete()
-    #     elif utility.is_purgeable_message(message, consts.COMMAND_LIST_INTERN_PLANING, consts.CHANNEL_INTERN_PLANING, [consts.BOT_DYNO_NAME, client.user.name]):
-    #         await message.delete()
-    
     if config["TOGGLE_COMMAND_ONLY"]:
         if utility.contains_any_command(message, consts.COMMAND_LIST_PLAY_REQUEST):
             await message.delete()
-
 
 @client.event
 async def on_message_delete(message):
@@ -178,8 +198,9 @@ async def on_message_delete(message):
         if message in message_tuple:
             message_cache.remove(message_tuple)
 
-
-
+####################################################################
+#                        === auto dm ===                           #
+####################################################################
 @client.event
 async def on_reaction_add(reaction, user):
     # auto dm
@@ -190,7 +211,6 @@ async def on_reaction_add(reaction, user):
   
     if not utility.is_auto_dm_subscriber(reaction.message, client, user, play_requests):
         return
-
     
     message_id = reaction.message.id
     play_request_author = play_requests[message_id][0][0]
@@ -202,7 +222,6 @@ async def on_reaction_add(reaction, user):
                 play_requests[message_id].remove(player)
         return
     
-  
     #send auto dms to subscribers and author
     for player in play_requests[message_id]:
         if player[0] == play_request_author and player[0] != user:
@@ -214,7 +233,9 @@ async def on_reaction_add(reaction, user):
     if len(play_requests[message_id]) == 6:
         await reaction.channel.send(utility.switch_to_internal_play_request(play_requests))
     
-# run
+####################################################################
+#                        === run ===                               #
+####################################################################
 print("Start Client")
 client.run(str(bot["token"]))
 print("End")
