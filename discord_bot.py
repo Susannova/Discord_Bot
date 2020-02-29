@@ -90,7 +90,7 @@ async def on_message(message):
 #                       === auto reminder ===                      #
 ####################################################################
         if utility.has_pattern(message, consts.PATTERN_PLAY_REQUEST):
-            time_difference = reminder.get_time_difference(message)
+            time_difference = reminder.get_time_difference(message.content)
             if time_difference > 0:
                 await asyncio.sleep(time_difference)
                 for player in play_requests[message.id]:
