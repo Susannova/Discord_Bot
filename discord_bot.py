@@ -86,9 +86,17 @@ async def on_message(message):
             message_cache, deleteable_messages = utility.get_purgeable_messages(message_cache)
             for message in deleteable_messages:
                 await message.delete()
-        #WIP
+####################################################################
+#                       === auto reminder ===                      #
+####################################################################
         if utility.has_pattern(message, consts.PATTERN_PLAY_REQUEST):
-            reminder.set_reminder(message)
+            time_difference = reminder.get_time_difference(message)
+            if time_difference > 0:
+                await asyncio.sleep(time_difference)
+                for player in play_requests[message.id]:
+                    await player[0].send(consts.MESSAGE_PLAY_REQUEST_REMINDER)
+
+###################################################################
 
     # make all messages in play_requests channel auto_deleteable
     elif config["TOGGLE_AUTO_DELETE"] and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
@@ -119,6 +127,7 @@ async def on_message(message):
         if len(message.content.split(' ')) == 2:
             tmp_message_author = message.author
             await message.channel.send((consts.MESSAGE_PLAY_LOL).format(message.author.mention, message.content.split(' ')[1]))
+
         else:
             await message.channel.send(f'Wrong format: {message.cotent}')
 

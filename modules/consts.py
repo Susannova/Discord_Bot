@@ -7,6 +7,10 @@ MESSAGE_AUTO_DM_CREATOR = '{0} hat auf dein Play-Request reagiert: {1} '
 MESSAGE_AUTO_DM_SUBSCRIBER ='{0} hat auch auf das Play-Request von {1} reagiert: {2} '
 MESSAGE_PLAY_NOW = '@everyone\n{0} spielt **__jetzt gerade__** League of Legends und sucht noch nach weiteren Spielern!'
 MESSAGE_PLAY_LOL = '@everyone\n{0} will League of Legends spielen. Kommt gegen **__{1}__** Uhr online!'
+MESSAGE_PLAY_REQUEST_REMINDER = 'REMINDER: Der abonnierte Play-Request geht in 5 Minuten los!'
+MESSAGE_TEAM_HEADER = '\n@here\n**__===Teams===__**\n'
+MESSAGE_TEAM_1 = 'Team 1:\n'
+MESSAGE_TEAM_2 = '\nTeam 2:\n'
 
 VERSION = ""
 
@@ -40,9 +44,7 @@ BOT_DYNO_NAME = 'Dyno'
 TIMER_NOTIFY_ON_REACT_PURGE = 15.0
 TIMER_LAST_PLAY_REQUEST_DELETE = 86400.0
 
-MESSAGE_TEAM_HEADER = '\n@here\n**__===Teams===__**\n'
-MESSAGE_TEAM_1 = 'Team 1:\n'
-MESSAGE_TEAM_2 = '\nTeam 2:\n'
+
 
 ROLE_SETZLING_ID = 643169161236840449
 ROLE_EVERYONE_ID =564481310417092629
