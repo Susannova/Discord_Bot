@@ -15,6 +15,8 @@ Features:
 - play-now requests
 - purges play_requests after 18h if new play_request is made
 - calculate best bans for a given lol team
+- check if player is a smurf
+- automaticall generate op.gg link from scanning clash scouting screen
 
 Dyno Features used:
 - internal play requests
@@ -29,6 +31,8 @@ Our Bot:
 - ?create-team
 - ?player
 - ?bans
+- ?clash
+- ?smurf
 
 DEBUG/DEV Commands:
 - ?testmsg

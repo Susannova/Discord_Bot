@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, date
 import time
 
 def start_timer(secs=0, mins=0, hrs=0):
-    return datetime.now() + timedelta(seconds=secs) + timedelta(hours=hrs)  + timedelta(hours=mins) 
+    return datetime.now() + timedelta(seconds=secs) + timedelta(minutes=mins) + timedelta(hours=hrs)  
 
 def is_timer_done(timer):
     _time = datetime.fromtimestamp(time.time())  
