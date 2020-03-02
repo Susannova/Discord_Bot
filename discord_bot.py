@@ -24,6 +24,10 @@ def set_version():
 def read_json(filename):
     return json.load(open(f'./config/{filename}.json', 'r'))
 
+def write_config_json(filename, data):
+    with open(f'./config/{filename}.json', 'w', encoding='utf-8') as f:
+        json.dump(data, f, ensure_ascii=False, indent=4)
+
 ####################################################################
 #                    === init variables ===                        #
 ####################################################################
@@ -175,6 +179,8 @@ async def on_message(message):
                 await message.channel.send("Debugging is activated for one hour.")
                 await asyncio.sleep(3600)
                 debug_bool = False
+                config["TOGGLE_DEBUG"] = False
+                write_config_json('configuration', config)
                 await message.channel.send("Debugging is deactivated.")
             elif debug_bool:
                 debug_bool = False
