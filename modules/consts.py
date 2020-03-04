@@ -11,7 +11,12 @@ MESSAGE_PLAY_REQUEST_REMINDER = 'REMINDER: Der abonnierte Play-Request geht in 5
 MESSAGE_TEAM_HEADER = '\n@here\n**__===Teams===__**\n'
 MESSAGE_TEAM_1 = 'Team 1:\n'
 MESSAGE_TEAM_2 = '\nTeam 2:\n'
-
+MESSAGE_SERVER_WELCOME =( 
+    'Hallo {0} und herzlich willkommen auf dem Discord Server von Kraut9!\n \
+    Hier ist eine kleine Erklärung zu unserem Server:\n \
+    https://discordapp.com/channels/564481310417092629/647752522764648448/647752549411061791 \
+    Viel Spaß auf dem Server von Kraut9!' 
+)
 VERSION = ""
 
 COMMAND_LIST_INTERN_PLANING = ["?create-team", "?play-internal"]

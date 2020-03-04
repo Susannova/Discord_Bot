@@ -161,6 +161,16 @@ async def print_(ctx):
 async def end_(ctx):
     await ctx.send('Bot is shut down!')
     await bot.logout()
+
+
+@bot.command(name='purge')
+@commands.is_owner()
+async def purge_(ctx, n: int):
+    last_n_messages = await ctx.message.channel.history(limit=n + 1).flatten()
+    for message_ in last_n_messages:
+        if not message_.pinned:
+            await message_.delete()
+    
 ####################################################################
 #                    === error handlers ===                        #
 ####################################################################
