@@ -1,8 +1,7 @@
 # === IMPORTS === #
 import json
-import time
-from datetime import datetime, timedelta, date
-from riotwatcher import RiotWatcher, ApiError
+from datetime import datetime, timedelta
+from riotwatcher import RiotWatcher
 from collections import OrderedDict
 import image_transformation
 import timers
@@ -50,7 +49,11 @@ def add_player_and_data(summoner_names):
     for player in summoner_names:
         with ThreadPoolExecutor() as executor:
             future = executor.submit(fetch_summoner, player, watcher)
-            populate_player(player, future.result()[0], future.result()[1], future.result()[2])
+            populate_player(
+                player, future.result()[0],
+                future.result()[1],
+                future.result()[2]
+                )
 
 # === PLAYER LIST MANAGEMENT END === #
 
@@ -62,10 +65,9 @@ def get_most_played_champs(idx, count):
         i += 1
 
 def get_last_time_played_by_id(idx, id):
-     for value in players[idx]["mastery"]:
+    for value in players[idx]["mastery"]:
         if value['championId'] == id:
             timestamp = int(str(value['lastPlayTime'])[:-3])
-            
             return datetime.fromtimestamp(timestamp)
 
 def get_last_time_played_by_name(idx, name):
@@ -76,7 +78,8 @@ def get_last_time_played_by_name(idx, name):
             return datetime.fromtimestamp(timestamp)
 
 def has_played_champ_by_name_in_last_n_days(idx, name, n):
-    return get_last_time_played_by_name(idx,name) > datetime.now() - timedelta(days=n)
+    return get_last_time_played_by_name(idx, name) \
+        > datetime.now() - timedelta(days=n)
 
 def get_best_ban(idx):
     ban_list = []
@@ -90,7 +93,7 @@ def get_best_ban(idx):
 
 def get_best_bans_for_team():
     ban_list = []
-    for i in range(0,len(players)):
+    for i in range(0, len(players)):
         _, rank = get_soloq_data(i)
         ban_list.append(get_best_ban(i)[0])
     return list(OrderedDict.fromkeys(ban_list))
@@ -109,9 +112,11 @@ def get_soloq_data(idx):
     for queue in players[idx]["league"]:
         if queue['queueType'] == 'RANKED_SOLO_5x5':
             soloq_stats = queue
-            games_played = int(soloq_stats['wins']) + int(soloq_stats['losses'])
-            winrate = round((int(soloq_stats['wins'])/ games_played) *100,1)
-            return winrate, '{}-{}'.format(soloq_stats['tier'], soloq_stats['rank'])
+            games_played = int(soloq_stats['wins']) + int(
+                soloq_stats['losses'])
+            winrate = round((int(soloq_stats['wins']) / games_played) * 100, 1)
+            return winrate, '{}-{}'.format(
+                soloq_stats['tier'], soloq_stats['rank'])
     # if player is not ranked return default value
     return 50.0, 'SILVER-II'
 
@@ -122,13 +127,13 @@ def get_soloq_rank_weight(rank):
 # === UTILITY FUNCTIONS === #
 def get_champion_name_by_id(id):
     for value in data_champ['data'].values():
-            if int(value["key"]) == id:
-               return value['id']
+        if int(value["key"]) == id:
+            return value['id']
 
 def get_champion_id_by_name(name):
     for value in data_champ['data'].values():
-            if value["id"] == name:
-               return int(value['key'])
+        if value["id"] == name:
+            return int(value['key'])
 
 def pretty_print_list(_list):
     output = ''
@@ -141,11 +146,12 @@ def format_last_time_played(time):
 
 
 def fetch_summoner(player, watcher):
-       my_region = 'euw1'
-       data_summoner = watcher.summoner.by_name(my_region, player)
-       data_league = watcher.league.by_summoner(my_region, data_summoner['id'])
-       data_mastery = watcher.champion_mastery.by_summoner(my_region, data_summoner['id'])
-       return [data_mastery, data_summoner, data_league]     
+    my_region = 'euw1'
+    data_summoner = watcher.summoner.by_name(my_region, player)
+    data_league = watcher.league.by_summoner(my_region, data_summoner['id'])
+    data_mastery = watcher.champion_mastery.by_summoner(
+        my_region, data_summoner['id'])
+    return [data_mastery, data_summoner, data_league]
 
 def get_summoner_name_list(message):
     player_names = []
@@ -157,9 +163,9 @@ def get_summoner_name_list(message):
 
 def format_summoner_name(name):
     if name.find('%20') > 0:
-            return name.replace('%20', ' ')
+        return name.replace('%20', ' ')
     return name
-  
+
 def update_champion_json():
     patch = ''
     with urllib.request.urlopen("https://ddragon.leagueoflegends.com/api/versions.json") as url:
@@ -187,12 +193,12 @@ def riot_command(message):
     return_value = ''
     if(message.content.split(' ')[0] == "?player"):
         winrate, rank = get_soloq_data(0)
-        return_value = 'Rank: {} , Winrate: {}%'.format(rank , winrate)
+        return_value = 'Rank: {} , Winrate: {}%'.format(rank, winrate)
     elif(message.content.split(' ')[0] == "?bans"):
         output = get_best_bans_for_team()
         image_transformation.create_new_image(output)
         op_url = f'https://euw.op.gg/multi/query={summoner_names[0]}%2C{summoner_names[1]}%2C{summoner_names[2]}%2C{summoner_names[3]}%2C{summoner_names[4]}'
-        return_value = "Team OP.GG: " + op_url + "\nBest Bans for Team:\n" + pretty_print_list(output) 
+        return_value = "Team OP.GG: " + op_url + "\nBest Bans for Team:\n" + pretty_print_list(output)
     elif (message.content.split(' ')[0] == "?smurf"):
         is_smurf_word = 'kein'
         if is_smurf(0):
@@ -200,7 +206,7 @@ def riot_command(message):
         return_value = f'Der Spieler **{format_summoner_name(summoner_names[0])}** ist sehr wahrscheinlich **{is_smurf_word}** Smurf.'
     removeAllPlayers()
     return return_value
-    
+
 
 # === INTERFACE END === #
 
@@ -226,7 +232,7 @@ def testModule():
     assert(list(get_most_played_champs(0, 2)) == ['Pyke', 'Blitzcrank'])
     assert(format_last_time_played(get_last_time_played_by_id(0, 555)) == "20-11-2019")
     assert(format_last_time_played(get_last_time_played_by_name(0, "Pyke")) == "20-11-2019")
-    assert(has_played_champ_by_name_in_last_n_days(0, "Pyke",30) == False)
+    assert(has_played_champ_by_name_in_last_n_days(0, "Pyke", 30) == False)
     winrate, rank = get_soloq_data(0)
     assert(winrate == 52.8)
     assert(rank == 'DIAMOND-IV')
@@ -236,7 +242,7 @@ def testModule():
     # assert(get_best_ban(0) == ['Pyke', 'Blitzcrank', 'Azir', 'Caitlyn', 'Zoe'])
     # populate_with_debug_data()
     # assert(get_best_bans_for_team() == ['Pyke'])
-    removeAllPlayers()  
+    removeAllPlayers()
     add_player_and_data(["Susannova"])
     print(get_soloq_data(0))
 
