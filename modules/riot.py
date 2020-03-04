@@ -243,6 +243,7 @@ def testModule():
     removeAllPlayers()
     add_player_and_data(["Thyanin"])
     print(get_best_ban(0)[0])
-
-#testModule()
+    
+if __name__ == "__main__":
+    testModule()
 # === TESTS END === #

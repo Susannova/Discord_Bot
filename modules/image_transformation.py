@@ -35,5 +35,6 @@ def testModule():
     assert(create_new_image(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Pingu']) == 0)
     return "Tests succeded."
 
-#print(testModule())
+if __name__ == "__main__":
+    testModule()
 # === TEST END === #

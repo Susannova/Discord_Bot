@@ -2,26 +2,35 @@
 ####################################################################
 #                        === imports ===                           #
 ####################################################################
-
+#system imports
 import sys, os
-sys.path.append(os.path.join(sys.path[0],'modules'))
-import discord
 import json
 import time
-from importlib import reload
-from modules import consts, riot, timers, bot_utility as utility, reminder, ocr
 import asyncio
-
+from importlib import reload
+from dataclasses import dataclass
+#third-party imports
+import discord
+#local source tree imports
+sys.path.append(os.path.join(sys.path[0],'modules'))
+from modules import(
+    consts,
+    riot,
+    timers, 
+    bot_utility as utility,
+    reminder,
+    ocr
+) 
 ####################################################################
 #                   === init functions ===                         #
 ####################################################################
 
-def set_version():
-    global consts
-    version_file = open("./.git/refs/heads/master", "r")
-    consts.VERSION = version_file.read()[:7]
+def set_version(consts):
+    with open("./.git/refs/heads/master", "r") as f:
+        consts.VERSION = version_file.read()[:7]        
+    return consts
 
-def read_json(filename):
+def read_config_json(filename):
     return json.load(open(f'./config/{filename}.json', 'r'))
 
 def write_config_json(filename, data):
@@ -32,17 +41,18 @@ def write_config_json(filename, data):
 #                    === init variables ===                        #
 ####################################################################
 client = discord.Client()
-bot =  read_json('bot')
-config = read_json('configuration')
+bot =  read_config_json('bot')
+config = read_config_json('configuration')
 play_requests = {}
 tmp_message_author = None
-set_version()
+consts = set_version(consts)
 message_cache = []
 debug_bool = False
 
 ####################################################################
 #                        === classes ===                           #
 ####################################################################
+
 
 ####################################################################
 #                        === events ===                            #
@@ -65,13 +75,12 @@ async def on_member_join(member):
 @client.event
 async def on_message(message):
     global config
-    global consts
     global play_requests
     global tmp_message_author
     global message_cache
     global debug_bool
 
-    if type(message.channel) is discord.DMChannel:
+    if isinstance(message.channel, discord.DMChannel):
         return
 
 ####################################################################
@@ -170,9 +179,9 @@ async def on_message(message):
             await message.channel.send(consts.VERSION)
         elif message.content.startswith("?reload_config"):
             await message.channel.send("Reload configuration.json:")
-            config = read_json('configuration')
+            config = read_config_json('configuration')
             consts = reload(consts)
-            set_version()
+            consts = set_version(consts)
             await message.channel.send("Done.")
             if config["TOGGLE_DEBUG"]:
                 debug_bool = True
@@ -204,7 +213,6 @@ async def on_message(message):
 
 @client.event
 async def on_message_delete(message):
-    global consts
     global play_requests
     # delete play_request if old play-request gets deleted
     if utility.has_any_pattern(message):
@@ -219,7 +227,6 @@ async def on_message_delete(message):
 @client.event
 async def on_reaction_add(reaction, user):
     # auto dm
-    global config
     global play_requests
     if not config["TOGGLE_AUTO_DM"]:
         return
@@ -251,6 +258,7 @@ async def on_reaction_add(reaction, user):
 ####################################################################
 #                        === run ===                               #
 ####################################################################
-print("Start Client")
-client.run(str(bot["token"]))
-print("End")
+if __name__ == "__main__":
+    print("Start Client")
+    client.run(str(bot["token"]))
+    print("End")

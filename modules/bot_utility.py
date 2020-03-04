@@ -1,9 +1,11 @@
-import consts
+# system imports
 import random
 import time
-import discord
-import consts
 import re
+# third-party imports
+import discord
+# local source tree imports
+import consts
 import timers
 
 # === functions === #
@@ -27,10 +29,13 @@ def create_team(players):
     return teams_message
 
 
-# checks if message should be purged based on if it starts with a specified command cmd
-# and is send in a specfied channel name channel and is from a user excepted user
-# that should not be purged
+
 def is_purgeable_message(message, cmds, channel, excepted_users):
+    """
+    Checks if message should be purged based on if it starts with a specified command cmd
+    and is send in a specfied channel name channel and is from a user excepted user
+    that should not be purged.
+    """
     if contains_command(message, tuple(cmds)) and is_in_channel(message, channel):
         if message.author.name in excepted_users:
             return False
@@ -38,8 +43,11 @@ def is_purgeable_message(message, cmds, channel, excepted_users):
     return False
 
 
-# creates an internal play_request message
+
 def create_internal_play_request_message(message, play_requests):
+    """
+    Creates an internal play_request message.
+    """
     play_request_time = re.findall('\d\d:\d\d', message.content)
     intern_message = consts.MESSAGE_CREATE_INTERN_PLAY_REQUEST.format(play_requests[message.id][0][0].name, 10  - len(play_requests[message.id]),play_request_time)
     for player_tuple in play_requests[message.id]:
@@ -59,8 +67,6 @@ def get_purgeable_messages(message_cache):
             deleteable_messages.append(msg[0])
             message_cache.remove(msg)
     return message_cache, deleteable_messages
-
-
 
 def has_any_pattern(message):
     for pattern in consts.PATTERN_LIST_AUTO_REACT:

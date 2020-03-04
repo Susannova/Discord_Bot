@@ -30,5 +30,6 @@ def test_module():
     assert(is_valid_time('17:34')=='17:34')
     assert(is_valid_time('41:94')=='-1')
 
-#test_module()
+if __name__ == "__main__":
+    test_module()
     
