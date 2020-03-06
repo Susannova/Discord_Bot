@@ -19,6 +19,10 @@ from modules import (
     checks
 )
 
+from cogs import (
+    cog_play-requests
+)
+
 
 ####################################################################
 #                   === init functions ===                         #
@@ -58,7 +62,9 @@ check_handler = checks.CheckHandler()
 check_handler._CONFIG_ = CONFIG_
 check_handler.debug_bool = False
 
+cogs = [cog_play-request.PlayRequestCog(bot, check_handler)]
 
+bot.add_cog(cogs[i] for i in cogs)
 ####################################################################
 #                       === commands ===                           #
 ####################################################################
@@ -70,11 +76,11 @@ async def create_team(ctx):
     players_list = utility.get_players_in_channel(voice_channel)
     await ctx.message.channel.send(utility.create_team(players_list))
 
-@bot.command(name='play-now')
-@check_handler.is_in_channels([CONSTS_.CHANNEL_PLAY_REQUESTS, CONSTS_.CHANNEL_BOT])
-async def play_now(ctx):
-    bot.tmp_message_author = ctx.message.author
-    await ctx.send(CONSTS_.MESSAGE_PLAY_NOW.format(ctx.message.author.mention))
+# @bot.command(name='play-now')
+# @check_handler.is_in_channels([CONSTS_.CHANNEL_PLAY_REQUESTS, CONSTS_.CHANNEL_BOT])
+# async def play_now(ctx):
+#     bot.tmp_message_author = ctx.message.author
+#     await ctx.send(CONSTS_.MESSAGE_PLAY_NOW.format(ctx.message.author.mention))
 
 
 @bot.command(name='play-lol')
