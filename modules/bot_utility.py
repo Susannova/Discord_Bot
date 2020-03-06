@@ -1,13 +1,10 @@
-"""Collection of utility functions for the
-discord.py file.
-"""
-
+# system imports
 import random
 import time
 import re
-
+# third-party imports
 import discord
-
+# local source tree imports
 import consts
 import timers
 
@@ -32,6 +29,7 @@ def create_team(players):
     return teams_message
 
 
+
 def is_purgeable_message(message, cmds, channel, excepted_users):
     """
     Checks if message should be purged based on if it starts with a specified command cmd
@@ -45,6 +43,7 @@ def is_purgeable_message(message, cmds, channel, excepted_users):
     return False
 
 
+
 def create_internal_play_request_message(message, play_requests):
     """
     Creates an internal play_request message.
@@ -55,12 +54,12 @@ def create_internal_play_request_message(message, play_requests):
         intern_message += player_tuple[0].name + '\n'
     return intern_message
 
-# TODO: implement this
+#TODO: implement this
 def switch_to_internal_play_request(play_requests):
     return create_internal_play_request_message(play_requests)
 
 
-# BUG: collides with play_requests and manual deletes
+#BUG: collides with play_requests and manual deletes
 def get_purgeable_messages(message_cache):
     deleteable_messages = []
     for msg in message_cache:
