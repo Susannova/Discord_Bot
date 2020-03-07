@@ -1,6 +1,6 @@
 # Discord Bot
 
-Features:
+## Features:
 - create a team 
 - commit/reject play request with auto react
 - auto dm
@@ -18,37 +18,23 @@ Features:
 - check if player is a smurf
 - automaticall generate op.gg link from scanning clash scouting screen
 
-Dyno Features used:
-- internal play requests
-- join message (new users get a dm from dyno with some text)
-
-Commands:
-- ?play-internal
-
-Our Bot:
+## Commands:
+- ?create-team
 - ?play-lol [Uhrzeit]
 - ?play-now
-- ?create-team
 - ?player
 - ?bans
 - ?clash
 - ?smurf
 
 DEBUG/DEV Commands:
-- ?testmsg
 - ?version
-- ?reload_config
+- ?enable-debug
+- ?reload-config
 - ?print
 - !end
 
-TODO:
-[issues](https://github.com/Susannova/Create_Team/issues)
+## KNOWN BUGS:
 
-KNOWN BUGS:
-- dyno commands work in every channel as admin
+## Developer Wiki:
 
-Wiki:
-
-{outdated
--  [player_request](https://drive.google.com/file/d/1hMAPciHA2Yc0a6dnL9igTXTL4uWULiSC/view?usp=sharing)
-}
