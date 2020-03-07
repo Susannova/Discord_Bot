@@ -1,6 +1,7 @@
 from PIL import Image
 import PIL.ImageOps
 import os
+
 import pytesseract
 
 opgg = 'https://euw.op.gg/multi/query={}%2C{}%2C{}%2C{}%2C{}'

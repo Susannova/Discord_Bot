@@ -1,14 +1,16 @@
-# system imports
 import random
 import time
 import re
-# third-party imports
-import discord
-# local source tree imports
-import consts
-import timers
+import json
 
-# === functions === #
+import discord
+
+from core import consts, timers
+from core.state import global_state as gstate
+
+def read_config_file(filename):
+    return json.load(open(f'./config/{filename}.json', 'r'))
+
 def create_team(players):
     num_players = len(players)  
     team1 = random.sample(players, int(num_players / 2))
@@ -22,10 +24,11 @@ def create_team(players):
     for player in team1:
         teams_message += player + "\n"
     
+
     teams_message += consts.MESSAGE_TEAM_2
     for player in team2:
         teams_message += player + "\n"
-    
+
     return teams_message
 
 
@@ -79,16 +82,17 @@ def has_pattern(message, pattern):
         return True
     return False
 
-def get_auto_role_list(member):
+def generator_get_auto_role_list(member):
     if len(member.roles) >= 2:
         return
-
-    # fill role_list with the default role(@everyone) and the lowest role(Setzling)
-    role_list = []
+    
     for role in member.guild.roles:
         if role.id == consts.ROLE_EVERYONE_ID or role.id == consts.ROLE_SETZLING_ID:
-            role_list.append(role)
-    return role_list
+            yield role
+
+def get_auto_role_list(member):
+    return list(generator_get_auto_role_list(member))
+
 
 def contains_command(message, command):
     if message.content.startswith(command):
@@ -111,17 +115,17 @@ def is_in_channel(message, channel):
     return message.channel.name == channel
 
 def get_voice_channel(message, name):
-    voice_channel = None
     for voice_channel_iterator in message.guild.voice_channels:
         if voice_channel_iterator.name == name:
             voice_channel = voice_channel_iterator
-    return voice_channel
+    return voice_channel if voice_channel is not None else None
+
+def generator_get_players_in_channel(channel):
+    for member in channel.members:
+        yield member.name
 
 def get_players_in_channel(channel):
-    players_list = []
-    for member in channel.members:
-        players_list.append(member.name)
-    return players_list
+    return list(generator_get_players_in_channel(channel))
 
 def get_play_request_creator(message):
     return ''
@@ -154,3 +158,20 @@ def is_auto_dm_subscriber(message, client, user, play_requests):
 def update_message_cache(message, message_cache, time=18):
     message_cache.append((message, timers.start_timer(hrs=time)))
     return message_cache
+
+def process_deleteables(message):
+    if not gstate.CONFIG["TOGGLE_AUTO_DELETE"]:
+        return
+
+    gstate.message_cache = update_message_cache(
+        message, gstate.message_cache)
+    gstate.message_cache, deleteable_messages = get_purgeable_messages(
+        gstate.message_cache)
+    for deleteable_message in deleteable_messages:
+        yield deleteable_message
+
+def is_no_play_request_command(message):
+    if not contains_any_command(message, CONSTS_.COMMAND_LIST_PLAY_REQUEST) \
+        and message.author != bot.user:
+            return True
+    return False

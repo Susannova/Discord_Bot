@@ -1,4 +1,7 @@
-# used for global variables that cant be used in json(lists, format strings, emoji) or need to be changed (VERSION) in code
+""" Used for global variables that cant be used in json(lists, format strings, emoji)
+or need to be changed (VERSION) in code.
+"""
+
 
 EMOJI_ID_LIST = [644252873672359946, 644254018377482255, 644252861827514388, 644252853644296227, 644252146023530506, 644575356908732437]
 EMOJI_PASS = '❌'
@@ -27,14 +30,14 @@ COMMAND_LIST_ALL = ["?create-team", "?play-internal", "?play-lol", "?play-now", 
 PATTERN_LIST_AUTO_REACT = [" will League of Legends spielen. Kommt gegen ", "hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!", " spielt **__jetzt gerade__** League of Legends und sucht noch nach weiteren Spielern!"]
 PATTERN_PLAY_REQUEST = " will League of Legends spielen. Kommt gegen "
 
-COMMAND_INDICATOR = '!'
-COMMAND_CREATE_TEAM = f'{COMMAND_INDICATOR}create-team'
-COMMAND_PLAY_LOL = f'{COMMAND_INDICATOR}play-lol'
-COMMAND_PLAY_NOW = f'{COMMAND_INDICATOR}play-now'
-COMMAND_CLASH = f'{COMMAND_INDICATOR}clash'
-COMMAND_BANS = f'{COMMAND_INDICATOR}bans'
-COMMAND_PLAYER = f'{COMMAND_INDICATOR}player'
-COMMAND_SMURF = f'{COMMAND_INDICATOR}smurf'
+COMMAND_PREFIX = '!'
+COMMAND_CREATE_TEAM = f'{COMMAND_PREFIX}create-team'
+COMMAND_PLAY_LOL = f'{COMMAND_PREFIX}play-lol'
+COMMAND_PLAY_NOW = f'{COMMAND_PREFIX}play-now'
+COMMAND_CLASH = f'{COMMAND_PREFIX}clash'
+COMMAND_BANS = f'{COMMAND_PREFIX}bans'
+COMMAND_PLAYER = f'{COMMAND_PREFIX}player'
+COMMAND_SMURF = f'{COMMAND_PREFIX}smurf'
 
 COMMAND_LIST_RIOT = [COMMAND_PLAYER, COMMAND_SMURF]
 

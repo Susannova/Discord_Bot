@@ -1,8 +1,9 @@
-import bot_utility as utility
-import consts
 import re
 from datetime import datetime, timedelta, date
 import asyncio
+
+import core.bot_utility as utility
+import core.consts
 
 REGEX_TIME = r"[0-2][0-9]:[0-5][0-9]"
 

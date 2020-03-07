@@ -1,12 +1,14 @@
 # === IMPORTS === #
 import json
 from datetime import datetime, timedelta
-from riotwatcher import RiotWatcher
 from collections import OrderedDict
-import image_transformation
-import timers
 from concurrent.futures import ThreadPoolExecutor
 import urllib.request
+
+from riotwatcher import RiotWatcher
+
+import core.image_transformation
+import core.timers
 # === IMPORTS END === #
 
 # === INIT === #
