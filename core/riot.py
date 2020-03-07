@@ -1,15 +1,17 @@
-# === IMPORTS === #
+
 import json
+import sys
+import os
 from datetime import datetime, timedelta
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
 import urllib.request
 
 from riotwatcher import RiotWatcher
+if __name__ == '__main__':
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))[:-5])
+from core import image_transformation, timers
 
-import core.image_transformation
-import core.timers
-# === IMPORTS END === #
 
 # === INIT === #
 def load_json(file_name):
@@ -155,13 +157,11 @@ def fetch_summoner(player, watcher):
         my_region, data_summoner['id'])
     return [data_mastery, data_summoner, data_league]
 
-def get_summoner_name_list(message):
-    player_names = []
-    for player in message.content.split(' ')[1:]:
+def generate_summoner_names(players):
+    for player in players:
         if player.find('%') > 0:
             player = player.replace('%', '%20')
-        player_names.append(player)
-    return player_names
+        yield player
 
 def format_summoner_name(name):
     if name.find('%20') > 0:
@@ -183,32 +183,33 @@ def update_champion_json():
 
 # === INTERFACE === #
 
-def riot_command(message):
+def riot_command(ctx, args) -> str:
+    players = list(args)
+    return_value = None
     update_champion_json()
     timers.remove_finished_timers(_timers)
     if len(_timers) != 0:
         return "Please wait a few seconds before using Riot API commands again!"
 
     _timers.append(timers.start_timer(secs=5))
-    summoner_names = get_summoner_name_list(message)
+    summoner_names = list(generate_summoner_names(players))
     add_player_and_data(summoner_names)
-    return_value = ''
-    if(message.content.split(' ')[0] == "?player"):
+    if(str(ctx.command) == 'player'):
+        print('got here')
         winrate, rank = get_soloq_data(0)
         return_value = 'Rank: {} , Winrate: {}%'.format(rank, winrate)
-    elif(message.content.split(' ')[0] == "?bans"):
+    elif(str(ctx.command) == 'bans' and len(summoner_names) == 5):
         output = get_best_bans_for_team()
         image_transformation.create_new_image(output)
         op_url = f'https://euw.op.gg/multi/query={summoner_names[0]}%2C{summoner_names[1]}%2C{summoner_names[2]}%2C{summoner_names[3]}%2C{summoner_names[4]}'
         return_value = "Team OP.GG: " + op_url + "\nBest Bans for Team:\n" + pretty_print_list(output)
-    elif (message.content.split(' ')[0] == "?smurf"):
+    elif (str(ctx.command) == 'smurf'):
         is_smurf_word = 'kein'
         if is_smurf(0):
             is_smurf_word = 'ein'
         return_value = f'Der Spieler **{format_summoner_name(summoner_names[0])}** ist sehr wahrscheinlich **{is_smurf_word}** Smurf.'
     removeAllPlayers()
-    return return_value
-
+    return return_value if return_value is not None else 'Something went wrong.'
 
 # === INTERFACE END === #
 
@@ -225,6 +226,7 @@ def populate_with_debug_data():
     populate_player("Thya", data_mastery, data_summoner, data_league)
 
 def testModule():
+    update_champion_json()
     populate_with_debug_data()
     assert(len(players) == 2)
     removePlayer("Thya")
@@ -239,8 +241,8 @@ def testModule():
     assert(winrate == 52.8)
     assert(rank == 'DIAMOND-IV')
     assert(get_soloq_rank_weight(rank) == 7)
-    # assert(is_smurf(0) == False)
-    # assert(get_level(0)== 119)
+    assert(is_smurf(0) == False)
+    assert(get_level(0)== 119)
     # assert(get_best_ban(0) == ['Pyke', 'Blitzcrank', 'Azir', 'Caitlyn', 'Zoe'])
     # populate_with_debug_data()
     # assert(get_best_bans_for_team() == ['Pyke'])
@@ -253,5 +255,9 @@ def testModule():
     print(get_best_ban(0)[0])
     
 if __name__ == "__main__":
-    testModule()
+    try:
+        testModule()
+    except ValueError as identifier:
+        print('Wrong Token.')
+    
 # === TESTS END === #

@@ -37,7 +37,6 @@ def is_riot_enabled():
 def is_debug_config_enabled():
     async def predicate(ctx):
         if not gstate.CONFIG['TOGGLE_DEBUG']:
-            ctx.send("Debugging is not activated in the config file.")
             return False
         return True
     return commands.check(predicate)
@@ -45,7 +44,6 @@ def is_debug_config_enabled():
 def is_debug_enabled():
     async def predicate(ctx):
         if not gstate.debug:
-            ctx.send("Debugging is not activated.")
             return False
         return True
     return commands.check(predicate)

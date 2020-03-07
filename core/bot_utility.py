@@ -115,6 +115,7 @@ def is_in_channel(message, channel):
     return message.channel.name == channel
 
 def get_voice_channel(message, name):
+    voice_channel = None
     for voice_channel_iterator in message.guild.voice_channels:
         if voice_channel_iterator.name == name:
             voice_channel = voice_channel_iterator

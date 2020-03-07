@@ -2,7 +2,7 @@ import os
 from PIL import Image
 import json
 
-import core.consts
+from core import consts
 
 
 def get_files(champs):

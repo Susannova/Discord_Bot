@@ -26,7 +26,7 @@ class KrautCogs(commands.Cog):
     
     @commands.command(name='create-team')
     @checks.is_in_channels([CONSTS_.CHANNEL_INTERN_PLANING, CONSTS_.CHANNEL_BOT])
-    async def create_team(self, ctx):
+    async def create_team(self, ctx: commands.Context):
         voice_channel = utility.get_voice_channel(ctx.message, CONSTS_.CHANNEL_CREATE_TEAM_VOICE)
         players_list = utility.get_players_in_channel(voice_channel)
         await ctx.send(utility.create_team(players_list))
@@ -61,19 +61,19 @@ class KrautCogs(commands.Cog):
 
     @commands.command(name='player')
     @checks.is_riot_enabled()
-    async def player_(self, ctx):
-        await ctx.send(riot.riot_command(ctx.message))
+    async def player_(self, ctx, *args):
+        await ctx.send(riot.riot_command(ctx, args))
 
     @commands.command(name='smurf')
     @checks.is_riot_enabled()
-    async def smurf_(self, ctx):
-        await ctx.send(riot.riot_command(ctx.message))
+    async def smurf_(self, ctx, *args):
+        await ctx.send(riot.riot_command(ctx, args))
 
     @commands.command(name='bans')
     @checks.is_riot_enabled()
-    async def bans_(self, ctx):
+    async def bans_(self, ctx, *args):
         await ctx.send(
-                riot.riot_command(ctx.message), file=discord.File(
+                riot.riot_command(ctx, args), file=discord.File(
                     f'./{CONSTS_.FOLDER_CHAMP_SPLICED}/image.jpg'))
 
     @commands.command(name='version')
@@ -131,8 +131,17 @@ class KrautCogs(commands.Cog):
     @play_now.error
     @play_lol.error
     @clash_.error
+    @enable_debug.error
+    @print_.error
     async def error_handler(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            await ctx.send('Das hat nicht funktioniert. (Überprüfe, ob du im richtigen Channel bist.)')
+            if str(ctx.command) == 'enable-debug':  
+                await ctx.send('Der Debug Toggle in der Konfiguration ist nicht eingeschaltet.')
+            elif str(ctx.command) == 'purge':
+                await ctx.send('Du hast nicht die benötigten Rechte um dieses Command auszuführen.')
+            elif str(ctx.command) == 'print':
+                await ctx.send(f'Der Debug Modus ist zur Zeit nicht aktiviert. Versuche es mit {ctx.bot.command_prefix}enable-debug zu aktivieren.')
+            else:
+                await ctx.send('Das hat nicht funktioniert. (Überprüfe, ob du im richtigen Channel bist.)')
         if isinstance(error, commands.MissingRequiredArgument):
             await ctx.send('Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
