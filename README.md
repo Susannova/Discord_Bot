@@ -19,15 +19,18 @@
 - automaticall generate op.gg link from scanning clash scouting screen
 
 ## Commands:
+### General Commands:
 - ?create-team
 - ?play-lol [Uhrzeit]
 - ?play-now
-- ?player
-- ?bans
 - ?clash
+
+### Riot Commands:
+- ?bans
+- ?player
 - ?smurf
 
-DEBUG/DEV Commands:
+### DEBUG/DEV Commands:
 - ?version
 - ?enable-debug
 - ?reload-config
