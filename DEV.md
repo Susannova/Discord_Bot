@@ -17,7 +17,6 @@ If you want to add a command to the bot use [this](https://discordpy.readthedocs
 @bot.command()
 async def foo(ctx, arg):
     await ctx.send(arg)
-    
 ````
 
 
