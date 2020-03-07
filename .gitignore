@@ -1,6 +1,7 @@
 local_token.txt
 /core/__pycache__
 /cogs/__pycache__
+/tests/__pycache__
 /.vscode/
 test-sequence
 /env/
