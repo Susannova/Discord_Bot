@@ -34,7 +34,7 @@ DEBUG/DEV Commands:
 - ?print
 - !end
 
-## KNOWN BUGS:
+## Known Bugs:
 
 ## Developer Wiki:
 
