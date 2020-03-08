@@ -57,8 +57,8 @@ def create_internal_play_request_message(message, play_requests):
 
 
 # TODO: implement this
-def switch_to_internal_play_request(play_requests):
-    return create_internal_play_request_message(play_requests)
+def switch_to_internal_play_request(message, play_requests):
+    return create_internal_play_request_message(message, play_requests)
 
 
 # BUG: collides with play_requests and manual deletes
@@ -155,7 +155,8 @@ def add_subscriber_to_play_request(message_id, user, play_requests):
 
 def is_auto_dm_subscriber(message, client, user, play_requests):
     if user.name in (client.user.name, "Secret Kraut9 Leader") or \
-     not is_in_channels(message, [consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT]):
+     not is_in_channels(
+         message, [consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT]):
         return False
 
     message_id = message.id

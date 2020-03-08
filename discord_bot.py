@@ -1,3 +1,5 @@
+"""Main module. Stars and defines the Discord Bot (KrautBot).
+"""
 import logging
 import time
 import asyncio
@@ -29,9 +31,16 @@ class KrautBot(commands.Bot):
     BOT_TOKEN = str(BOT_TOKENS['token'])
 
     def __init__(self):
+        """ Sets the Command Prefix and then 
+        call the __init__ method of the commands.Bot
+        Class.
+        """
         super().__init__(command_prefix=CONSTS_.COMMAND_PREFIX)
 
     def run(self):
+        """ Runs the Bot using the Token defined
+        in BOT_TOKEN.
+        """
         try:
             super().run(self.BOT_TOKEN)
         except KeyboardInterrupt:
@@ -112,10 +121,11 @@ class KrautBot(commands.Bot):
                 await player[0].send(
                     CONSTS_.MESSAGE_AUTO_DM_SUBSCRIBER.format(
                         user.name, play_request_author.name, str(reaction.emoji)))
-        # switch to internal play request if more than 6 players(author + 5 players_known) are subscribed
+        # switch to internal play request
+        # if more than 6 players(author + 5 players_known) are subscribed
         if len(gstate.play_requests[message_id]) == 6:
             await reaction.channel.send(
-                utility.switch_to_internal_play_request(gstate.play_requests))
+                utility.switch_to_internal_play_request(message, gstate.play_requests))
 
 
 if __name__ == '__main__':

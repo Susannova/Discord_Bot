@@ -1,8 +1,3 @@
-
-import sys
-import os
-import json
-import time
 import asyncio
 import ast
 from importlib import reload
@@ -11,10 +6,9 @@ import discord
 from discord.ext import commands
 
 from core import (
-    consts as CONSTS_,
+    consts,
     riot,
     bot_utility as utility,
-    reminder,
     ocr,
     checks
 )
@@ -23,29 +17,29 @@ from core.state import global_state as gstate
 class KrautCogs(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
-    
+
     @commands.command(name='create-team')
-    @checks.is_in_channels([CONSTS_.CHANNEL_INTERN_PLANING, CONSTS_.CHANNEL_BOT])
+    @checks.is_in_channels([consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_BOT])
     async def create_team(self, ctx: commands.Context):
-        voice_channel = utility.get_voice_channel(ctx.message, CONSTS_.CHANNEL_CREATE_TEAM_VOICE)
+        voice_channel = utility.get_voice_channel(ctx.message, consts.CHANNEL_CREATE_TEAM_VOICE)
         players_list = utility.get_players_in_channel(voice_channel)
         await ctx.send(utility.create_team(players_list))
 
     @commands.command(name='play-now')
-    @checks.is_in_channels([CONSTS_.CHANNEL_PLAY_REQUESTS, CONSTS_.CHANNEL_BOT])
+    @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT])
     async def play_now(self, ctx):
         gstate.tmp_message_author = ctx.message.author
-        await ctx.send(CONSTS_.MESSAGE_PLAY_NOW.format(gstate.tmp_message_author.mention))
+        await ctx.send(consts.MESSAGE_PLAY_NOW.format(gstate.tmp_message_author.mention))
 
     @commands.command(name='play-lol')
-    @checks.is_in_channels([CONSTS_.CHANNEL_PLAY_REQUESTS, CONSTS_.CHANNEL_BOT])
+    @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT])
     async def play_lol(self, ctx, _time):
         gstate.tmp_message_author = ctx.message.author
-        await ctx.send(CONSTS_.MESSAGE_PLAY_LOL.format(
+        await ctx.send(consts.MESSAGE_PLAY_LOL.format(
             gstate.tmp_message_author.mention, _time))
 
     @commands.command(name='clash')
-    @checks.is_in_channels([CONSTS_.CHANNEL_BOT, CONSTS_.CHANNEL_MEMBER_ONLY])
+    @checks.is_in_channels([consts.CHANNEL_BOT, consts.CHANNEL_MEMBER_ONLY])
     @checks.has_n_attachments(1)
     async def clash_(self, ctx):
         attached_image = ctx.message.attachments[0]
@@ -73,38 +67,38 @@ class KrautCogs(commands.Cog):
     @checks.is_riot_enabled()
     async def bans_(self, ctx, *args):
         await ctx.send(
-                riot.riot_command(ctx, args), file=discord.File(
-                    f'./{CONSTS_.FOLDER_CHAMP_SPLICED}/image.jpg'))
+            riot.riot_command(ctx, args), file=discord.File(
+                f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))
 
     @commands.command(name='version')
-    @checks.is_in_channels([CONSTS_.CHANNEL_BOT])
+    @checks.is_in_channels([consts.CHANNEL_BOT])
     async def version_(self, ctx):
         await ctx.send(gstate.VERSION)
 
     @commands.command(name='reload-config')
-    @checks.is_in_channels([CONSTS_.CHANNEL_BOT])
+    @checks.is_in_channels([consts.CHANNEL_BOT])
     async def reload_config(self, ctx):
-        global CONSTS_
+        global consts
         await ctx.send("Reload configuration.json:")
         gstate.read_config()
-        CONSTS_ = reload(CONSTS_)
+        consts = reload(consts)
         gstate.get_version()
         await ctx.send("Done.")
 
     @commands.command(name='enable-debug')
-    @checks.is_in_channels([CONSTS_.CHANNEL_BOT])
+    @checks.is_in_channels([consts.CHANNEL_BOT])
     @checks.is_debug_config_enabled()
     async def enable_debug(self, ctx):
-        gstae.debug = True
+        gstate.debug = True
         await ctx.send("Debugging is activated for one hour.")
         await asyncio.sleep(3600)
-        gstae.debug = False
+        gstate.debug = False
         gstate.CONFIG["TOGGLE_DEBUG"] = False
         gstate.write_and_reload_config(gstate.CONFIG)
         await ctx.send("Debugging is deactivated.")
 
     @commands.command(name='print')
-    @checks.is_in_channels([CONSTS_.CHANNEL_BOT])
+    @checks.is_in_channels([consts.CHANNEL_BOT])
     @checks.is_debug_enabled()
     async def print_(self, ctx):
         return_string = ast.literal_eval(ctx.message.content.split(' ')[1])
@@ -112,17 +106,17 @@ class KrautCogs(commands.Cog):
         print(return_string)
 
     @commands.command(name='end')
-    @checks.is_in_channels([CONSTS_.CHANNEL_BOT])
+    @checks.is_in_channels([consts.CHANNEL_BOT])
     async def end_(self, ctx):
         await ctx.send('Bot is shut down!')
-        await bot.logout()
+        await self.bot.logout()
 
 
     @commands.command(name='purge')
     @commands.is_owner()
-    async def purge_(self, ctx, n: int):
-        last_n_messages = await ctx.message.channel.history(limit=n + 1).flatten()
-        for message_ in last_n_messages:
+    async def purge_(self, ctx, count: int):
+        last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
+        for message_ in last_count_messages:
             if not message_.pinned:
                 await message_.delete()
 
@@ -135,13 +129,18 @@ class KrautCogs(commands.Cog):
     @print_.error
     async def error_handler(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
-            if str(ctx.command) == 'enable-debug':  
-                await ctx.send('Der Debug Toggle in der Konfiguration ist nicht eingeschaltet.')
+            if str(ctx.command) == 'enable-debug':
+                await ctx.send(
+                    'Der Debug Toggle in der Konfiguration ist nicht eingeschaltet.')
             elif str(ctx.command) == 'purge':
-                await ctx.send('Du hast nicht die benötigten Rechte um dieses Command auszuführen.')
+                await ctx.send(
+                    'Du hast nicht die benötigten Rechte um dieses Command auszuführen.')
             elif str(ctx.command) == 'print':
-                await ctx.send(f'Der Debug Modus ist zur Zeit nicht aktiviert. Versuche es mit {ctx.bot.command_prefix}enable-debug zu aktivieren.')
+                await ctx.send(
+                    f'Der Debug Modus ist zur Zeit nicht aktiviert. Versuche es mit {ctx.bot.command_prefix}enable-debug zu aktivieren.')
             else:
-                await ctx.send('Das hat nicht funktioniert. (Überprüfe, ob du im richtigen Channel bist.)')
+                await ctx.send(
+                    'Das hat nicht funktioniert. (Überprüfe, ob du im richtigen Channel bist.)')
         if isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send('Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
+            await ctx.send(
+                'Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
