@@ -5,3 +5,4 @@ local_token.txt
 /.vscode/
 test-sequence
 /env/
+.pylintrc

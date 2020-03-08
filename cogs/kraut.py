@@ -12,9 +12,10 @@ from core import (
     ocr,
     checks
 )
+from core.play_requests import PlayRequest
 from core.state import global_state as gstate
 
-class KrautCogs(commands.Cog):
+class KrautCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -49,9 +50,7 @@ class KrautCogs(commands.Cog):
         await ctx.send(ocr.run_ocr())
         ocr.clean_up_image(attached_image_file_name)
         await ctx.send(
-            f'If you want to receive the best bans \
-            for the scoutet team copy the following Command:\n?bans \
-            {ocr.get_formatted_summoner_names()}')
+            consts.MESSAGE_BANS.format(ocr.get_formatted_summoner_names()))
 
     @commands.command(name='player')
     @checks.is_riot_enabled()

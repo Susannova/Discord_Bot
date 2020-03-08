@@ -144,26 +144,25 @@ def get_play_request_creator(message):
 
 def add_subscriber_to_play_request(message_id, user, play_requests):
     is_already_in_list = False
-    for player_list in play_requests[message_id]:
+    for player_list in gstate.play_requests[message_id]:
         if user in player_list:
             is_already_in_list = True
 
     if not is_already_in_list:
-        play_requests[message_id].append((user, time.time()))
-    return play_requests
+        gstate.play_requests[message_id].append((user, time.time()))
 
 
-def is_auto_dm_subscriber(message, client, user, play_requests):
+def is_auto_dm_subscriber(message, client, user):
     if user.name in (client.user.name, "Secret Kraut9 Leader") or \
      not is_in_channels(
          message, [consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT]):
         return False
 
     message_id = message.id
-    if message_id not in play_requests:
+    if message_id not in gstate.play_requests:
         return False
 
-    play_request_author = play_requests[message_id][0][0]
+    play_request_author = gstate.play_requests[message_id][0][0]
     if user == play_request_author:
         return False
 
