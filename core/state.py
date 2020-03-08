@@ -1,11 +1,31 @@
 import json
 
-class GlobalState():
+class SingletonBase(type):
+    """Metaclass that changes class to be a Singleton.
+    """
+    def __init__(self, *args, **kwargs):
+        self._instance = None
+        super().__init__(*args, **kwargs)
+
+    def __call__(self, *args, **kwargs):
+        if self._instance is None:
+            self._instance = super().__call__(*args, **kwargs)
+            return self._instance
+        else:
+            return self._instance
+
+class Singleton(metaclass=SingletonBase):
+    """Inhertiable class that provides the Singleton
+    property to all heirs.
+    """
+    pass
+
+class GlobalState(Singleton):
     """Global state class that saves all variables that need to have a
     global state at runtime that potentially has to change during
-    runtime. Instantiate once and use the instance in all modules that
-    need global state. This makes sure that the state is consistent
-    throughout all of the modules.
+    runtime. Has the Singleton property, which means that all instances
+    created of this class all point to the same region in memory.
+    This makes sure that the state stays conistent.
     """
     CONFIG_FILENAME = 'configuration'
 
