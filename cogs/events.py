@@ -41,7 +41,7 @@ class EventCog(commands.Cog):
 
             gstate.play_requests[message.id] = PlayRequest(message, gstate.tmp_message_author)
 
-            for deletable_message in utility.process_deleteables(message):
+            for deletable_message in utility.process_deleteables(message, gstate.message_cache):
                 await deletable_message.delete()
 
             # auto reminder
@@ -55,7 +55,7 @@ class EventCog(commands.Cog):
         # auto delete
         if gstate.CONFIG["TOGGLE_AUTO_DELETE"] \
         and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
-            gstate.message_cache = utility.update_message_cache(message, gstate.message_cache)
+            utility.update_message_cache(message, gstate.message_cache)
 
         # command only
         if gstate.CONFIG["TOGGLE_COMMAND_ONLY"] \
@@ -78,9 +78,9 @@ class EventCog(commands.Cog):
         if not utility.is_auto_dm_subscriber(reaction.message, self.bot, user):
             return
 
-        play_request = gstate.play_requests[message_id]
         message_id = reaction.message.id
-        play_request_author = play_request.message_author
+        play_request = gstate.play_requests[message_id]
+        play_request_author = play_request.author
         utility.add_subscriber_to_play_request(user, play_request)
         # if reaction is 'EMOJI_PASS' delete player from play_request and return
         if str(reaction.emoji) == consts.EMOJI_PASS:

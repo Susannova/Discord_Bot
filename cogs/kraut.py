@@ -100,9 +100,9 @@ class KrautCog(commands.Cog):
     @checks.is_in_channels([consts.CHANNEL_BOT])
     @checks.is_debug_enabled()
     async def print_(self, ctx, arg):
-        return_string = ast.literal_eval(arg)
+        # return_string = ast.literal_eval(arg)
         # less safe but more powerful
-        # return_string = eval(arg)
+        return_string = eval(arg)
         await ctx.send(return_string)
         print(return_string)
 
@@ -117,9 +117,7 @@ class KrautCog(commands.Cog):
     @commands.is_owner()
     async def purge_(self, ctx, count: int):
         last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
-        for message_ in last_count_messages:
-            if not message_.pinned:
-                await message_.delete()
+        [await message_.delete() for message_ in last_count_messages if not message_.pinned]
 
 
     @create_team.error
