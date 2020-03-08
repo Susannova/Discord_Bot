@@ -1,8 +1,9 @@
-import sys
-import os
 import logging
 import time
 import asyncio
+
+import discord
+from discord.ext import commands
 
 from core import (
     bot_utility as utility,
@@ -14,14 +15,13 @@ from cogs import (
     kraut
 )
 
-import discord
-from discord.ext import commands
 
 logging.getLogger(__name__)
 logging.basicConfig(level=logging.WARNING)
 discord.voice_client.VoiceClient.warn_nacl = False
 
 BOT_TOKENS = utility.read_config_file('bot')
+
 
 class KrautBot(commands.Bot):
     """The actual bot.
@@ -31,13 +31,11 @@ class KrautBot(commands.Bot):
     def __init__(self):
         super().__init__(command_prefix=CONSTS_.COMMAND_PREFIX)
 
-
     def run(self):
         try:
             super().run(self.BOT_TOKEN)
-        except KeyboardInterrupt as keyboard_interrupt:
+        except KeyboardInterrupt:
             logging.warning('Stopped Bot due to Keyboard Interrupt.')
- 
 
     async def on_ready(self):
         print('We have logged in as {0.user}'.format(bot))
@@ -52,12 +50,13 @@ class KrautBot(commands.Bot):
         if isinstance(message.channel, discord.DMChannel):
             return
 
+        # auto react
         if gstate.CONFIG["TOGGLE_AUTO_REACT"] and utility.has_any_pattern(message):
             await message.add_reaction(bot.get_emoji(CONSTS_.EMOJI_ID_LIST[5]))
             await message.add_reaction(CONSTS_.EMOJI_PASS)
 
             gstate.play_requests[message.id] = [[gstate.tmp_message_author, time.time()]]
-            
+
             for deletable_message in utility.process_deleteables(message):
                 await deletable_message.delete()
 
@@ -69,23 +68,21 @@ class KrautBot(commands.Bot):
                     for player in gstate.play_requests[message.id]:
                         await player[0].send(CONSTS_.MESSAGE_PLAY_REQUEST_REMINDER)
 
-        await super().process_commands(message)
-        # make all messages in play_requests channel auto_deleteable
+        # auto delete
         if gstate.CONFIG["TOGGLE_AUTO_DELETE"] \
         and utility.is_in_channel(message, CONSTS_.CHANNEL_PLAY_REQUESTS):
             gstate.message_cache = utility.update_message_cache(message, gstate.message_cache)
 
+        # command only
         if gstate.CONFIG["TOGGLE_COMMAND_ONLY"] \
-        and utility.is_no_play_request_command(message):
-           await message.delete()
+        and utility.is_no_play_request_command(message, bot):
+            await message.delete()
+
+        await super().process_commands(message)
 
     async def on_message_delete(self, message):
-        # delete play_request if old play-request gets deleted
-        if utility.has_any_pattern(message):
-            del gstate.play_requests[message.id]
-        for message_tuple in gstate.message_cache:
-            if message in message_tuple:
-                gstate.message_cache.remove(message_tuple)
+        utility.clear_play_requests(message)
+        utility.clear_message_cache(message)
 
     async def on_reaction_add(self, reaction, user):
         # auto dm
@@ -128,7 +125,7 @@ if __name__ == '__main__':
         logging.info("Start Bot")
         bot.add_cog(kraut.KrautCogs(bot))
         bot.run()
-    except discord.LoginFailure as login_failure:
         print("End Bot")
-        logging.warning('Failed to login due to improper Token.')
         logging.info("End")
+    except discord.LoginFailure:
+        logging.warning('Failed to login due to improper Token.')
