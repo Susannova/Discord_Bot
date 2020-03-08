@@ -12,7 +12,7 @@ from core import (
     ocr,
     checks
 )
-from core.play_requests import PlayRequest
+
 from core.state import global_state as gstate
 
 class KrautCog(commands.Cog):
@@ -99,8 +99,10 @@ class KrautCog(commands.Cog):
     @commands.command(name='print')
     @checks.is_in_channels([consts.CHANNEL_BOT])
     @checks.is_debug_enabled()
-    async def print_(self, ctx):
-        return_string = ast.literal_eval(ctx.message.content.split(' ')[1])
+    async def print_(self, ctx, arg):
+        return_string = ast.literal_eval(arg)
+        # less safe but more powerful
+        # return_string = eval(arg)
         await ctx.send(return_string)
         print(return_string)
 
@@ -126,6 +128,9 @@ class KrautCog(commands.Cog):
     @clash_.error
     @enable_debug.error
     @print_.error
+    @player_.error
+    @smurf_.error
+    @bans_.error
     async def error_handler(self, ctx, error):
         if isinstance(error, commands.CheckFailure):
             if str(ctx.command) == 'enable-debug':
@@ -140,6 +145,9 @@ class KrautCog(commands.Cog):
             else:
                 await ctx.send(
                     'Das hat nicht funktioniert. (Überprüfe, ob du im richtigen Channel bist.)')
-        if isinstance(error, commands.MissingRequiredArgument):
+        elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(
                 'Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
+        elif isinstance(error, commands.CommandInvokeError):
+            await ctx.send(
+                'Der Riot API Schlüssel ist nicht richtig konfiguriert oder falsch.') 

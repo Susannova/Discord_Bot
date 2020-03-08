@@ -195,7 +195,6 @@ def riot_command(ctx, args) -> str:
     summoner_names = list(generate_summoner_names(players))
     add_player_and_data(summoner_names)
     if(str(ctx.command) == 'player'):
-        print('got here')
         winrate, rank = get_soloq_data(0)
         return_value = 'Rank: {} , Winrate: {}%'.format(rank, winrate)
     elif(str(ctx.command) == 'bans' and len(summoner_names) == 5):
