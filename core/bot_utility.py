@@ -61,12 +61,6 @@ def switch_to_internal_play_request(message, play_request):
     return create_internal_play_request_message(message, play_request)
 
 
-# BUG: collides with play_requests and manual deletes
-def get_purgeable_messages(message_cache):
-    for msg in message_cache:
-        if timers.is_timer_done(msg[1]):
-            message_cache.remove(msg)
-            yield msg
 
 
 def has_any_pattern(message):
@@ -164,19 +158,15 @@ def is_auto_dm_subscriber(message, client, user):
     if user == play_request_author:
         return False
     return True
+# FIXME
+def update_message_cache(message,  time=18):
+    gstate.message_cache.append((message, timers.start_timer(hrs=18)))
 
 
-def update_message_cache(message, message_cache, time=18):
-    message_cache.append((message, timers.start_timer(hrs=time)))
-
-
-def process_deleteables(message, message_cache):
+def get_purgeable_messages_list(message):
     if not gstate.CONFIG["TOGGLE_AUTO_DELETE"]:
         return
-
-    update_message_cache(message, message_cache)
-    for deleteable_message in get_purgeable_messages(message_cache):
-        yield deleteable_message
+    return [msg[0] for msg in gstate.message_cache if timers.is_timer_done(msg[1])]
 
 
 def is_no_play_request_command(message, bot):
