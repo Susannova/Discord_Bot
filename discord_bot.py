@@ -31,7 +31,7 @@ class KrautBot(commands.Bot):
     def __init__(self):
         """ Sets the Command Prefix and then 
         call the __init__ method of the commands.Bot
-        Class.
+        class.
         """
         super().__init__(command_prefix=consts.COMMAND_PREFIX)
 

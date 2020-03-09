@@ -4,10 +4,20 @@ import discord
 
 class PlayRequest():
     subscribers = []
-    def __init__(self, message: discord.Message, message_author: discord.User):
+    message = None
+
+    def __init__(self, message: discord.Message, author: discord.User):
         self.message = message
-        self.message_author = message_author
+        self.author = author
         self.timestamp_ = time.time()
 
-    def add_subscriber(user: discord.User):
+    def add_subscriber(self, user: discord.User):
         self.subscribers.append(user)
+
+    def remove_subscriber(self, user: discord.User):
+        self.subscribers.remove(user)
+    
+    def generate_all_players(self):
+        for subscriber in self.subscribers:
+            yield subscriber
+        yield self.author

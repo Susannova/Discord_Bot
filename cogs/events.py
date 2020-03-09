@@ -1,4 +1,3 @@
-import time
 import asyncio
 
 import discord
@@ -35,39 +34,42 @@ class EventCog(commands.Cog):
         if isinstance(message.channel, discord.DMChannel):
             return
 
+        # add all messages in channel to gstate.message_cache
+        if gstate.CONFIG["TOGGLE_AUTO_DELETE"] \
+        and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
+            utility.update_message_cache(message)
+
         # auto react
         if gstate.CONFIG["TOGGLE_AUTO_REACT"] and utility.has_any_pattern(message):
             await message.add_reaction(self.bot.get_emoji(consts.EMOJI_ID_LIST[5]))
             await message.add_reaction(consts.EMOJI_PASS)
 
-            gstate.play_requests[message.id] = [[gstate.tmp_message_author, time.time()]]
+            gstate.play_requests[message.id] = PlayRequest(message, gstate.tmp_message_author)
 
-            for deletable_message in utility.process_deleteables(message):
-                await deletable_message.delete()
+            # auto delete all purgeable messages
+            purgeable_message_list = utility.get_purgeable_messages_list(message)
+            for purgeable_message in purgeable_message_list:
+                utility.clear_message_cache(purgeable_message)
+                await purgeable_message.delete()
 
             # auto reminder
             if utility.has_pattern(message, consts.PATTERN_PLAY_REQUEST):
                 time_difference = reminder.get_time_difference(message.content)
                 if time_difference > 0:
                     await asyncio.sleep(time_difference)
-                    for player in gstate.play_requests[message.id]:
-                        await player[0].send(consts.MESSAGE_PLAY_REQUEST_REMINDER)
+                    for player in gstate.play_requests[message.id].generate_all_players():
+                        await player.send(consts.MESSAGE_PLAY_REQUEST_REMINDER)
 
-        # auto delete
-        if gstate.CONFIG["TOGGLE_AUTO_DELETE"] \
-        and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
-            gstate.message_cache = utility.update_message_cache(message, gstate.message_cache)
 
-        # command only
-        if gstate.CONFIG["TOGGLE_COMMAND_ONLY"] \
-        and utility.is_no_play_request_command(message, self.bot):
-            await message.delete()
-
+        # # command only
+        # if gstate.CONFIG["TOGGLE_COMMAND_ONLY"] \
+        # and utility.is_no_play_request_command(message, self.bot):
+        #     await message.delete()
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         utility.clear_play_requests(message)
-        utility.clear_message_cache(message)
+        [utility.clear_message_cache(message) for msg in gstate.message_cache if message in msg]
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
@@ -80,26 +82,27 @@ class EventCog(commands.Cog):
             return
 
         message_id = reaction.message.id
-        play_request_author = gstate.play_requests[message_id][0][0]
-        utility.add_subscriber_to_play_request(message_id, user)
+        play_request = gstate.play_requests[message_id]
+        play_request_author = play_request.author
+        utility.add_subscriber_to_play_request(user, play_request)
         # if reaction is 'EMOJI_PASS' delete player from play_request and return
         if str(reaction.emoji) == consts.EMOJI_PASS:
-            for player in gstate.play_requests[message_id]:
-                if user == player[0]:
-                    gstate.play_requests[message_id].remove(player)
+            for player in play_request.generate_all_players():
+                if user == player:
+                    play_request.remove_subscriber(user)
             return
 
         # send auto dms to subscribers and author
-        for player in gstate.play_requests[message_id]:
-            if player[0] == play_request_author and player[0] != user:
+        for player in play_request.generate_all_players():
+            if player == play_request_author and player != user:
                 await play_request_author.send(
                     consts.MESSAGE_AUTO_DM_CREATOR.format(user.name, str(reaction.emoji)))
-            elif player[0] != user:
-                await player[0].send(
+            elif player != user:
+                await player.send(
                     consts.MESSAGE_AUTO_DM_SUBSCRIBER.format(
                         user.name, play_request_author.name, str(reaction.emoji)))
         # switch to internal play request
         # if more than 6 players(author + 5 players_known) are subscribed
-        if len(gstate.play_requests[message_id]) == 6:
+        if len(play_request.subscribers) + 1 == 6:
             await reaction.channel.send(
-                utility.switch_to_internal_play_request(message, gstate.play_requests))
+                utility.switch_to_internal_play_request(reaction.message, play_request))
