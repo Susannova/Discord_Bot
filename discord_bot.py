@@ -21,10 +21,11 @@ logging.basicConfig(level=logging.WARNING)
 discord.voice_client.VoiceClient.warn_nacl = False
 
 BOT_TOKENS = utility.read_config_file('bot')
-
+kraut_cog = None
 
 class KrautBot(commands.Bot):
-    """The actual bot.
+    """The actual bot. Use the run
+    method to start it.
     """
     BOT_TOKEN = str(BOT_TOKENS['token'])
 
@@ -49,7 +50,8 @@ if __name__ == '__main__':
     try:
         print("Start Bot")
         logging.info("Start Bot")
-        bot.add_cog(kraut.KrautCog(bot))
+        kraut_cog = kraut.KrautCog(bot)
+        bot.add_cog(kraut_cog)
         bot.add_cog(events.EventCog(bot))
         bot.run()
         print("End Bot")

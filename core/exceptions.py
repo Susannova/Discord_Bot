@@ -4,4 +4,13 @@ class MissingRequiredAttachment(discord.DiscordException):
 
     This inherits from :exc:`~discord.DiscordException`.
     """
-    pass
+    def __str__(self):
+        return 'Es fehlt ein Attachment. (z.B. das Bild bei ?clash)'
+
+
+class NotInstantiatedException():
+    """Exception raised if something is not yet
+    instantiated.
+    """
+    def __str__(self):
+        return 'Something was called before it was instantiated.'
