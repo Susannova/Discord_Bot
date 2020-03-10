@@ -62,3 +62,6 @@ ROLE_EVERYONE_ID = 564481310417092629
 
 FOLDER_CHAMP_ICON = './data/champ-icon/'
 FOLDER_CHAMP_SPLICED = './data/champ-spliced/'
+
+# source: https://na.leagueoflegends.com/en-us/news/game-updates/patch-10-1-notes/
+RIOT_SEASON_2020_START = '10.01.2020'

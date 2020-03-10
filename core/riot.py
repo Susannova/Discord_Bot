@@ -10,7 +10,9 @@ import urllib.request
 from riotwatcher import RiotWatcher
 if __name__ == '__main__':
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))[:-5])
-from core import image_transformation, timers
+from core import image_transformation, timers, consts
+
+SEASON_2020_START_EPOCH = timers.convert_human_to_epoch_time(consts.RIOT_SEASON_2020_START)
 
 
 # === INIT === #

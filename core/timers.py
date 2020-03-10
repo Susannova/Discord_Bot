@@ -28,3 +28,12 @@ def test_module():
 
 if __name__ == "__main__":
     test_module()
+
+
+def convert_human_to_epoch_time(date: str) -> int:
+    """ Input date formated as dd.mm.YYYY. Returns that
+    date as epoch time.
+    """
+    date_time = f'{date}'
+    pattern = '%d.%m.%Y'
+    return int(time.mktime(time.strptime(date_time, pattern)))
