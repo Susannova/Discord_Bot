@@ -10,10 +10,13 @@ from core import (
     riot,
     bot_utility as utility,
     ocr,
-    checks
+    checks,
+    exceptions
 )
 
 from core.state import global_state as gstate
+from ..discord_bot import kraut_cog
+
 
 class KrautCog(commands.Cog):
     def __init__(self, bot):
@@ -28,16 +31,18 @@ class KrautCog(commands.Cog):
 
     @commands.command(name='play-now')
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT])
+    @checks.is_instantiated(kraut_cog)
     async def play_now(self, ctx):
-        gstate.tmp_message_author = ctx.message.author
-        await ctx.send(consts.MESSAGE_PLAY_NOW.format(gstate.tmp_message_author.mention))
+        kraut_cog.tmp_message_author = ctx.message.author
+        await ctx.send(consts.MESSAGE_PLAY_NOW.format(kraut_cog.tmp_message_author.mention))
 
     @commands.command(name='play-lol')
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT])
+    @checks.is_instantiated(kraut_cog)
     async def play_lol(self, ctx, _time):
-        gstate.tmp_message_author = ctx.message.author
+        kraut.tmp_message_author = ctx.message.author
         await ctx.send(consts.MESSAGE_PLAY_LOL.format(
-            gstate.tmp_message_author.mention, _time))
+            kraut_cog.mention, _time))
 
     @commands.command(name='clash')
     @checks.is_in_channels([consts.CHANNEL_BOT, consts.CHANNEL_MEMBER_ONLY])

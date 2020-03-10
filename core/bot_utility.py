@@ -144,17 +144,17 @@ def add_subscriber_to_play_request(user, play_request):
         play_request.add_subscriber(user)
 
 
-def is_auto_dm_subscriber(message, client, user):
+def is_auto_dm_subscriber(message, client, user, play_requests):
     if user.name in (client.user.name, "Secret Kraut9 Leader") or \
      not is_in_channels(
          message, [consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT]):
         return False
 
     message_id = message.id
-    if message_id not in gstate.play_requests:
+    if message_id not in play_requests:
         return False
 
-    play_request_author = gstate.play_requests[message_id].author
+    play_request_author = play_requests[message_id].author
     if user == play_request_author:
         return False
     return True
@@ -182,6 +182,6 @@ def clear_message_cache(message):
             gstate.message_cache.remove(message_tuple)
 
 
-def clear_play_requests(message):
+def clear_play_requests(message, play_requests):
     if has_any_pattern(message):
-        del gstate.play_requests[message.id]
+        del play_requests[message.id]
