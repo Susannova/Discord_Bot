@@ -18,7 +18,6 @@ class EventCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.play_requests = gstate.play_requests
-        self.tmp_message_author = ''
 
     def update_global_play_requests():
         gstate.play_requests = self.play_requests
