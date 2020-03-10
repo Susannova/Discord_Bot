@@ -1,7 +1,8 @@
 import os
 from PIL import Image
 import json
-import consts
+
+from core import consts
 
 
 def get_files(champs):
@@ -35,5 +36,6 @@ def testModule():
     assert(create_new_image(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Pingu']) == 0)
     return "Tests succeded."
 
-#print(testModule())
+if __name__ == "__main__":
+    testModule()
 # === TEST END === #

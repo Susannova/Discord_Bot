@@ -31,6 +31,7 @@ def download_image(url):
 def start_download():
     with concurrent.futures.ThreadPoolExecutor() as executor:
         executor.map(download_image, urls)
-   
-#fill_urls()
-#start_download()
+
+if __name__ == "__main__":
+    fill_urls()
+    start_download()

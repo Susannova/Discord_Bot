@@ -1,8 +1,9 @@
-import bot_utility as utility
-import consts
 import re
 from datetime import datetime, timedelta, date
 import asyncio
+
+import core.bot_utility as utility
+import core.consts
 
 REGEX_TIME = r"[0-2][0-9]:[0-5][0-9]"
 
@@ -30,5 +31,6 @@ def test_module():
     assert(is_valid_time('17:34')=='17:34')
     assert(is_valid_time('41:94')=='-1')
 
-#test_module()
+if __name__ == "__main__":
+    test_module()
     

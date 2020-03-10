@@ -1,5 +1,8 @@
 local_token.txt
-/modules/__pycache__
+/core/__pycache__
+/cogs/__pycache__
+/tests/__pycache__
 /.vscode/
 test-sequence
 /env/
+.pylintrc

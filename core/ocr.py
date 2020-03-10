@@ -1,7 +1,7 @@
 from PIL import Image
-import PIL.ImageOps    
-import sys
+import PIL.ImageOps
 import os
+
 import pytesseract
 
 opgg = 'https://euw.op.gg/multi/query={}%2C{}%2C{}%2C{}%2C{}'
@@ -9,7 +9,7 @@ opgg = 'https://euw.op.gg/multi/query={}%2C{}%2C{}%2C{}%2C{}'
 image_file_name = ''
 summoners = []
 
-START_WIDTH_BASE  = 0
+START_WIDTH_BASE = 0
 END_WIDTH_BASE = 175
 START_HEIGHT_RATIO = .3
 END_HEIGHT_RATIO = .38
@@ -22,7 +22,12 @@ def set_image_file_name(name):
 def crop_and_invert_image(i):
     image = Image.open(f'{image_file_name}')
     width, height = image.size
-    image = image.crop((START_WIDTH_BASE+(i*int(width*WIDTH_RATIO)),int(height*START_HEIGHT_RATIO),END_WIDTH_BASE+(i*int(width*WIDTH_RATIO)),int(height*END_HEIGHT_RATIO)))
+    image = image.crop((
+        START_WIDTH_BASE+(i*int(width*WIDTH_RATIO)),
+        int(height*START_HEIGHT_RATIO),
+        END_WIDTH_BASE+(i*int(width*WIDTH_RATIO)),
+        int(height*END_HEIGHT_RATIO))
+        )
     inverted_image = PIL.ImageOps.invert(image)
     inverted_image.save(f'{i}.png')
 
@@ -30,7 +35,8 @@ def run_ocr_on_image(i):
     return pytesseract.image_to_string(Image.open(f'{i}.png'))
 
 def get_opgg_link(summoners):
-    return opgg.format(summoners[0], summoners[1], summoners[2], summoners[3], summoners[4])
+    return opgg.format(
+        summoners[0], summoners[1], summoners[2], summoners[3], summoners[4])
 
 def clean_up_image(name):
     os.remove(name)
