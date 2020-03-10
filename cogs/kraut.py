@@ -10,12 +10,10 @@ from core import (
     riot,
     bot_utility as utility,
     ocr,
-    checks,
-    exceptions
+    checks
 )
 
 from core.state import global_state as gstate
-
 
 class KrautCog(commands.Cog):
     def __init__(self, bot):
