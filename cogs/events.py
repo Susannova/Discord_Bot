@@ -17,10 +17,17 @@ class EventCog(commands.Cog):
     """
     def __init__(self, bot):
         self.bot = bot
+        """ Dicts are mutable objects, which means
+        that 'self.play_requests = gstate.play_requests'
+        makes self.play_requests a pointer to gstate.play_requests
+        so every change to play_requests also changes 
+        gstate.play_requests. Technically we can make play_requests
+        local, but I feel like we might need play_requests in a global
+        scope sometime. Same for message_cache.
+        """
         self.play_requests = gstate.play_requests
+        self.message_cache = gstate.message_cache
 
-    def update_global_play_requests():
-        gstate.play_requests = self.play_requests
 
     @commands.Cog.listener()
     async def on_ready(self):
@@ -41,7 +48,7 @@ class EventCog(commands.Cog):
         # add all messages in channel to gstate.message_cache
         if gstate.CONFIG["TOGGLE_AUTO_DELETE"] \
         and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
-            utility.update_message_cache(message)
+            utility.update_message_cache(message, self.message_cache)
 
         # auto react
         if gstate.CONFIG["TOGGLE_AUTO_REACT"] and utility.has_any_pattern(message):
@@ -51,9 +58,9 @@ class EventCog(commands.Cog):
             self.play_requests[message.id] = PlayRequest(message, gstate.tmp_message_author)
 
             # auto delete all purgeable messages
-            purgeable_message_list = utility.get_purgeable_messages_list(message)
+            purgeable_message_list = utility.get_purgeable_messages_list(message, self.message_cache)
             for purgeable_message in purgeable_message_list:
-                utility.clear_message_cache(purgeable_message)
+                utility.clear_message_cache(purgeable_message, self.message_cache)
                 await purgeable_message.delete()
 
             # auto reminder
@@ -68,7 +75,7 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         utility.clear_play_requests(message, self.play_requests)
-        [utility.clear_message_cache(message) for msg in gstate.message_cache if message in msg]
+        [utility.clear_message_cache(message, self.message_cache) for msg in self.message_cache if message in msg]
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
