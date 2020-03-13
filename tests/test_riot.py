@@ -1,8 +1,8 @@
 import sys
 import os
-sys.path.append(os.path.join(os.path.dirname(sys.path[0]),'modules'))
 import unittest
-import riot
+sys.path.append(os.path.dirname(sys.path[0]))
+from core import riot
 
 
     # populate_with_debug_data()
@@ -27,11 +27,24 @@ import riot
 
 
 class TestRiot(unittest.TestCase):
+    def setUp(self):
+        self.data = 1
+        self.data2 = 2
+        self.player_name = 'test'
+        self.data_set_name = 'data_summoner'
+        self.players = [riot.Summoner('test', self.data2)]
+
+
     def test_get_champion_id_by_name(self):
         self.assertEqual(riot.get_champion_id_by_name("Pyke"), 555)
 
     def test_get_champion_name_by_id(self):
         self.assertEqual(riot.get_champion_name_by_id(555), "Pyke")
 
-if __name__ == '__main__':
-    unittest.main()
+    def test_update_player(self):
+
+        riot.update_player('test', self.data_set_name, self.data)
+        self.assertEqual(getattr(self.players[0], self.data_set_name), self.data)
+
+
+unittest.main(module='test_riot')

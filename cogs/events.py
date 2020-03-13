@@ -10,6 +10,7 @@ from core import (
     reminder
 )
 from core.play_requests import PlayRequest
+from core.play_requests import PlayRequestCategory
 
 class EventCog(commands.Cog):
     """Cog that handles all events. Used for
@@ -44,7 +45,14 @@ class EventCog(commands.Cog):
             await message.add_reaction(self.bot.get_emoji(consts.EMOJI_ID_LIST[5]))
             await message.add_reaction(consts.EMOJI_PASS)
 
-            gstate.play_requests[message.id] = PlayRequest(message, gstate.tmp_message_author)
+            _category = PlayRequestCategory.PLAY
+
+            if utility.has_pattern(message, consts.PATTERN_CLASH):
+                _category = PlayRequestCategory.CLASH
+                self.play_requests[message.id] = PlayRequest(message, gstate.tmp_message_author, category=_category)
+                self.play_requests[message.id].add_clash_date(gstate.clash_date)
+            else:
+                self.play_requests[message.id] = PlayRequest(message, gstate.tmp_message_author, category=_category)
 
             # auto delete all purgeable messages
             purgeable_message_list = utility.get_purgeable_messages_list(message)
@@ -78,31 +86,45 @@ class EventCog(commands.Cog):
         if not gstate.CONFIG["TOGGLE_AUTO_DM"]:
             return
 
-        if not utility.is_auto_dm_subscriber(reaction.message, self.bot, user):
+        if utility.is_user_bot(user, self.bot):
             return
 
-        message_id = reaction.message.id
-        play_request = gstate.play_requests[message_id]
-        play_request_author = play_request.author
-        utility.add_subscriber_to_play_request(user, play_request)
-        # if reaction is 'EMOJI_PASS' delete player from play_request and return
+        play_request = self.play_requests[reaction.message.id]
+
+        if utility.is_play_request_author(user, play_request):
+            await reaction.remove(user)
+            return
+
         if str(reaction.emoji) == consts.EMOJI_PASS:
             for player in play_request.generate_all_players():
                 if user == player:
                     play_request.remove_subscriber(user)
+            return  
+
+        if utility.is_already_subscriber(user, play_request):
             return
+        
+        utility.add_subscriber_to_play_request(user, play_request)
 
         # send auto dms to subscribers and author
         for player in play_request.generate_all_players():
-            if player == play_request_author and player != user:
-                await play_request_author.send(
+            if player == play_request.author and player != user:
+                await play_request.author.send(
                     consts.MESSAGE_AUTO_DM_CREATOR.format(user.name, str(reaction.emoji)))
             elif player != user:
                 await player.send(
                     consts.MESSAGE_AUTO_DM_SUBSCRIBER.format(
-                        user.name, play_request_author.name, str(reaction.emoji)))
-        # switch to internal play request
-        # if more than 6 players(author + 5 players_known) are subscribed
-        if len(play_request.subscribers) + 1 == 6:
+                        use r.name, play_request.author.name, str(reaction.emoji)))
+
+        if len(play_request.subscribers) + 1 == 5 and play_request.category == PlayRequestCategory.CLASH:
+            await reaction.channel.send(consts.MESSAGE_CLASH_FULL.format(
+                play_request.author, play_request.clash_date, utility.pretty_print_list(play_request.subscribers, play_request.author)
+            ))
+
+        if len(play_request.subscribers) + 1 > 5 and play_request.category == PlayRequestCategory.CLASH:
+            await reaction.remove(user)
+            await user.send('Das Clash Team ist zur Zeit leider schon voll.')
+
+        if len(play_request.subscribers) + 1 == 6 and play_request.category == PlayRequestCategory.INTERN:
             await reaction.channel.send(
                 utility.switch_to_internal_play_request(reaction.message, play_request))

@@ -26,15 +26,26 @@ MESSAGE_BANS = (
     ?bans {0}'
 )
 
+MESSAGE_CLASH_CREATE = (
+    '@everyone\n{0} sucht nach Mitspielern für den Clash am {1}.'
+)
+MESSAGE_CLASH_FULL = 'Das Clash Team von {0} für den {1} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{1}'
+
+
 COMMAND_LIST_INTERN_PLANING = ["?create-team", "?play-internal"]
 COMMAND_LIST_PLAY_REQUEST = ["?play-lol", "?play-now"]
 COMMAND_LIST_ALL = ["?create-team", "?play-internal", "?play-lol", "?play-now", "?player", "?bans"]
 
 
-PATTERN_LIST_AUTO_REACT = [" will League of Legends spielen. Kommt gegen ", "hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!", " spielt **__jetzt gerade__** League of Legends und sucht noch nach weiteren Spielern!"]
-PATTERN_PLAY_REQUEST = " will League of Legends spielen. Kommt gegen "
+PATTERN_LIST_AUTO_REACT = [" will League of Legends spielen. Kommt gegen ",
+ "hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!",
+  " spielt **__jetzt gerade__** League of Legends und sucht noch nach weiteren Spielern!",
+  " sucht nach Mitspielern für den Clash am "]
 
-COMMAND_PREFIX = '!'
+PATTERN_PLAY_REQUEST = " will League of Legends spielen. Kommt gegen "
+PATTERN_CLASH = " sucht nach Mitspielern für den Clash am "
+
+COMMAND_PREFIX = '?'
 COMMAND_CREATE_TEAM = f'{COMMAND_PREFIX}create-team'
 COMMAND_PLAY_LOL = f'{COMMAND_PREFIX}play-lol'
 COMMAND_PLAY_NOW = f'{COMMAND_PREFIX}play-now'
@@ -50,6 +61,7 @@ CHANNEL_INTERN_PLANING = 'intern-planing'
 CHANNEL_PLAY_REQUESTS = 'play-requests'
 CHANNEL_BOT = 'bot'
 CHANNEL_MEMBER_ONLY = 'member-only'
+CHANNEL_CLASH = 'clash'
 
 BOT_DYNO_NAME = 'Dyno'
 
@@ -65,3 +77,7 @@ FOLDER_CHAMP_SPLICED = './data/champ-spliced/'
 
 # source: https://na.leagueoflegends.com/en-us/news/game-updates/patch-10-1-notes/
 RIOT_SEASON_2020_START = '10.01.2020'
+RIOT_REGION = 'euw1'
+
+DATABASE_DIRECTORY = './db/summoners'
+DATABASE_NAME = 'summoner_db'

@@ -1,7 +1,9 @@
-
+""" Checks used as decorators for Commands.
+Note: Only works on Commands (needs a ctx parameter).
+"""
 from discord.ext import commands
 
-from core import (
+from . import (
     bot_utility as utility,
     exceptions as _exceptions
 ) 

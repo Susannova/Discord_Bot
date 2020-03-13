@@ -26,6 +26,14 @@ class KrautCog(commands.Cog):
         players_list = utility.get_players_in_channel(voice_channel)
         await ctx.send(utility.create_team(players_list))
 
+    @commands.command(name='create-clash')
+    @checks.is_in_channels([consts.CHANNEL_CLASH, consts.CHANNEL_BOT])
+    async def create_clash(self, ctx, arg):
+        gstate.tmp_message_author = ctx.message.author
+        gstate.clash_date = arg
+        await ctx.send(consts.MESSAGE_CLASH_CREATE.format(
+            ctx.message.author.mention, arg
+        ))
     @commands.command(name='play-now')
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT])
     async def play_now(self, ctx):
@@ -68,6 +76,28 @@ class KrautCog(commands.Cog):
         await ctx.send(
             riot.riot_command(ctx, args), file=discord.File(
                 f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))
+
+    @commands.command(name='link')
+    @checks.is_riot_enabled()
+    async def link_(self, ctx, arg):
+        try:
+            riot.link_account(ctx, arg)
+        except commands.CommandInvokeError:
+            pass
+        else:
+            await ctx.send(
+                f'Dein Lol-Account wurde erfolgreich mit deinem Discord Account verbunden!\nFalls du deinen Account wieder entfernen möchtest benutze das {ctx.bot.command_prefix}unlink Command.')
+
+    @commands.command(name='unlink')
+    @checks.is_riot_enabled()
+    async def unlink_(self, ctx):
+        try:
+            riot.unlink_account(ctx)
+        except commands.CommandInvokeError:
+            pass
+        else:
+            await ctx.send(
+                'Dein Lol-Account wurde erfolgreich von deinem Discord Account getrennt!')
 
     @commands.command(name='version')
     @checks.is_in_channels([consts.CHANNEL_BOT])
@@ -119,8 +149,16 @@ class KrautCog(commands.Cog):
         last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
         [await message_.delete() for message_ in last_count_messages if not message_.pinned]
 
+    @commands.command(name='test-embed')
+    @commands.is_owner()
+    async def test_embed(self, ctx):
+        await ctx.send(embed=riot.create_embed(ctx))
+
+    
+        
 
     @create_team.error
+    @create_clash.error
     @play_now.error
     @play_lol.error
     @clash_.error
@@ -147,5 +185,4 @@ class KrautCog(commands.Cog):
             await ctx.send(
                 'Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
         elif isinstance(error, commands.CommandInvokeError):
-            await ctx.send(
-                'Der Riot API Schlüssel ist nicht richtig konfiguriert oder falsch.') 
+            await ctx.send(error)

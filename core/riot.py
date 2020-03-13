@@ -1,4 +1,7 @@
-
+"""Module that interacts with the Riot API
+and transforms the received data in 
+a user readable way.
+"""
 import json
 import sys
 import os
@@ -6,60 +9,85 @@ from datetime import datetime, timedelta
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
 import urllib.request
+import statistics
+import shelve
+import discord
 
 from riotwatcher import RiotWatcher
-if __name__ == '__main__':
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))[:-5])
-from core import image_transformation, timers, consts
+
+from . import image_transformation, timers, consts, exceptions
+from .state import Singleton
 
 SEASON_2020_START_EPOCH = timers.convert_human_to_epoch_time(consts.RIOT_SEASON_2020_START)
 
 
+
 # === INIT === #
-def load_json(file_name):
-    with open(f'./config/{file_name}.json',  encoding="utf8") as all_data:
+def load_json(file_name, folder='config'):
+    with open(f'./{folder}/{file_name}.json',  encoding="utf8") as all_data:
         return json.load(all_data)
 
-players = []
 data_champ = load_json("champion")
 dict_rank = load_json("rank")
 bot = load_json("bot")
 _timers = []
 # === INIT END === #
 
+
 # === PLAYER LIST MANAGEMENT === #
-def populate_player(player, data_mastery, data_summoner, data_league):
-    players.append({"name":     player,
-                    "mastery":  data_mastery,
-                    "summoner": data_summoner,
-                    "league":   data_league})
 
+class Summoner():
+    def __init__(self, name, data_summoner={}, data_mastery=[], data_league=[]):
+        self.name = name
+        self.data_summoner = data_summoner
+        self.data_mastery = data_mastery
+        self.data_league = data_league
 
-def updatePlayer(player, data_set_name, data):
-    for _player in players:
-        if _player["name"] == player:
-            _player[data_set_name] = data
-
-def removePlayer(player):
-    for _player in players:
-        if _player["name"] == player:
-            players.remove(_player)
-
-def removeAllPlayers():
-    global players
+class SummonerManager(Singleton):
     players = []
 
-def add_player_and_data(summoner_names):
+    def populate_player(self, summoner):
+        self.players.append(summoner)
+
+    def update_player(self, player_name, data_set_name, data):
+        [setattr(player, data_set_name, data) for player in self.players if player.name == player_name]
+
+    def remove_player(self, player):
+        for _player in self.players:
+            if _player.name == player:
+                self.players.remove(_player)
+
+    def remove_all_players(self):
+        self.players = []
+
+summoner_manager = SummonerManager()
+
+def create_summoners(summoner_names):
     riot_token = str(bot["riot_token"])
     watcher = RiotWatcher(riot_token)
     for player in summoner_names:
         with ThreadPoolExecutor() as executor:
             future = executor.submit(fetch_summoner, player, watcher)
-            populate_player(
-                player, future.result()[0],
-                future.result()[1],
-                future.result()[2]
+            data = future.result()
+            yield Summoner(
+                player,
+                data[0],
+                data[1],
+                data[2]
                 )
+
+
+def add_player_and_data(summoner_names):
+    [summoner_manager.populate_player(summoner) for summoner in create_summoners(summoner_names)]
+
+
+def fetch_summoner(player, watcher):
+    region = consts.RIOT_REGION
+    data_summoner = watcher.summoner.by_name(region, player)
+    data_league = watcher.league.by_summoner(region, data_summoner['id'])
+    data_mastery = watcher.champion_mastery.by_summoner(
+        region, data_summoner['id'])
+    return [data_summoner, data_mastery, data_league]
 
 # === PLAYER LIST MANAGEMENT END === #
 
@@ -67,18 +95,18 @@ def add_player_and_data(summoner_names):
 def get_most_played_champs(idx, count):
     i = 0
     while i < count:
-        yield get_champion_name_by_id(players[idx]["mastery"][i]['championId'])
+        yield get_champion_name_by_id(summoner_manager.players[idx].data_mastery[i]['championId'])
         i += 1
 
 def get_last_time_played_by_id(idx, id):
-    for value in players[idx]["mastery"]:
+    for value in summoner_manager.players[idx].data_mastery:
         if value['championId'] == id:
             timestamp = int(str(value['lastPlayTime'])[:-3])
             return datetime.fromtimestamp(timestamp)
 
 def get_last_time_played_by_name(idx, name):
     id = int(get_champion_id_by_name(name))
-    for value in players[idx]["mastery"]:
+    for value in summoner_manager.players[idx].data_mastery:
         if value['championId'] == id:
             timestamp = int(str(value['lastPlayTime'])[:-3])
             return datetime.fromtimestamp(timestamp)
@@ -99,13 +127,30 @@ def get_best_ban(idx):
 
 def get_best_bans_for_team():
     ban_list = []
-    for i in range(0, len(players)):
+    ranks = []
+    best_bans_for_i = []
+    for i in range(0, len(summoner_manager.players)):
         _, rank = get_soloq_data(i)
-        ban_list.append(get_best_ban(i)[0])
+        ranks.append(get_soloq_rank_weight(rank))
+        best_bans_for_i.append(get_best_ban(i))
+    median_rank = get_median_rank_for_team(ranks)
+    for i in range(0, len(summoner_manager.players)):
+        if ranks[i] <= median_rank:
+            ban_list.append(best_bans_for_i[0])
+        elif ranks[i] >= median_rank + 3:
+            ban_list.append(best_bans_for_i[0])
+            ban_list.append(best_bans_for_i[1])
+            ban_list.append(best_bans_for_i[2])
+        elif ranks[i] > median_rank:
+            ban_list.append(best_bans_for_i[0])
+            ban_list.append(best_bans_for_i[1])
     return list(OrderedDict.fromkeys(ban_list))
 
+def get_median_rank_for_team(ranks):
+    statistics.median(ranks)
+
 def get_level(idx):
-    return int(players[idx]["summoner"]['summonerLevel'])
+    return int(summoner_manager.players[idx].data_summoner['summonerLevel'])
 
 def is_smurf(idx):
     winrate, rank = get_soloq_data(idx)
@@ -115,7 +160,7 @@ def is_smurf(idx):
         return False
 
 def get_soloq_data(idx):
-    for queue in players[idx]["league"]:
+    for queue in summoner_manager.players[idx].data_league:
         if queue['queueType'] == 'RANKED_SOLO_5x5':
             soloq_stats = queue
             games_played = int(soloq_stats['wins']) + int(
@@ -150,15 +195,6 @@ def pretty_print_list(_list):
 def format_last_time_played(time):
     return time.strftime('%d-%m-%Y')
 
-
-def fetch_summoner(player, watcher):
-    my_region = 'euw1'
-    data_summoner = watcher.summoner.by_name(my_region, player)
-    data_league = watcher.league.by_summoner(my_region, data_summoner['id'])
-    data_mastery = watcher.champion_mastery.by_summoner(
-        my_region, data_summoner['id'])
-    return [data_mastery, data_summoner, data_league]
-
 def generate_summoner_names(players):
     for player in players:
         if player.find('%') > 0:
@@ -171,7 +207,6 @@ def format_summoner_name(name):
     return name
 
 def update_champion_json():
-    patch = ''
     with urllib.request.urlopen("https://ddragon.leagueoflegends.com/api/versions.json") as url:
         data = json.loads(url.read().decode())
         patch = data[0]
@@ -180,22 +215,29 @@ def update_champion_json():
         with open('./config/champion.json', 'w', encoding='utf-8') as f:
             json.dump(data, f, ensure_ascii=False, indent=4)
 
+def is_command_on_cooldown():
+        timers.remove_finished_timers(_timers)
+        if len(_timers) != 0:
+            return True
+        _timers.append(timers.start_timer(secs=5))
+        return False
+
+
 
 # === UTILITY FUNCTIONS END === #
 
 # === INTERFACE === #
 
-def riot_command(ctx, args) -> str:
-    players = list(args)
+def riot_command(ctx, *args) -> str:
     return_value = None
     update_champion_json()
-    timers.remove_finished_timers(_timers)
-    if len(_timers) != 0:
-        return "Please wait a few seconds before using Riot API commands again!"
-
-    _timers.append(timers.start_timer(secs=5))
-    summoner_names = list(generate_summoner_names(players))
-    add_player_and_data(summoner_names)
+    summoner_names = list(generate_summoner_names(list(args[0])))
+    if len(summoner_names) == 0:
+        summoner_manager.populate_player(read_account(ctx.message.author.name))
+    else:
+        if is_command_on_cooldown():
+            return "Please wait a few seconds before using Riot API commands again!"
+        add_player_and_data(summoner_names)
     if(str(ctx.command) == 'player'):
         winrate, rank = get_soloq_data(0)
         return_value = 'Rank: {} , Winrate: {}%'.format(rank, winrate)
@@ -208,9 +250,67 @@ def riot_command(ctx, args) -> str:
         is_smurf_word = 'kein'
         if is_smurf(0):
             is_smurf_word = 'ein'
-        return_value = f'Der Spieler **{format_summoner_name(summoner_names[0])}** ist sehr wahrscheinlich **{is_smurf_word}** Smurf.'
-    removeAllPlayers()
+        return_value = f'Der Spieler **{format_summoner_name(summoner_manager.players[0].name)}** ist sehr wahrscheinlich **{is_smurf_word}** Smurf.'
+    summoner_manager.remove_all_players()
     return return_value if return_value is not None else 'Something went wrong.'
+
+def link_account(ctx, summoner_name):
+    if is_command_on_cooldown():
+        raise exceptions.DataBaseException('Command on cooldown')
+    discord_user_name = ctx.message.author.name
+    summoner_name = list(generate_summoner_names([summoner_name]))[0]
+    summoner = list(create_summoners([summoner_name]))[0]
+    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
+        for key in database.keys():
+            if key == str(discord_user_name):
+                raise exceptions.DataBaseException('Your discord account already has a lol account linked to it')
+            if database[key] is not None:
+                if database[key].name == summoner.name:
+                    raise exceptions.DataBaseException('This lol account already has a discord account linked to it')
+        database[str(discord_user_name)] = summoner
+     
+def read_account(discord_user_name):
+    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'r') as database:
+        for key in database.keys():
+            if key == str(discord_user_name):
+                return database[key][0]
+    raise exceptions.DataBaseException('No lol account linked to this discord account')
+
+def read_all_accounts():
+    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'r') as database:
+        for key in database.keys():
+            yield database[key]
+
+def unlink_account(ctx):
+    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
+        for key in database.keys():
+            if key == str(ctx.message.author.id):
+                del database[key]
+
+# FIXME this is super trash
+# the whole module needs a rewrite honestly
+def create_embed(ctx):
+    _embed = discord.Embed(title='Kraut9 Leaderboard',
+    colour=discord.Color.from_rgb(62,221,22))
+    summoners = list(read_all_accounts())
+    users = ''
+    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
+        for key in database.keys():
+            users += f'{key}\n'
+
+    summoner_names = ''
+    for summoner in summoners:
+        summoner_names += f'{summoner.name}\n'
+
+    rank_tier_winrate= ''
+    for i in range(0,len(summoners)):
+        summoner_manager.populate_player(summoner)
+        winrate, rank =  get_soloq_data(i)
+        rank_tier_winrate += str(rank) + '      ' + str(winrate) + '\n'
+    _embed.add_field(name='User', value=users)
+    _embed.add_field(name='Summoner', value=summoner_names)
+    _embed.add_field(name='Rank               Winrate', value=rank_tier_winrate)
+    return _embed
 
 # === INTERFACE END === #
 
@@ -223,15 +323,15 @@ def populate_with_debug_data():
     with open('./debug/riot-json/league.json',  encoding="utf8") as all_data:
         data_league = json.load(all_data)
 
-    populate_player("Thyanin", data_mastery, data_summoner, data_league)
-    populate_player("Thya", data_mastery, data_summoner, data_league)
+    summoner_manager.populate_player("Thyanin", data_mastery, data_summoner, data_league)
+    summoner_manager.populate_player("Thya", data_mastery, data_summoner, data_league)
 
 def testModule():
     update_champion_json()
     populate_with_debug_data()
-    assert(len(players) == 2)
-    removePlayer("Thya")
-    assert(len(players) == 1)
+    assert(len(summoner_manager.players) == 2)
+    summoner_manager.remove_player("Thya")
+    assert(len(summoner_manager.players) == 1)
     assert(get_champion_id_by_name("Pyke") == 555)
     assert(get_champion_name_by_id(555) == "Pyke")
     assert(list(get_most_played_champs(0, 2)) == ['Pyke', 'Blitzcrank'])
@@ -247,14 +347,15 @@ def testModule():
     # assert(get_best_ban(0) == ['Pyke', 'Blitzcrank', 'Azir', 'Caitlyn', 'Zoe'])
     # populate_with_debug_data()
     # assert(get_best_bans_for_team() == ['Pyke'])
-    removeAllPlayers()
+    summoner_manager.remove_all_players()
     add_player_and_data(["Susannova"])
     print(get_soloq_data(0))
 
-    removeAllPlayers()
+    summoner_manager.remove_all_players()
     add_player_and_data(["Thyanin"])
     print(get_best_ban(0)[0])
-    
+
+# testModule()
 if __name__ == "__main__":
     try:
         testModule()

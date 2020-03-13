@@ -36,6 +36,7 @@ class GlobalState(Singleton):
         self.play_requests = {}
         self.tmp_message_author = None
         self.message_cache = []
+        self.clash_date = ''
 
     def get_version(self):
         version_file = open("./.git/refs/heads/master", "r")

@@ -135,32 +135,24 @@ def get_play_request_creator(message):
 
 
 def add_subscriber_to_play_request(user, play_request):
-    is_player = False
-    for player in play_request.generate_all_players():
-        if user == player:
-            is_player = True
-
-    if not is_player:
         play_request.add_subscriber(user)
 
 
-def is_auto_dm_subscriber(message, client, user):
-    if user.name in (client.user.name, "Secret Kraut9 Leader") or \
-     not is_in_channels(
-         message, [consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT]):
-        return False
+def is_user_bot(user, bot):
+    if user.name in (bot.user.name, "Secret Kraut9 Leader"):
+        return True
+    return False
 
-    message_id = message.id
-    if message_id not in gstate.play_requests:
-        return False
+def is_already_subscriber(user, play_request):
+    if user in play_request.subscribers:
+        return True
+    return False
 
-    play_request_author = gstate.play_requests[message_id].author
-    if user == play_request_author:
-        return False
-    return True
-# FIXME
-def update_message_cache(message,  time=18):
-    gstate.message_cache.append((message, timers.start_timer(hrs=18)))
+def is_play_request_author(user, play_request):
+    if user == play_request.author:
+        return True
+    return False
+
 
 
 def get_purgeable_messages_list(message):
@@ -184,4 +176,15 @@ def clear_message_cache(message):
 
 def clear_play_requests(message):
     if has_any_pattern(message):
-        del gstate.play_requests[message.id]
+        del play_requests[message.id]
+
+def pretty_print_list(*players) -> str:
+    pretty_print = ''
+    player_list = list(players[0])
+    for player_object in player_list:
+        if isinstance(player_object, list):
+            for player in player_object:
+                pretty_print += player + '\n'
+        elif isinstance(player_object, str):
+            pretty_print += player + '\n'
+    return pretty_print
