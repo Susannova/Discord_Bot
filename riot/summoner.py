@@ -1,6 +1,8 @@
-from . import timers, riot_utility as utility
-from .riot_utility import dict_rank
 from datetime import datetime, timedelta
+
+from core import timers
+from . import riot_utility
+from .riot_utility import dict_rank
 
 
 class Summoner():

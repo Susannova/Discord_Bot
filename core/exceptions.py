@@ -1,4 +1,6 @@
 import discord
+
+
 class MissingRequiredAttachment(discord.DiscordException):
     """Exception raised if a @has_n_attachments(n) check fails.
 
@@ -28,6 +30,6 @@ class DataBaseException(Exception):
     """
     def __init__(self, message='No Description'):
         self.message = message
-    
+
     def __str__(self):
         return f'{self.message}: Something went wrong while handling the database.'

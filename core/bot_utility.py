@@ -61,8 +61,6 @@ def switch_to_internal_play_request(message, play_request):
     return create_internal_play_request_message(message, play_request)
 
 
-
-
 def has_any_pattern(message):
     for pattern in consts.PATTERN_LIST_AUTO_REACT:
         if message.content.find(pattern) > -1:
@@ -135,7 +133,7 @@ def get_play_request_creator(message):
 
 
 def add_subscriber_to_play_request(user, play_request):
-        play_request.add_subscriber(user)
+    play_request.add_subscriber(user)
 
 
 def is_user_bot(user, bot):
@@ -143,16 +141,17 @@ def is_user_bot(user, bot):
         return True
     return False
 
+
 def is_already_subscriber(user, play_request):
     if user in play_request.subscribers:
         return True
     return False
 
+
 def is_play_request_author(user, play_request):
     if user == play_request.author:
         return True
     return False
-
 
 
 def get_purgeable_messages_list(message):
@@ -177,6 +176,7 @@ def clear_message_cache(message):
 def clear_play_requests(message):
     if has_any_pattern(message):
         del play_requests[message.id]
+
 
 def pretty_print_list(*players) -> str:
     pretty_print = ''

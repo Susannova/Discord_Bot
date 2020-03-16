@@ -7,7 +7,7 @@ from urllib.error import HTTPError
 
 from riotwatcher import RiotWatcher
 
-from . import consts, exceptions, timers
+from core import consts, exceptions, timers
 from .summoner import Summoner
 
 

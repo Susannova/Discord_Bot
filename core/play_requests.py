@@ -3,10 +3,12 @@ from enum import Enum
 
 import discord
 
+
 class PlayRequestCategory(Enum):
-    PLAY=1
-    CLASH=2
-    INTERN=3
+    PLAY = 1
+    CLASH = 2
+    INTERN = 3
+
 
 class PlayRequest():
     subscribers = []
@@ -27,7 +29,7 @@ class PlayRequest():
 
     def remove_subscriber(self, user: discord.User):
         self.subscribers.remove(user)
-    
+
     def generate_all_players(self):
         for subscriber in self.subscribers:
             yield subscriber

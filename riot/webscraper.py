@@ -3,11 +3,14 @@ import re
 
 from bs4 import BeautifulSoup
 
+
 def get_soup_for_summoner(summoner_name) -> BeautifulSoup:
     r = requests.get(f'https://euw.op.gg/summoner/champions/userName={summoner_name}')
     return BeautifulSoup(r.text, features="html.parser")
 
+
 soup = get_soup_for_summoner('Maxteria')
+
 
 def generate_winrates():
     win_rates = []
@@ -15,17 +18,20 @@ def generate_winrates():
         win_rates.append(win_rate.text[:-1])
     return win_rates
 
+
 def generate_names():
     names = []
     for name in soup.find_all(class_="ChampionName", limit=10):
         names.append(name.text[1:-1])
     return names
 
+
 def generate_games_played():
     games_played = []
     for played in soup.find_all(class_="Graph", limit=10):
         games_played.append(played.text[2:])
     return games_played
+
 
 def clean_result(result):
     wins = []
@@ -36,11 +42,10 @@ def clean_result(result):
             print(line)
             wins.append(line.replace('\n', ' ').split(' ')[0])
             fails.append(line.replace('\n', ' ').split(' ')[2])
-    
+
     print(wins)
     print(fails)
     return wins, fails
-
 
 
 def create_summoner():
@@ -51,8 +56,9 @@ def create_summoner():
 
     for i in range(0, len(generate_names())):
         stats.append((names[i], win_rates[i], wins[i], fails[i]))
-    
     return stats
+
+
 stats = create_summoner()
 
 # print(stats)

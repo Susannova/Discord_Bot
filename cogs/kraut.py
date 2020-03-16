@@ -7,11 +7,12 @@ from discord.ext import commands
 
 from core import (
     consts,
-    riot,
     bot_utility as utility,
     ocr,
     checks
 )
+
+from riot import riot
 
 from core.state import global_state as gstate
 
@@ -63,26 +64,26 @@ class KrautCog(commands.Cog):
 
     @commands.command(name='player')
     @checks.is_riot_enabled()
-    async def player_(self, ctx, *args):
-        await ctx.send(riot.riot_command(ctx, args))
+    async def player_(self, ctx, summoner_name):
+        await ctx.send(riot.get_player_stats(ctx.message.author.name, summoner_name))
 
     @commands.command(name='smurf')
     @checks.is_riot_enabled()
-    async def smurf_(self, ctx, *args):
-        await ctx.send(riot.riot_command(ctx, args))
+    async def smurf_(self, ctx, summoner_name):
+        await ctx.send(riot.get_smurf(ctx.message.author.name, summoner_name))
 
     @commands.command(name='bans')
     @checks.is_riot_enabled()
-    async def bans_(self, ctx, *args):
+    async def bans_(self, ctx, *team_names):
         await ctx.send(
-            riot.riot_command(ctx, args), file=discord.File(
+            riot.get_best_bans_for_team(team_names), file=discord.File(
                 f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))
 
     @commands.command(name='link')
     @checks.is_riot_enabled()
-    async def link_(self, ctx, arg):
+    async def link_(self, ctx, summoner_name):
         try:
-            riot.link_account(ctx, arg)
+            riot.link_account(ctx.message.author.name, summoner_name)
         except commands.CommandInvokeError:
             pass
         else:
@@ -93,7 +94,7 @@ class KrautCog(commands.Cog):
     @checks.is_riot_enabled()
     async def unlink_(self, ctx):
         try:
-            riot.unlink_account(ctx)
+            riot.unlink_account(ctx.message.author.name)
         except commands.CommandInvokeError:
             pass
         else:

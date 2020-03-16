@@ -6,11 +6,14 @@ import shelve
 
 from discord.ext import commands
 
-from . import (
-    image_transformation,
+from core import (
     timers,
     consts,
-    exceptions,
+    exceptions
+)
+
+from . import (
+    image_transformation,
     riot_utility as utility
 )
 
@@ -57,13 +60,13 @@ def get_best_bans_for_team(team) -> list:
 # === INTERFACE === #
 
 
-def get_player_stats(ctx, summoner_name=None) -> str:
-    summoner = utility.get_or_create_summoner(ctx, summoner_name)
+def get_player_stats(discord_user_name, summoner_name=None) -> str:
+    summoner = get_or_create_summoner(discord_user_name, summoner_name)
     return f'Rank: {summoner.get_soloq_tier()}-{summoner.get_soloq_rank()} {summoner.get_soloq_lp()}LP, Winrate {summoner.get_soloq_winrate()}%.'
 
 
-def get_smurf(ctx, summoner_name=None) -> str:
-    summoner = utility.get_or_create_summoner(summoner_name)
+def get_smurf(discord_user_name, summoner_name=None) -> str:
+    summoner = get_or_create_summoner(discord_user_name, summoner_name)
     is_smurf_word = 'kein'
     if summoner.is_smurf():
         is_smurf_word = 'ein'
@@ -101,19 +104,19 @@ def update_linked_account_data(discord_user_name):
     link_account(discord_user_name, summoner.name)
 
 
-def get_or_create_summoner(ctx, summoner_name):
+def get_or_create_summoner(discord_user_name, summoner_name):
     if summoner_name is None:
-        summoner = utility.create_summoner(utility.read_account(ctx.message.author.name))
+        summoner = utility.create_summoner(utility.read_account(discord_user_name))
         if utility.is_in_need_of_update(summoner):
-            update_linked_account_data(ctx.message.author.name)
+            update_linked_account_data(discord_user_name)
         return summoner
     return utility.create_summoner(summoner_name)
 
 
-def unlink_account(ctx):
+def unlink_account(discord_user_name):
     with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
         for key in database.keys():
-            if key == str(ctx.message.author.id):
+            if key == str(discord_user_name):
                 del database[key]
 
 
