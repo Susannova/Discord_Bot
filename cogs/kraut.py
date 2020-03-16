@@ -15,6 +15,7 @@ from core import (
 
 from core.state import global_state as gstate
 
+
 class KrautCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
