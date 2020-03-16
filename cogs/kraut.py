@@ -12,7 +12,7 @@ from core import (
     checks
 )
 
-from riot import riot
+from riot import riot_commands
 
 from core.state import global_state as gstate
 
@@ -64,26 +64,37 @@ class KrautCog(commands.Cog):
 
     @commands.command(name='player')
     @checks.is_riot_enabled()
-    async def player_(self, ctx, summoner_name):
-        await ctx.send(riot.get_player_stats(ctx.message.author.name, summoner_name))
+    async def player_(self, ctx, *summoner_name):
+        if len(list(summoner_name)) == 0:
+            arg = None
+        else:
+            arg = summoner_name[0]
+        print(arg)
+        await ctx.send(riot_commands.get_player_stats(ctx.message.author.name, arg))
 
     @commands.command(name='smurf')
     @checks.is_riot_enabled()
-    async def smurf_(self, ctx, summoner_name):
-        await ctx.send(riot.get_smurf(ctx.message.author.name, summoner_name))
+    async def smurf_(self, ctx, *summoner_name):
+        if len(list(summoner_name)) == 0:
+            arg = None
+        else:
+            arg = summoner_name[0]
+        await ctx.send(riot_commands.get_smurf(ctx.message.author.name, arg))
 
     @commands.command(name='bans')
     @checks.is_riot_enabled()
     async def bans_(self, ctx, *team_names):
+        if len(list(team_names)) != 0:
+            raise commands.CheckFailure()
         await ctx.send(
-            riot.get_best_bans_for_team(team_names), file=discord.File(
+            riot_commands.get_best_bans_for_team(team_names), file=discord.File(
                 f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))
 
     @commands.command(name='link')
     @checks.is_riot_enabled()
     async def link_(self, ctx, summoner_name):
         try:
-            riot.link_account(ctx.message.author.name, summoner_name)
+            riot_commands.link_account(ctx.message.author.name, summoner_name)
         except commands.CommandInvokeError:
             pass
         else:
@@ -94,7 +105,7 @@ class KrautCog(commands.Cog):
     @checks.is_riot_enabled()
     async def unlink_(self, ctx):
         try:
-            riot.unlink_account(ctx.message.author.name)
+            riot_commands.unlink_account(ctx.message.author.name)
         except commands.CommandInvokeError:
             pass
         else:
@@ -144,7 +155,6 @@ class KrautCog(commands.Cog):
         await ctx.send('Bot is shut down!')
         await self.bot.logout()
 
-
     @commands.command(name='purge')
     @commands.is_owner()
     async def purge_(self, ctx, count: int):
@@ -154,10 +164,8 @@ class KrautCog(commands.Cog):
     @commands.command(name='test-embed')
     @commands.is_owner()
     async def test_embed(self, ctx):
-        await ctx.send(embed=riot.create_embed(ctx))
-
-    
-        
+        pass
+        # await ctx.send(embed=riot_commands.create_embed(ctx))
 
     @create_team.error
     @create_clash.error
@@ -187,4 +195,4 @@ class KrautCog(commands.Cog):
             await ctx.send(
                 'Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
         elif isinstance(error, commands.CommandInvokeError):
-            await ctx.send(error)
+            await ctx.send('Irgendwas hat nicht funktioniert.')

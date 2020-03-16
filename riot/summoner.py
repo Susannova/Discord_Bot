@@ -1,8 +1,16 @@
 from datetime import datetime, timedelta
+import json
 
 from core import timers
-from . import riot_utility
-from .riot_utility import dict_rank
+
+
+def load_json(file_name, folder='config'):
+    with open(f'./{folder}/{file_name}.json', encoding="utf8") as all_data:
+        return json.load(all_data)
+
+
+dict_rank = load_json("rank")
+data_champ = load_json("champion")
 
 
 class Summoner():
@@ -33,9 +41,9 @@ class Summoner():
         return int(self.data_summoner['summonerLevel'])
 
     def is_smurf(self):
-        winrate = self.get_soloq_winrate(self)
-        rank = self.get_soloq_tier(self)
-        if self.get_level(self) < 40 and winrate >= 58 and self.get_soloq_rank_weight(rank) < 7:
+        winrate = self.get_soloq_winrate()
+        rank = self.get_soloq_tier()
+        if self.get_level() < 40 and winrate >= 58 and self.get_soloq_rank_weight(rank) < 7:
             return True
         else:
             return False
@@ -46,7 +54,7 @@ class Summoner():
                 return queue_data
 
     def get_soloq_winrate(self):
-        soloq_stats = self.get_soloq_data(self)
+        soloq_stats = self.get_soloq_data()
         games_played = int(soloq_stats['wins']) + int(
             soloq_stats['losses'])
         if games_played != 0 and games_played is not None:
@@ -55,19 +63,19 @@ class Summoner():
         return 50.0
 
     def get_soloq_tier(self):
-        soloq_stats = self.get_soloq_data(self)
+        soloq_stats = self.get_soloq_data()
         if soloq_stats['tier'] is not None:
             return soloq_stats['tier']
         return 'SILVER'
 
     def get_soloq_rank(self):
-        soloq_stats = self.get_soloq_data(self)
+        soloq_stats = self.get_soloq_data()
         if soloq_stats['rank'] is not None:
             return soloq_stats['rank']
         return 'II'
 
     def get_soloq_lp(self):
-        soloq_stats = self.get_soloq_data(self)
+        soloq_stats = self.get_soloq_data()
         if soloq_stats['leaguePoints'] is not None:
             return soloq_stats['leaguePoints']
         return 0
@@ -78,7 +86,7 @@ class Summoner():
     def get_most_played_champs(self, count):
         i = 0
         while i < count:
-            yield utility.get_champion_name_by_id(self.data_mastery[i]['championId'])
+            yield self.get_champion_name_by_id(self.data_mastery[i]['championId'])
             i += 1
 
     def get_last_time_played_by_id(self, id):
@@ -88,7 +96,7 @@ class Summoner():
                 return datetime.fromtimestamp(timestamp)
 
     def get_last_time_played_by_name(self, name):
-        id = int(utility.get_champion_id_by_name(name))
+        id = int(self.get_champion_id_by_name(name))
         for value in self.data_mastery:
             if value['championId'] == id:
                 timestamp = int(str(value['lastPlayTime'])[:-3])
@@ -97,3 +105,13 @@ class Summoner():
     def has_played_champ_by_name_in_last_n_days(self, name, n):
         return self.get_last_time_played_by_name(self, name) \
             > datetime.now() - timedelta(days=n)
+
+    def get_champion_name_by_id(self, id):
+        for value in data_champ['data'].values():
+            if int(value["key"]) == id:
+                return value['id']
+
+    def get_champion_id_by_name(self, name):
+        for value in data_champ['data'].values():
+            if value["id"] == name:
+                return int(value['key'])

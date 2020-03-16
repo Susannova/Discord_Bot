@@ -114,7 +114,7 @@ class EventCog(commands.Cog):
             elif player != user:
                 await player.send(
                     consts.MESSAGE_AUTO_DM_SUBSCRIBER.format(
-                        use r.name, play_request.author.name, str(reaction.emoji)))
+                        user.name, play_request.author.name, str(reaction.emoji)))
 
         if len(play_request.subscribers) + 1 == 5 and play_request.category == PlayRequestCategory.CLASH:
             await reaction.channel.send(consts.MESSAGE_CLASH_FULL.format(

@@ -18,8 +18,6 @@ def load_json(file_name, folder='config'):
 
 tokens = load_json("bot")
 data_champ = load_json("champion")
-dict_rank = load_json("rank")
-data_champ = load_json("champion")
 
 
 def get_champion_name_by_id(id):
@@ -68,11 +66,11 @@ def update_champion_json():
             json.dump(data, f, ensure_ascii=False, indent=4)
 
 
-def is_command_on_cooldown(_timers):
-    _timers.remove_finished_timers(_timers)
-    if len(_timers) != 0:
+def is_command_on_cooldown(timer_list):
+    timers.remove_finished_timers(timer_list)
+    if len(timer_list) != 0:
         return True
-    _timers.append(_timers.start_timer(secs=5))
+    timer_list.append(timers.start_timer(secs=5))
     return False
 
 
@@ -84,7 +82,7 @@ def read_account(discord_user_name):
     with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'r') as database:
         for key in database.keys():
             if key == str(discord_user_name):
-                return database[key][0]
+                return database[key]
     raise exceptions.DataBaseException('No lol account linked to this discord account')
 
 

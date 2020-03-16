@@ -19,6 +19,7 @@ from . import (
 
 SEASON_2020_START_EPOCH = timers.convert_human_to_epoch_time(consts.RIOT_SEASON_2020_START)
 
+_timers = []
 
 # FIXME: this is trash
 # === BAN CALCULATION === #
@@ -60,12 +61,12 @@ def get_best_bans_for_team(team) -> list:
 # === INTERFACE === #
 
 
-def get_player_stats(discord_user_name, summoner_name=None) -> str:
+def get_player_stats(discord_user_name, summoner_name) -> str:
     summoner = get_or_create_summoner(discord_user_name, summoner_name)
     return f'Rank: {summoner.get_soloq_tier()}-{summoner.get_soloq_rank()} {summoner.get_soloq_lp()}LP, Winrate {summoner.get_soloq_winrate()}%.'
 
 
-def get_smurf(discord_user_name, summoner_name=None) -> str:
+def get_smurf(discord_user_name, summoner_name) -> str:
     summoner = get_or_create_summoner(discord_user_name, summoner_name)
     is_smurf_word = 'kein'
     if summoner.is_smurf():
@@ -85,7 +86,7 @@ def calculate_bans_for_team(*names) -> str:
 
 
 def link_account(discord_user_name, summoner_name):
-    if utility.is_command_on_cooldown():
+    if utility.is_command_on_cooldown(_timers):
         raise exceptions.DataBaseException('Command on cooldown')
     summoner = utility.create_summoner(summoner_name)
     with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
@@ -106,7 +107,7 @@ def update_linked_account_data(discord_user_name):
 
 def get_or_create_summoner(discord_user_name, summoner_name):
     if summoner_name is None:
-        summoner = utility.create_summoner(utility.read_account(discord_user_name))
+        summoner = utility.create_summoner(utility.read_account(discord_user_name).name)
         if utility.is_in_need_of_update(summoner):
             update_linked_account_data(discord_user_name)
         return summoner

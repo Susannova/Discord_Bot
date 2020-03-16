@@ -29,7 +29,7 @@ class KrautBot(commands.Bot):
     BOT_TOKEN = str(BOT_TOKENS['token'])
 
     def __init__(self):
-        """ Sets the Command Prefix and then 
+        """ Sets the Command Prefix and then
         call the __init__ method of the commands.Bot
         class.
         """
