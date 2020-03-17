@@ -65,9 +65,9 @@ class EventCog(commands.Cog):
                 self.play_requests[message.id] = PlayRequest(message, gstate.tmp_message_author, category=_category)
 
             # auto delete all purgeable messages
-            purgeable_message_list = utility.get_purgeable_messages_list(message)
+            purgeable_message_list = utility.get_purgeable_messages_list(message, self.message_cache)
             for purgeable_message in purgeable_message_list:
-                utility.clear_message_cache(purgeable_message)
+                utility.clear_message_cache(purgeable_message, self.message_cache)
                 await purgeable_message.delete()
 
             # auto reminder
@@ -75,7 +75,7 @@ class EventCog(commands.Cog):
                 time_difference = reminder.get_time_difference(message.content)
                 if time_difference > 0:
                     await asyncio.sleep(time_difference)
-                    for player in gstate.play_requests[message.id].generate_all_players():
+                    for player in self.play_requests[message.id].generate_all_players():
                         await player.send(consts.MESSAGE_PLAY_REQUEST_REMINDER)
 
 
@@ -87,7 +87,7 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message_delete(self, message):
         utility.clear_play_requests(message)
-        [utility.clear_message_cache(message) for msg in gstate.message_cache if message in msg]
+        [utility.clear_message_cache(message, self.message_cache) for msg in self.message_cache if message in msg]
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):

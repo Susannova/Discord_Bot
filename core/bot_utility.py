@@ -30,7 +30,7 @@ def create_team(players):
 
     return teams_message
 
-
+# FIXME: this is bs
 def is_purgeable_message(message, cmds, channel, excepted_users):
     """
     Checks if message should be purged based on if it starts with
@@ -74,7 +74,7 @@ def has_pattern(message, pattern):
     return False
 
 
-def generator_get_auto_role_list(member):
+def generate_auto_role_list(member):
     if len(member.roles) >= 2:
         return
 
@@ -84,7 +84,7 @@ def generator_get_auto_role_list(member):
 
 
 def get_auto_role_list(member):
-    return list(generator_get_auto_role_list(member))
+    return list(generate_auto_role_list(member))
 
 
 def contains_command(message, command):
@@ -119,17 +119,13 @@ def get_voice_channel(message, name):
     return voice_channel if voice_channel is not None else None
 
 
-def generator_get_players_in_channel(channel):
+def generate_players_in_channel(channel):
     for member in channel.members:
         yield member.name
 
 
 def get_players_in_channel(channel):
-    return list(generator_get_players_in_channel(channel))
-
-
-def get_play_request_creator(message):
-    return ''
+    return list(generate_players_in_channel(channel))
 
 
 def add_subscriber_to_play_request(user, play_request):
@@ -154,10 +150,10 @@ def is_play_request_author(user, play_request):
     return False
 
 
-def get_purgeable_messages_list(message):
+def get_purgeable_messages_list(message, message_cache):
     if not gstate.CONFIG["TOGGLE_AUTO_DELETE"]:
         return
-    return [msg[0] for msg in gstate.message_cache if timers.is_timer_done(msg[1])]
+    return [msg[0] for msg in message_cache if timers.is_timer_done(msg[1])]
 
 
 def is_no_play_request_command(message, bot):
@@ -167,10 +163,10 @@ def is_no_play_request_command(message, bot):
     return False
 
 
-def clear_message_cache(message):
-    for message_tuple in gstate.message_cache:
+def clear_message_cache(message, message_cache):
+    for message_tuple in message_cache:
         if message in message_tuple:
-            gstate.message_cache.remove(message_tuple)
+            message_cache.remove(message_tuple)
 
 
 def clear_play_requests(message):

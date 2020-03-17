@@ -47,7 +47,7 @@ class KrautCog(commands.Cog):
     @commands.command(name='play-lol')
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS])
     async def play_lol(self, ctx, _time):
-        if re.findall('\d\d:\d\d', _time) is None:
+        if len(re.findall('[0-2][0-9]:[0-5][0-9]', _time)) == 0:
             raise exceptions.BadArgumentFormat()
         gstate.tmp_message_author = ctx.message.author
         await ctx.send(consts.MESSAGE_PLAY_LOL.format(
@@ -178,7 +178,6 @@ class KrautCog(commands.Cog):
     @commands.command(name='test-embed')
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def test_embed(self, ctx):
-        #pass
         await ctx.send(embed=riot_commands.create_embed(ctx))
 
     @commands.command(name='test-plt')
@@ -214,7 +213,6 @@ class KrautCog(commands.Cog):
         elif isinstance(error, commands.MissingRequiredArgument):
             await ctx.send(
                 'Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
-        elif isinstance(error, commands.CommandInvokeError):
-            await ctx.send('Irgendwas hat nicht funktioniert.')
-        elif isinstance(error, exceptions.BadArgumentFormat):
+        else: 
             await ctx.send(error)
+
