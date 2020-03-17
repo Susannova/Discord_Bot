@@ -1,6 +1,7 @@
 import asyncio
 import ast
 from importlib import reload
+import re
 
 import discord
 from discord.ext import commands
@@ -9,7 +10,8 @@ from core import (
     consts,
     bot_utility as utility,
     ocr,
-    checks
+    checks,
+    exceptions
 )
 
 from riot import riot_commands
@@ -45,6 +47,8 @@ class KrautCog(commands.Cog):
     @commands.command(name='play-lol')
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS])
     async def play_lol(self, ctx, _time):
+        if re.findall('\d\d:\d\d', _time) is None:
+            raise exceptions.BadArgumentFormat()
         gstate.tmp_message_author = ctx.message.author
         await ctx.send(consts.MESSAGE_PLAY_LOL.format(
             gstate.tmp_message_author.mention, _time))
@@ -212,3 +216,5 @@ class KrautCog(commands.Cog):
                 'Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
         elif isinstance(error, commands.CommandInvokeError):
             await ctx.send('Irgendwas hat nicht funktioniert.')
+        elif isinstance(error, exceptions.BadArgumentFormat):
+            await ctx.send(error)

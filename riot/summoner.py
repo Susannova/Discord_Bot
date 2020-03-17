@@ -122,4 +122,4 @@ class Summoner():
         self.rank_value = self.get_soloq_rank_weight(f'{self.get_soloq_tier()}-{self.get_soloq_rank()}') * 100 + self.get_soloq_lp()
 
     def get_soloq_rank_string(self):
-        returrn f'{self.get_soloq_tier()}-{self.get_soloq_rank()} {self.get_soloq_lp()}LP'
+        return f'{self.get_soloq_tier()}-{self.get_soloq_rank()} {self.get_soloq_lp()}LP'

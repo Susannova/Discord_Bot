@@ -33,3 +33,13 @@ class DataBaseException(Exception):
 
     def __str__(self):
         return f'{self.message}: Something went wrong while handling the database.'
+
+class BadArgumentFormat(Exception):
+    """Exception that gets raised if an argument for a command
+    is not well formated.
+    """
+    def __init__(self):
+        pass
+    
+    def __str__(self):
+        return 'Das angegebene Argument ist falsch formatiert. (z.B. beim Command: play-lol)'

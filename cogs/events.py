@@ -18,6 +18,16 @@ class EventCog(commands.Cog):
     """
     def __init__(self, bot):
         self.bot = bot
+        """ Dicts are mutable objects, which means
+        that 'self.play_requests = gstate.play_requests'
+        makes self.play_requests a pointer to gstate.play_requests
+        so every change to play_requests also changes 
+        gstate.play_requests. Technically we can make play_requests
+        local, but I feel like we might need play_requests in a global
+        scope sometime. Same for message_cache.
+        """
+        self.play_requests = gstate.play_requests
+        self.message_cache = gstate.message_cache
 
     @commands.Cog.listener()
     async def on_ready(self):

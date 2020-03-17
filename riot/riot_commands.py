@@ -132,7 +132,6 @@ def unlink_account(discord_user_name):
 
 # FIXME im still not happy with this
 def create_embed(ctx):
-
     summoners = list(utility.read_all_accounts())
     [summoner.get_rank_value() for summoner in summoners]
     summoners.sort(key=lambda x: x.rank_value, reverse=True)
