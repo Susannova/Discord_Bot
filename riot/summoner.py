@@ -27,12 +27,14 @@ class Summoner():
     data_league: list
         basic league data from Riot API
     """
-    def __init__(self, name, data_summoner={}, data_mastery=[], data_league=[]):
+    def __init__(self, name, data_summoner={}, data_mastery=[], data_league=[], discord_user_name=None):
         self.name = name
         self.data_summoner = data_summoner
         self.data_mastery = data_mastery
         self.data_league = data_league
-        self.needs_update_timer = timers.start_timer(hrs=12)
+        self.needs_update_timer = timers.start_timer(hrs=1)
+        self.discord_user_name = None
+        self.rank_value = 0
 
     def __str__(self):
         return f'Summoner: {self.name}, Level: {self.get_level()}, Rank: {self.get_soloq_tier}, Winrate: {self.get_soloq_winrate}'
@@ -115,3 +117,9 @@ class Summoner():
         for value in data_champ['data'].values():
             if value["id"] == name:
                 return int(value['key'])
+
+    def get_rank_value(self):
+        self.rank_value = self.get_soloq_rank_weight(f'{self.get_soloq_tier()}-{self.get_soloq_rank()}') * 100 + self.get_soloq_lp()
+
+    def get_soloq_rank_string(self):
+        returrn f'{self.get_soloq_tier()}-{self.get_soloq_rank()} {self.get_soloq_lp()}LP'

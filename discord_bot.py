@@ -44,6 +44,7 @@ class KrautBot(commands.Bot):
         except KeyboardInterrupt:
             logging.warning('Stopped Bot due to Keyboard Interrupt.')
 
+
 if __name__ == '__main__':
     bot = KrautBot()
     try:

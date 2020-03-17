@@ -5,7 +5,8 @@ from discord.ext import commands
 
 from . import (
     bot_utility as utility,
-    exceptions as _exceptions
+    exceptions as _exceptions,
+    consts
 )
 
 from core.state import global_state as gstate
@@ -13,6 +14,7 @@ from core.state import global_state as gstate
 
 def is_in_channels(channel_names):
     async def predicate(ctx):
+        channel_names.append(consts.CHANNEL_BOT)
         return utility.is_in_channels(ctx.message, channel_names)
     return commands.check(predicate)
 
