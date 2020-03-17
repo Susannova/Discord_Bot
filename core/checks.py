@@ -1,27 +1,20 @@
-
+""" Checks used as decorators for Commands.
+Note: Only works on Commands (needs a ctx parameter).
+"""
 from discord.ext import commands
 
-from core import (
+from . import (
     bot_utility as utility,
-    exceptions as _exceptions
-) 
+    exceptions as _exceptions,
+    consts
+)
 
 from core.state import global_state as gstate
-
-def is_instantiated(object_):
-    async def predicate(ctx):
-        if object_ is not None:
-            return True
-        else:
-            try:
-                raise _exceptions.NotInstantiatedException()
-            except _exceptions.NotInstantiatedException as e:
-                ctx.send(e)
-    return commands.check(predicate)
 
 
 def is_in_channels(channel_names):
     async def predicate(ctx):
+        channel_names.append(consts.CHANNEL_BOT)
         return utility.is_in_channels(ctx.message, channel_names)
     return commands.check(predicate)
 
@@ -33,8 +26,9 @@ def has_n_attachments(n):
         else:
             try:
                 raise _exceptions.MissingRequiredAttachment()
-            except _exceptions.MissingRequiredAttachment as e:
-                await ctx.send(e)                    
+            except _exceptions.MissingRequiredAttachment:
+                await ctx.send(
+                    'Es fehlt ein Attachment. (z.B. das Bild bei ?clash)')
     return commands.check(predicate)
 
 

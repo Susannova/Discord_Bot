@@ -14,11 +14,11 @@ MESSAGE_PLAY_REQUEST_REMINDER = 'REMINDER: Der abonnierte Play-Request geht in 5
 MESSAGE_TEAM_HEADER = '\n@here\n**__===Teams===__**\n'
 MESSAGE_TEAM_1 = 'Team 1:\n'
 MESSAGE_TEAM_2 = '\nTeam 2:\n'
-MESSAGE_SERVER_WELCOME = ( 
+MESSAGE_SERVER_WELCOME = (
     'Hallo {0} und herzlich willkommen auf dem Discord Server von Kraut9!\n \
     Hier ist eine kleine Erklärung zu unserem Server:\n \
     https://discordapp.com/channels/564481310417092629/647752522764648448/647752549411061791 \
-    Viel Spaß auf dem Server von Kraut9!' 
+    Viel Spaß auf dem Server von Kraut9!'
 )
 MESSAGE_BANS = (
     'If you want to receive the best bans \
@@ -26,15 +26,26 @@ MESSAGE_BANS = (
     ?bans {0}'
 )
 
+MESSAGE_CLASH_CREATE = (
+    '@everyone\n{0} sucht nach Mitspielern für den Clash am {1}.'
+)
+MESSAGE_CLASH_FULL = 'Das Clash Team von {0} für den {1} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{1}'
+
+
 COMMAND_LIST_INTERN_PLANING = ["?create-team", "?play-internal"]
 COMMAND_LIST_PLAY_REQUEST = ["?play-lol", "?play-now"]
 COMMAND_LIST_ALL = ["?create-team", "?play-internal", "?play-lol", "?play-now", "?player", "?bans"]
 
 
-PATTERN_LIST_AUTO_REACT = [" will League of Legends spielen. Kommt gegen ", "hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!", " spielt **__jetzt gerade__** League of Legends und sucht noch nach weiteren Spielern!"]
-PATTERN_PLAY_REQUEST = " will League of Legends spielen. Kommt gegen "
+PATTERN_LIST_AUTO_REACT = [" will League of Legends spielen. Kommt gegen ",
+ "hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!",
+  " spielt **__jetzt gerade__** League of Legends und sucht noch nach weiteren Spielern!",
+  " sucht nach Mitspielern für den Clash am "]
 
-COMMAND_PREFIX = '!'
+PATTERN_PLAY_REQUEST = " will League of Legends spielen. Kommt gegen "
+PATTERN_CLASH = " sucht nach Mitspielern für den Clash am "
+
+COMMAND_PREFIX = '?'
 COMMAND_CREATE_TEAM = f'{COMMAND_PREFIX}create-team'
 COMMAND_PLAY_LOL = f'{COMMAND_PREFIX}play-lol'
 COMMAND_PLAY_NOW = f'{COMMAND_PREFIX}play-now'
@@ -50,6 +61,9 @@ CHANNEL_INTERN_PLANING = 'intern-planing'
 CHANNEL_PLAY_REQUESTS = 'play-requests'
 CHANNEL_BOT = 'bot'
 CHANNEL_MEMBER_ONLY = 'member-only'
+CHANNEL_COMMANDS_MEMBER = 'kraut-commands'
+CHANNEL_COMMANDS = 'commands'
+CHANNEL_CLASH = 'clash'
 
 BOT_DYNO_NAME = 'Dyno'
 
@@ -59,9 +73,13 @@ TIMER_LAST_PLAY_REQUEST_DELETE = 86400.0
 
 ROLE_SETZLING_ID = 643169161236840449
 ROLE_EVERYONE_ID = 564481310417092629
-
+ROLE_ADMIN_ID = 564492616977088532
 FOLDER_CHAMP_ICON = './data/champ-icon/'
 FOLDER_CHAMP_SPLICED = './data/champ-spliced/'
 
 # source: https://na.leagueoflegends.com/en-us/news/game-updates/patch-10-1-notes/
 RIOT_SEASON_2020_START = '10.01.2020'
+RIOT_REGION = 'euw1'
+
+DATABASE_DIRECTORY = './db/summoners'
+DATABASE_NAME = 'summoner_db'

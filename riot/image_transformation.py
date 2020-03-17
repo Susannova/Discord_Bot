@@ -14,6 +14,7 @@ def get_files(champs):
             files.append(f'./{consts.FOLDER_CHAMP_ICON}/-1.png')
     return files
 
+
 def create_new_image(champs):
     files = get_files(champs)
     result = Image.new("RGB", (600, 120))
@@ -22,7 +23,7 @@ def create_new_image(champs):
         img = Image.open(path)
         img.thumbnail((120, 120), Image.ANTIALIAS)
         x = index * 120
-        y = index %  120
+        y = index % 120
         w, h = img.size
         result.paste(img, (x, y, x + w, y + h))
     result.save(os.path.expanduser(f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))
@@ -36,6 +37,6 @@ def testModule():
     assert(create_new_image(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Pingu']) == 0)
     return "Tests succeded."
 
+
 if __name__ == "__main__":
     testModule()
-# === TEST END === #

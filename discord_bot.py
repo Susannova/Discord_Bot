@@ -21,16 +21,15 @@ logging.basicConfig(level=logging.WARNING)
 discord.voice_client.VoiceClient.warn_nacl = False
 
 BOT_TOKENS = utility.read_config_file('bot')
-kraut_cog = None
+
 
 class KrautBot(commands.Bot):
-    """The actual bot. Use the run
-    method to start it.
+    """The actual bot.
     """
     BOT_TOKEN = str(BOT_TOKENS['token'])
 
     def __init__(self):
-        """ Sets the Command Prefix and then 
+        """ Sets the Command Prefix and then
         call the __init__ method of the commands.Bot
         class.
         """
@@ -45,13 +44,13 @@ class KrautBot(commands.Bot):
         except KeyboardInterrupt:
             logging.warning('Stopped Bot due to Keyboard Interrupt.')
 
+
 if __name__ == '__main__':
     bot = KrautBot()
     try:
         print("Start Bot")
         logging.info("Start Bot")
-        kraut_cog = kraut.KrautCog(bot)
-        bot.add_cog(kraut_cog)
+        bot.add_cog(kraut.KrautCog(bot))
         bot.add_cog(events.EventCog(bot))
         bot.run()
         print("End Bot")

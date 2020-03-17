@@ -61,8 +61,6 @@ def switch_to_internal_play_request(message, play_request):
     return create_internal_play_request_message(message, play_request)
 
 
-
-
 def has_any_pattern(message):
     for pattern in consts.PATTERN_LIST_AUTO_REACT:
         if message.content.find(pattern) > -1:
@@ -135,39 +133,31 @@ def get_play_request_creator(message):
 
 
 def add_subscriber_to_play_request(user, play_request):
-    is_player = False
-    for player in play_request.generate_all_players():
-        if user == player:
-            is_player = True
-
-    if not is_player:
-        play_request.add_subscriber(user)
+    play_request.add_subscriber(user)
 
 
-def is_auto_dm_subscriber(message, client, user, play_requests):
-    if user.name in (client.user.name, "Secret Kraut9 Leader") or \
-     not is_in_channels(
-         message, [consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_PLAY_REQUESTS, consts.CHANNEL_BOT]):
-        return False
-
-    message_id = message.id
-    if message_id not in play_requests:
-        return False
-
-    play_request_author = play_requests[message_id].author
-    if user == play_request_author:
-        return False
-    return True
+def is_user_bot(user, bot):
+    if user.name in (bot.user.name, "Secret Kraut9 Leader"):
+        return True
+    return False
 
 
-def update_message_cache(message, message_cache,  time=18):
-    message_cache.append((message, timers.start_timer(hrs=18)))
+def is_already_subscriber(user, play_request):
+    if user in play_request.subscribers:
+        return True
+    return False
 
 
-def get_purgeable_messages_list(message, message_cache):
+def is_play_request_author(user, play_request):
+    if user == play_request.author:
+        return True
+    return False
+
+
+def get_purgeable_messages_list(message):
     if not gstate.CONFIG["TOGGLE_AUTO_DELETE"]:
         return
-    return [msg[0] for msg in message_cache if timers.is_timer_done(msg[1])]
+    return [msg[0] for msg in gstate.message_cache if timers.is_timer_done(msg[1])]
 
 
 def is_no_play_request_command(message, bot):
@@ -177,12 +167,24 @@ def is_no_play_request_command(message, bot):
     return False
 
 
-def clear_message_cache(message, message_cache):
-    for message_tuple in message_cache:
+def clear_message_cache(message):
+    for message_tuple in gstate.message_cache:
         if message in message_tuple:
-            message_cache.remove(message_tuple)
+            gstate.message_cache.remove(message_tuple)
 
 
-def clear_play_requests(message, play_requests):
+def clear_play_requests(message):
     if has_any_pattern(message):
         del play_requests[message.id]
+
+
+def pretty_print_list(*players) -> str:
+    pretty_print = ''
+    player_list = list(players[0])
+    for player_object in player_list:
+        if isinstance(player_object, list):
+            for player in player_object:
+                pretty_print += player + '\n'
+        elif isinstance(player_object, str):
+            pretty_print += player + '\n'
+    return pretty_print

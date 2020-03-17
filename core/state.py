@@ -1,5 +1,6 @@
 import json
 
+
 class SingletonBase(type):
     """Metaclass that changes class to be a Singleton.
     """
@@ -14,11 +15,13 @@ class SingletonBase(type):
         else:
             return self._instance
 
+
 class Singleton(metaclass=SingletonBase):
     """Inhertiable class that provides the Singleton
     property to all heirs.
     """
     pass
+
 
 class GlobalState(Singleton):
     """Global state class that saves all variables that need to have a
@@ -36,6 +39,7 @@ class GlobalState(Singleton):
         self.play_requests = {}
         self.tmp_message_author = None
         self.message_cache = []
+        self.clash_date = ''
 
     def get_version(self):
         version_file = open("./.git/refs/heads/master", "r")
@@ -48,6 +52,7 @@ class GlobalState(Singleton):
         with open(f'./config/{self.CONFIG_FILENAME}.json', 'w', encoding='utf-8') as file_:
             json.dump(data, file_, ensure_ascii=False, indent=4)
         self.CONFIG = read_config_json('configuration')
+
 
 global_state = GlobalState()
 
