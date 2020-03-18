@@ -186,6 +186,7 @@ class KrautCog(commands.Cog):
         riot_commands.test_matplotlib()
         await ctx.send(file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/leaderboard.png'))
 
+
     @create_team.error
     @create_clash.error
     @play_now.error

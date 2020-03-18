@@ -31,6 +31,7 @@ MESSAGE_CLASH_CREATE = (
 )
 MESSAGE_CLASH_FULL = 'Das Clash Team von {0} für den {1} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{1}'
 
+MESSAGE_PATCH_NOTES = '@here\nEin neuer LoL Patch ist da: {0}'
 
 COMMAND_LIST_INTERN_PLANING = ["?create-team", "?play-internal"]
 COMMAND_LIST_PLAY_REQUEST = ["?play-lol", "?play-now"]
