@@ -4,5 +4,6 @@
     "TOGGLE_AUTO_REACT": true,
     "TOGGLE_AUTO_DM": true,
     "TOGGLE_RIOT_API": true,
-    "TOGGLE_DEBUG": false
+    "TOGGLE_DEBUG": false,
+    "LOL_PATCH": "10.6"
 }

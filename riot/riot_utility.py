@@ -9,7 +9,7 @@ from riotwatcher import RiotWatcher
 
 from core import consts, exceptions, timers
 from .summoner import Summoner
-
+from core.state import global_state as gstate
 
 def load_json(file_name, folder='config'):
     with open(f'./{folder}/{file_name}.json', encoding="utf8") as all_data:
@@ -55,11 +55,23 @@ def format_summoner_name(name):
         return name.replace('%20', ' ')
     return name
 
+def get_current_patch():
+  with urllib.request.urlopen("https://ddragon.leagueoflegends.com/api/versions.json") as url:
+        data = json.loads(url.read().decode())
+        return data[0]
+
+def update_current_patch():
+    current_patch_list = get_current_patch().split('.')
+    current_patch = current_patch_list[0] + '.' + current_patch_list[1]
+    if gstate.CONFIG['LOL_PATCH'] == current_patch:
+        return False
+    gstate.CONFIG['LOL_PATCH'] = current_patch
+    gstate.write_and_reload_config(gstate.CONFIG)
+    return True
+
 
 def update_champion_json():
-    with urllib.request.urlopen("https://ddragon.leagueoflegends.com/api/versions.json") as url:
-        data = json.loads(url.read().decode())
-        patch = data[0]
+    patch = get_current_patch()
     with urllib.request.urlopen(f'https://ddragon.leagueoflegends.com/cdn/{patch}/data/en_US/champion.json') as url:
         data = json.loads(url.read().decode())
         with open('./config/champion.json', 'w', encoding='utf-8') as f:
