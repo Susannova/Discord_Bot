@@ -38,6 +38,7 @@ class KrautCog(commands.Cog):
         await ctx.send(consts.MESSAGE_CLASH_CREATE.format(
             ctx.message.author.mention, arg
         ))
+
     @commands.command(name='play-now')
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS])
     async def play_now(self, ctx):
