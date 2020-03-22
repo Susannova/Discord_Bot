@@ -3,3 +3,6 @@ requests==2.23.0
 riotwatcher==2.7.1
 pytesseract==0.3.2
 Pillow==7.0.0
+numpy==1.18.2
+matplotlib==3.2.1
+pandsa==1.0.3
