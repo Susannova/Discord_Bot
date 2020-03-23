@@ -42,6 +42,7 @@ class EventCog(commands.Cog):
         """Automatically assigns lowest role to
         anyone that joins the server.
         """
+        logger.info(f'New member joined: {member.name}')
         await member.edit(roles=utility.get_auto_role_list(member))
 
     @commands.Cog.listener()
@@ -63,6 +64,7 @@ class EventCog(commands.Cog):
 
         # auto react
         if gstate.CONFIG["TOGGLE_AUTO_REACT"] and utility.has_any_pattern(message):
+            logger.info(f'Play-Request created with message: {message.content}')
             await message.add_reaction(self.bot.get_emoji(consts.EMOJI_ID_LIST[5]))
             await message.add_reaction(consts.EMOJI_PASS)
 
@@ -97,6 +99,7 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
+        logger.info(f'Maually deleted a message')
         utility.clear_play_requests(message)
         [utility.clear_message_cache(message, self.message_cache) for msg in self.message_cache if message in msg]
 

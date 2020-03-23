@@ -132,11 +132,6 @@ def unlink_account(discord_user_name):
             if key == str(discord_user_name):
                 del database[key]
 
-
-
-
-
-
 # FIXME im still not happy with this
 def create_embed(ctx):
     summoners = list(utility.read_all_accounts())
