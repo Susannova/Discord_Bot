@@ -2,6 +2,7 @@ import asyncio
 import ast
 from importlib import reload
 import re
+import logging
 
 import discord
 from discord.ext import commands
@@ -18,6 +19,7 @@ from riot import riot_commands
 
 from core.state import global_state as gstate
 
+logger = logging.getLogger(consts.LOG_NAME)
 
 class KrautCog(commands.Cog):
     def __init__(self, bot):
@@ -75,7 +77,6 @@ class KrautCog(commands.Cog):
             arg = None
         else:
             arg = summoner_name[0]
-        print(arg)
         await ctx.send(riot_commands.get_player_stats(ctx.message.author.name, arg))
 
     @commands.command(name='smurf')
@@ -199,6 +200,7 @@ class KrautCog(commands.Cog):
     @smurf_.error
     @bans_.error
     async def error_handler(self, ctx, error):
+        logger.exception('Error handler got called.')
         if isinstance(error, commands.CheckFailure):
             if str(ctx.command) == 'enable-debug':
                 await ctx.send(

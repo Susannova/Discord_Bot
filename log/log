@@ -1,0 +1,68 @@
+13:14:55,579 __main__ INFO Start Bot
+13:14:55,580 discord.client INFO logging in using static token
+13:14:56,192 discord.gateway INFO Created websocket connected to wss://gateway.discord.gg?encoding=json&v=6&compress=zlib-stream
+13:14:56,195 discord.gateway INFO Shard ID None has sent the IDENTIFY payload.
+13:14:56,423 discord.gateway INFO Shard ID None has connected to Gateway: ["gateway-prd-main-pngc",{"micros":95475,"calls":["discord-sessions-prd-1-31",{"micros":88522,"calls":["start_session",{"micros":84235,"calls":["api-prd-main-r527",{"micros":79153,"calls":["get_user",{"micros":7617},"add_authorized_ip",{"micros":3799},"get_guilds",{"micros":6155},"coros_wait",{"micros":2}]}]},"guilds_connect",{"micros":2,"calls":[]},"presence_connect",{"micros":1,"calls":[]}]}]}] (Session ID: be047a7dcad53a9be7d93056675280e5).
+13:14:58,423 cogs.events INFO We have logged in as AutoReact#6168
+13:15:17,75 discord.client INFO Received signal to terminate bot and event loop.
+13:15:17,76 discord.client INFO Cleaning up tasks.
+13:15:17,76 discord.client INFO Cleaning up after 4 tasks.
+13:15:23,630 discord.client INFO Closing the event loop.
+13:15:23,631 __main__ WARNING Stopped Bot due to Keyboard Interrupt.
+13:15:23,631 __main__ INFO End
+13:15:30,676 __main__ INFO Start Bot
+13:15:30,677 discord.client INFO logging in using static token
+13:15:31,244 discord.gateway INFO Created websocket connected to wss://gateway.discord.gg?encoding=json&v=6&compress=zlib-stream
+13:15:31,247 discord.gateway INFO Shard ID None has sent the IDENTIFY payload.
+13:15:31,423 discord.gateway INFO Shard ID None has connected to Gateway: ["gateway-prd-main-j9g5",{"micros":42114,"calls":["discord-sessions-prd-1-47",{"micros":36755,"calls":["start_session",{"micros":34302,"calls":["api-prd-main-4fd2",{"micros":31147,"calls":["get_user",{"micros":2973},"add_authorized_ip",{"micros":1710},"get_guilds",{"micros":2716},"coros_wait",{"micros":1}]}]},"guilds_connect",{"micros":2,"calls":[]},"presence_connect",{"micros":1,"calls":[]}]}]}] (Session ID: 0db3938e597a59cce43a64401632b544).
+13:15:33,426 cogs.events INFO We have logged in as AutoReact#6168
+13:16:01,959 __main__ INFO Start Bot
+13:16:01,960 discord.client INFO logging in using static token
+13:16:02,617 discord.gateway INFO Created websocket connected to wss://gateway.discord.gg?encoding=json&v=6&compress=zlib-stream
+13:16:02,620 discord.gateway INFO Shard ID None has sent the IDENTIFY payload.
+13:16:02,800 discord.gateway INFO Shard ID None has connected to Gateway: ["gateway-prd-main-3lw3",{"micros":51087,"calls":["discord-sessions-prd-1-23",{"micros":46955,"calls":["start_session",{"micros":43045,"calls":["api-prd-main-0vjn",{"micros":40068,"calls":["get_user",{"micros":3037},"add_authorized_ip",{"micros":1900},"get_guilds",{"micros":2713},"coros_wait",{"micros":2}]}]},"guilds_connect",{"micros":2,"calls":[]},"presence_connect",{"micros":1,"calls":[]}]}]}] (Session ID: 090cf032629de5b6be92abad6ebc01b1).
+13:16:04,795 cogs.events INFO We have logged in as AutoReact#6168
+13:17:00,793 __main__ INFO Start Bot
+13:17:00,794 discord.client INFO logging in using static token
+13:17:01,361 discord.gateway INFO Created websocket connected to wss://gateway.discord.gg?encoding=json&v=6&compress=zlib-stream
+13:17:01,363 discord.gateway INFO Shard ID None has sent the IDENTIFY payload.
+13:17:01,560 discord.gateway INFO Shard ID None has connected to Gateway: ["gateway-prd-main-nz9k",{"micros":65212,"calls":["discord-sessions-prd-1-15",{"micros":60914,"calls":["start_session",{"micros":59086,"calls":["api-prd-main-6x7m",{"micros":54532,"calls":["get_user",{"micros":4735},"add_authorized_ip",{"micros":2529},"get_guilds",{"micros":1757},"coros_wait",{"micros":2}]}]},"guilds_connect",{"micros":3,"calls":[]},"presence_connect",{"micros":992,"calls":[]}]}]}] (Session ID: 76f2fb7f122fa7f37f4f3548b6c6354d).
+13:17:03,570 cogs.events INFO We have logged in as AutoReact#6168
+13:21:23,733 __main__ INFO Start Bot
+13:21:23,734 discord.client INFO logging in using static token
+13:21:24,387 discord.gateway INFO Created websocket connected to wss://gateway.discord.gg?encoding=json&v=6&compress=zlib-stream
+13:21:24,390 discord.gateway INFO Shard ID None has sent the IDENTIFY payload.
+13:21:24,572 discord.gateway INFO Shard ID None has connected to Gateway: ["gateway-prd-main-k19q",{"micros":52033,"calls":["discord-sessions-prd-1-4",{"micros":46627,"calls":["start_session",{"micros":45413,"calls":["api-prd-main-12nf",{"micros":42112,"calls":["get_user",{"micros":3581},"add_authorized_ip",{"micros":1765},"get_guilds",{"micros":8330},"coros_wait",{"micros":2}]}]},"guilds_connect",{"micros":2,"calls":[]},"presence_connect",{"micros":1,"calls":[]}]}]}] (Session ID: f2b747ebdbe5c6b04e805b423a7d13fa).
+13:21:26,584 __main__ INFO We have logged in as AutoReact#6168
+13:22:41,227 kraut.log INFO Start Bot
+13:22:41,228 discord.client INFO logging in using static token
+13:22:41,842 discord.gateway INFO Created websocket connected to wss://gateway.discord.gg?encoding=json&v=6&compress=zlib-stream
+13:22:41,843 discord.gateway INFO Shard ID None has sent the IDENTIFY payload.
+13:22:42,25 discord.gateway INFO Shard ID None has connected to Gateway: ["gateway-prd-main-c2s6",{"micros":51301,"calls":["discord-sessions-prd-1-53",{"micros":41254,"calls":["start_session",{"micros":37415,"calls":["api-prd-main-26pr",{"micros":34223,"calls":["get_user",{"micros":3472},"add_authorized_ip",{"micros":1938},"get_guilds",{"micros":2602},"coros_wait",{"micros":2}]}]},"guilds_connect",{"micros":2,"calls":[]},"presence_connect",{"micros":1,"calls":[]}]}]}] (Session ID: d37b8b8dfc3da8233d7e87e7e6c7f5c4).
+13:22:44,27 kraut.log INFO We have logged in as AutoReact#6168
+13:23:23,95 discord.client INFO Received signal to terminate bot and event loop.
+13:23:23,96 discord.client INFO Cleaning up tasks.
+13:23:23,96 discord.client INFO Cleaning up after 4 tasks.
+13:23:23,214 discord.client INFO Closing the event loop.
+13:23:23,215 kraut.log ERROR Stopped Bot due to Keyboard Interrupt.
+Traceback (most recent call last):
+  File "c:/Users/Nick/Documents/Discord/Discord_Bot/discord_bot.py", line 49, in run
+    super().run(self.BOT_TOKEN)
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\client.py", line 595, in run
+    _cleanup_loop(loop)
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\client.py", line 92, in _cleanup_loop
+    _cancel_tasks(loop)
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\client.py", line 77, in _cancel_tasks
+    loop.run_until_complete(asyncio.gather(*tasks, loop=loop, return_exceptions=True))
+  File "C:\Program Files\Python37\lib\asyncio\base_events.py", line 555, in run_until_complete
+    self.run_forever()
+  File "C:\Program Files\Python37\lib\asyncio\base_events.py", line 523, in run_forever
+    self._run_once()
+  File "C:\Program Files\Python37\lib\asyncio\base_events.py", line 1722, in _run_once
+    event_list = self._selector.select(timeout)
+  File "C:\Program Files\Python37\lib\selectors.py", line 323, in select
+    r, w, _ = self._select(self._readers, self._writers, [], timeout)
+  File "C:\Program Files\Python37\lib\selectors.py", line 314, in _select
+    r, w, x = select.select(r, w, w, timeout)
+KeyboardInterrupt
+13:23:23,268 kraut.log INFO End

@@ -5,6 +5,7 @@ a user readable way.
 import shelve
 import numpy as np
 import matplotlib.pyplot as plt
+import logging
 
 from discord.ext import commands
 import discord
@@ -21,6 +22,8 @@ from . import (
     riot_utility as utility
 )
 
+
+logger = logging.getLogger(consts.LOG_NAME)
 SEASON_2020_START_EPOCH = timers.convert_human_to_epoch_time(consts.RIOT_SEASON_2020_START)
 
 _timers = []
@@ -81,6 +84,7 @@ def get_smurf(discord_user_name, summoner_name) -> str:
 def calculate_bans_for_team(*names) -> str:
     utility.update_champion_json()
     if len(names) != 5:
+        logger.exception('Check Failure')
         raise commands.CheckFailure()
     team = utility.create_summoners(list(names))
     output = get_best_bans_for_team(team)
@@ -91,15 +95,18 @@ def calculate_bans_for_team(*names) -> str:
 
 def link_account(discord_user_name, summoner_name):
     if utility.is_command_on_cooldown(_timers):
+        logger.exception('DataBaseException')
         raise exceptions.DataBaseException('Command on cooldown')
     summoner = utility.create_summoner(summoner_name)
     summoner.discord_user_name = discord_user_name
     with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
         for key in database.keys():
             if key == str(discord_user_name):
+                logger.exception('DataBaseException')
                 raise exceptions.DataBaseException('Your discord account already has a lol account linked to it')
             if database[key] is not None:
                 if database[key].name == summoner.name:
+                    logger.exception('DataBaseException')
                     raise exceptions.DataBaseException('This lol account already has a discord account that is linked to it')
         database[str(discord_user_name)] = summoner
 

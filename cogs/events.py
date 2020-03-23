@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 import discord
 from discord.ext import commands
@@ -12,6 +13,8 @@ from core import (
 from core.play_requests import PlayRequest
 from core.play_requests import PlayRequestCategory
 from riot import riot_utility
+
+logger = logging.getLogger(consts.LOG_NAME)
 
 class EventCog(commands.Cog):
     """Cog that handles all events. Used for
@@ -32,7 +35,7 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-            print('We have logged in as {0.user}'.format(self.bot))
+            logger.info('We have logged in as {0.user}'.format(self.bot))
 
     @commands.Cog.listener()
     async def on_member_join(self, member):

@@ -16,8 +16,14 @@ from cogs import (
 )
 
 
-logging.getLogger(__name__)
-logging.basicConfig(level=logging.WARNING)
+
+logging.basicConfig(filename=consts.LOG_FILE,
+                            filemode='a',
+                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+                            datefmt='%H:%M:%S',
+                            level=logging.INFO)
+
+logger = logging.getLogger(consts.LOG_NAME)
 discord.voice_client.VoiceClient.warn_nacl = False
 
 BOT_TOKENS = utility.read_config_file('bot')
@@ -42,18 +48,16 @@ class KrautBot(commands.Bot):
         try:
             super().run(self.BOT_TOKEN)
         except KeyboardInterrupt:
-            logging.warning('Stopped Bot due to Keyboard Interrupt.')
+            logger.exception('Stopped Bot due to Keyboard Interrupt.')
 
 
 if __name__ == '__main__':
     bot = KrautBot()
     try:
-        print("Start Bot")
-        logging.info("Start Bot")
+        logger.info("Start Bot")
         bot.add_cog(kraut.KrautCog(bot))
         bot.add_cog(events.EventCog(bot))
         bot.run()
-        print("End Bot")
-        logging.info("End")
+        logger.info("End")
     except discord.LoginFailure:
-        logging.warning('Failed to login due to improper Token.')
+        logger.exception('Failed to login due to improper Token.')
