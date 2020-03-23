@@ -5,4 +5,4 @@ pytesseract==0.3.2
 Pillow==7.0.0
 numpy==1.18.2
 matplotlib==3.2.1
-pandsa==1.0.3
+pandas==1.0.3
