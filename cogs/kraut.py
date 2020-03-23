@@ -112,8 +112,10 @@ class KrautCog(commands.Cog):
 
     @commands.command(name='unlink')
     @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
-    async def unlink_(self, ctx):
+    async def unlink_(self, ctx, *args):
         try:
+            if len(list(summoner_name)) != 0:
+                raise commands.CommandInvokeError
             riot_commands.unlink_account(ctx.message.author.name)
         except commands.CommandInvokeError:
             pass
@@ -176,7 +178,7 @@ class KrautCog(commands.Cog):
         last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
         [await message_.delete() for message_ in last_count_messages if not message_.pinned]
 
-    @commands.command(name='test-embed')
+    @commands.command(name='leaderboard')
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def test_embed(self, ctx):
         await ctx.send(embed=riot_commands.create_embed(ctx))
