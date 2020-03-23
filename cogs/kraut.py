@@ -107,7 +107,7 @@ class KrautCog(commands.Cog):
         except commands.CommandInvokeError:
             pass
         else:
-            await ctx.send(
+            await ctx.message.author.send(
                 f'Dein Lol-Account wurde erfolgreich mit deinem Discord Account verbunden!\nFalls du deinen Account wieder entfernen möchtest benutze das {ctx.bot.command_prefix}unlink Command.')
 
     @commands.command(name='unlink')
@@ -120,7 +120,7 @@ class KrautCog(commands.Cog):
         except commands.CommandInvokeError:
             pass
         else:
-            await ctx.send(
+            await ctx.message.author.send(
                 'Dein Lol-Account wurde erfolgreich von deinem Discord Account getrennt!')
 
     @commands.command(name='version')
