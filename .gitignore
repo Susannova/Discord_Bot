@@ -7,3 +7,4 @@ local_token.txt
 test-sequence
 /env/
 .pylintrc
+/log/log

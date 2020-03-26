@@ -113,9 +113,9 @@ class KrautCog(commands.Cog):
 
     @commands.command(name='unlink')
     @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
-    async def unlink_(self, ctx, *args):
+    async def unlink_(self, ctx, *summoner_names):
         try:
-            if len(list(summoner_name)) != 0:
+            if len(list(summoner_names)) != 0:
                 raise commands.CommandInvokeError
             riot_commands.unlink_account(ctx.message.author.name)
         except commands.CommandInvokeError:
