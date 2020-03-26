@@ -46,7 +46,7 @@ PATTERN_LIST_AUTO_REACT = [" will League of Legends spielen. Kommt gegen ",
 PATTERN_PLAY_REQUEST = " will League of Legends spielen. Kommt gegen "
 PATTERN_CLASH = " sucht nach Mitspielern für den Clash am "
 
-COMMAND_PREFIX = '?'
+COMMAND_PREFIX = '!'
 COMMAND_CREATE_TEAM = f'{COMMAND_PREFIX}create-team'
 COMMAND_PLAY_LOL = f'{COMMAND_PREFIX}play-lol'
 COMMAND_PLAY_NOW = f'{COMMAND_PREFIX}play-now'
