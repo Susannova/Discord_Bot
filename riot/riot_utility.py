@@ -4,6 +4,7 @@ import statistics
 import shelve
 from concurrent.futures import ThreadPoolExecutor
 from urllib.error import HTTPError
+import logging
 
 from riotwatcher import RiotWatcher
 
@@ -16,6 +17,7 @@ def load_json(file_name, folder='config'):
         return json.load(all_data)
 
 
+logger = logging.getLogger(__name__)
 tokens = load_json("bot")
 data_champ = load_json("champion")
 

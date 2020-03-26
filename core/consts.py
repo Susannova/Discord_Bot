@@ -84,3 +84,6 @@ RIOT_REGION = 'euw1'
 
 DATABASE_DIRECTORY = './db/summoners'
 DATABASE_NAME = 'summoner_db'
+
+LOG_FILE = './log/log'
+LOG_NAME = 'kraut.log'
