@@ -50,6 +50,7 @@ class EventCog(commands.Cog):
         
         # checks if a new lol patch is out and posts it if it is
         if riot_utility.update_current_patch():
+            logger.info('Posted new Patch notes')
             annoucement_channel = discord.utils.find(lambda m: m.name == 'announcements', message.channel.guild.channels)
             await annoucement_channel.send(consts.MESSAGE_PATCH_NOTES.format(riot_utility.get_current_patch()))
         
@@ -60,7 +61,7 @@ class EventCog(commands.Cog):
         # add all messages in channel to gstate.message_cache
         if gstate.CONFIG["TOGGLE_AUTO_DELETE"] \
         and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
-            utility.update_message_cache(message)
+            utility.update_message_cache(message, self.message_cache)
 
         # auto react
         if gstate.CONFIG["TOGGLE_AUTO_REACT"] and utility.has_any_pattern(message):

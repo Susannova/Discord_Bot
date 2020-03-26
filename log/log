@@ -66,3 +66,82 @@ Traceback (most recent call last):
     r, w, x = select.select(r, w, w, timeout)
 KeyboardInterrupt
 13:23:23,268 kraut.log INFO End
+17:30:05,224 kraut.log INFO Start Bot
+17:30:05,225 discord.client INFO logging in using static token
+17:30:05,956 discord.client INFO Cleaning up tasks.
+17:30:05,956 discord.client INFO Closing the event loop.
+17:30:05,958 kraut.log ERROR Failed to login due to improper Token.
+Traceback (most recent call last):
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\http.py", line 258, in static_login
+    data = await self.request(Route('GET', '/users/@me'))
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\http.py", line 222, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 401 Unauthorized (error code: 0): 401: Unauthorized
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:/Users/Nick/Documents/Discord/Discord_Bot/discord_bot.py", line 60, in <module>
+    bot.run()
+  File "c:/Users/Nick/Documents/Discord/Discord_Bot/discord_bot.py", line 49, in run
+    super().run(self.BOT_TOKEN)
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\client.py", line 598, in run
+    return future.result()
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\client.py", line 579, in runner
+    await self.start(*args, **kwargs)
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\client.py", line 542, in start
+    await self.login(*args, bot=bot)
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\client.py", line 400, in login
+    await self.http.static_login(token, bot=bot)
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\http.py", line 262, in static_login
+    raise LoginFailure('Improper token has been passed.') from exc
+discord.errors.LoginFailure: Improper token has been passed.
+17:30:19,67 kraut.log INFO Start Bot
+17:30:19,68 discord.client INFO logging in using static token
+17:30:19,290 discord.client INFO Cleaning up tasks.
+17:30:19,290 discord.client INFO Closing the event loop.
+17:30:19,291 kraut.log ERROR Failed to login due to improper Token.
+Traceback (most recent call last):
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\http.py", line 258, in static_login
+    data = await self.request(Route('GET', '/users/@me'))
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\http.py", line 222, in request
+    raise HTTPException(r, data)
+discord.errors.HTTPException: 401 Unauthorized (error code: 0): 401: Unauthorized
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "c:/Users/Nick/Documents/Discord/Discord_Bot/discord_bot.py", line 60, in <module>
+    bot.run()
+  File "c:/Users/Nick/Documents/Discord/Discord_Bot/discord_bot.py", line 49, in run
+    super().run(self.BOT_TOKEN)
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\client.py", line 598, in run
+    return future.result()
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\client.py", line 579, in runner
+    await self.start(*args, **kwargs)
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\client.py", line 542, in start
+    await self.login(*args, bot=bot)
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\client.py", line 400, in login
+    await self.http.static_login(token, bot=bot)
+  File "C:\Users\Nick\AppData\Roaming\Python\Python37\site-packages\discord\http.py", line 262, in static_login
+    raise LoginFailure('Improper token has been passed.') from exc
+discord.errors.LoginFailure: Improper token has been passed.
+17:30:42,118 kraut.log INFO Start Bot
+17:30:42,119 discord.client INFO logging in using static token
+17:30:42,811 discord.gateway INFO Created websocket connected to wss://gateway.discord.gg?encoding=json&v=6&compress=zlib-stream
+17:30:42,814 discord.gateway INFO Shard ID None has sent the IDENTIFY payload.
+17:30:43,29 discord.gateway INFO Shard ID None has connected to Gateway: ["gateway-prd-main-gl78",{"micros":86501,"calls":["discord-sessions-prd-1-25",{"micros":80141,"calls":["start_session",{"micros":75060,"calls":["api-prd-main-ngs4",{"micros":71641,"calls":["get_user",{"micros":3787},"add_authorized_ip",{"micros":1868},"get_guilds",{"micros":4256},"coros_wait",{"micros":3}]}]},"guilds_connect",{"micros":2,"calls":[]},"presence_connect",{"micros":2161,"calls":[]}]}]}] (Session ID: 6a907c88b704eb12b0ca0f755d1e1aec).
+17:30:45,24 kraut.log INFO We have logged in as AutoReact#6168
+17:36:35,94 kraut.log INFO Start Bot
+17:36:35,95 discord.client INFO logging in using static token
+17:36:35,758 discord.gateway INFO Created websocket connected to wss://gateway.discord.gg?encoding=json&v=6&compress=zlib-stream
+17:36:35,759 discord.gateway INFO Shard ID None has sent the IDENTIFY payload.
+17:36:35,943 discord.gateway INFO Shard ID None has connected to Gateway: ["gateway-prd-main-kbg7",{"micros":50686,"calls":["discord-sessions-prd-1-28",{"micros":38916,"calls":["start_session",{"micros":36660,"calls":["api-prd-main-74hd",{"micros":32916,"calls":["get_user",{"micros":3475},"add_authorized_ip",{"micros":1824},"get_guilds",{"micros":1977},"coros_wait",{"micros":2}]}]},"guilds_connect",{"micros":2,"calls":[]},"presence_connect",{"micros":1,"calls":[]}]}]}] (Session ID: c4299b6ad78c710eec7666ec97ed645a).
+17:36:37,949 kraut.log INFO We have logged in as AutoReact#6168
+17:36:55,927 kraut.log INFO Start Bot
+17:36:55,928 discord.client INFO logging in using static token
+17:36:56,548 discord.gateway INFO Created websocket connected to wss://gateway.discord.gg?encoding=json&v=6&compress=zlib-stream
+17:36:56,549 discord.gateway INFO Shard ID None has sent the IDENTIFY payload.
+17:36:56,769 discord.gateway INFO Shard ID None has connected to Gateway: ["gateway-prd-main-k19q",{"micros":88790,"calls":["discord-sessions-prd-1-1",{"micros":78890,"calls":["start_session",{"micros":74901,"calls":["api-prd-main-js71",{"micros":71485,"calls":["get_user",{"micros":2990},"add_authorized_ip",{"micros":1410},"get_guilds",{"micros":28099},"coros_wait",{"micros":2}]}]},"guilds_connect",{"micros":1,"calls":[]},"presence_connect",{"micros":2,"calls":[]}]}]}] (Session ID: 888a9d85adc0469042a41fd47e2523f8).
+17:36:58,757 kraut.log INFO We have logged in as AutoReact#6168
+17:37:01,240 kraut.log INFO Play-Request created with message: <@158205450343415808> spielt **__jetzt gerade__** League of Legends und sucht noch nach weiteren Spielern!

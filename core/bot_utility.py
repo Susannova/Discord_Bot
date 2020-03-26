@@ -184,3 +184,6 @@ def pretty_print_list(*players) -> str:
         elif isinstance(player_object, str):
             pretty_print += player + '\n'
     return pretty_print
+
+def update_message_cache(message, message_cache,  time=18):
+    message_cache.append((message, timers.start_timer(hrs=18)))
