@@ -93,10 +93,8 @@ class KrautCog(commands.Cog):
     @checks.is_riot_enabled()
     @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
     async def bans_(self, ctx, *team_names):
-        if len(list(team_names)) != 0:
-            raise commands.CheckFailure()
         await ctx.send(
-            riot_commands.get_best_bans_for_team(team_names), file=discord.File(
+            riot_commands.calculate_bans_for_team(team_names), file=discord.File(
                 f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))
 
     @commands.command(name='link')
@@ -200,7 +198,7 @@ class KrautCog(commands.Cog):
     @print_.error
     @player_.error
     @smurf_.error
-    @bans_.error
+    #@bans_.error
     async def error_handler(self, ctx, error):
         logger.exception('Error handler got called.')
         if isinstance(error, commands.CheckFailure):

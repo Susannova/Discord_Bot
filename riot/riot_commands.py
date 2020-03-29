@@ -48,20 +48,20 @@ def get_best_bans_for_team(team) -> list:
     ranks = []
     best_bans_for_player = []
     for player in team:
-        _, rank = player.get_soloq_data()
-        ranks.append(player.get_soloq_rank_weight(rank))
+        ranks.append(player.rank_value)
         best_bans_for_player.append(get_best_ban(player))
-    median_rank = utility.get_median_rank(ranks)
+    average_rank = utility.get_average_rank(ranks)
     for i in range(0, len(team)):
-        if ranks[i] <= median_rank:
-            ban_list.append(get_best_bans_for_team[0])
-        elif ranks[i] >= median_rank + 3:
-            ban_list.append(get_best_bans_for_team[0])
-            ban_list.append(get_best_bans_for_team[1])
-            ban_list.append(get_best_bans_for_team[2])
-        elif ranks[i] > median_rank:
-            ban_list.append(get_best_bans_for_team[0])
-            ban_list.append(get_best_bans_for_team[1])
+        if ranks[i] <= average_rank - 500:
+            continue
+        elif ranks[i] > average_rank - 500 and ranks[i] <= average_rank + 800:
+            ban_list.append(best_bans_for_player[i][0])
+        elif team[i].is_smurf() or ranks[i] > average_rank + 800:
+            ban_list.append(best_bans_for_player[i][0])
+            ban_list.append(best_bans_for_player[i][1])
+            ban_list.append(best_bans_for_player[i][2])
+        while len(ban_list) > 5:
+            del ban_list[-1]
     return ban_list
 
 
@@ -83,10 +83,10 @@ def get_smurf(discord_user_name, summoner_name) -> str:
 
 def calculate_bans_for_team(*names) -> str:
     utility.update_champion_json()
-    if len(names) != 5:
+    if len(names[0]) != 5:
         logger.exception('Check Failure')
         raise commands.CheckFailure()
-    team = utility.create_summoners(list(names))
+    team = list(utility.create_summoners(list(names[0])))
     output = get_best_bans_for_team(team)
     image_transformation.create_new_image(output)
     op_url = f'https://euw.op.gg/multi/query={team[0].name}%2C{team[1].name}%2C{team[2].name}%2C{team[3].name}%2C{team[4].name}'

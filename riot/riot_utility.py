@@ -91,6 +91,11 @@ def is_command_on_cooldown(timer_list):
 def get_median_rank(ranks):
     return statistics.median(ranks)
 
+def get_average_rank(ranks):
+    tmp = 0
+    for rank in ranks:
+        tmp += rank
+    return tmp / len(ranks)
 
 def read_account(discord_user_name):
     with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'r') as database:

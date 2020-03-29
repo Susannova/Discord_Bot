@@ -34,10 +34,10 @@ class Summoner():
         self.data_league = data_league
         self.needs_update_timer = timers.start_timer(hrs=1)
         self.discord_user_name = None
-        self.rank_value = 0
+        self.rank_value = self.get_rank_value()
 
     def __str__(self):
-        return f'Summoner: {self.name}, Level: {self.get_level()}, Rank: {self.get_soloq_tier}, Winrate: {self.get_soloq_winrate}'
+        return f'Summoner: {self.name}, Level: {self.get_level()}, Rank: {self.get_soloq_rank_string()}, Winrate: {self.get_soloq_winrate()}'
 
     def get_level(self):
         return int(self.data_summoner['summonerLevel'])
@@ -57,30 +57,34 @@ class Summoner():
 
     def get_soloq_winrate(self):
         soloq_stats = self.get_soloq_data()
+        if soloq_stats is None:
+            return 50.0
         games_played = int(soloq_stats['wins']) + int(
             soloq_stats['losses'])
-        if games_played != 0 and games_played is not None:
-            winrate = round((int(soloq_stats['wins']) / games_played) * 100, 1)
-            return winrate
-        return 50.0
+        winrate = round((int(soloq_stats['wins']) / games_played) * 100, 1)
+        return winrate
+    
 
     def get_soloq_tier(self):
         soloq_stats = self.get_soloq_data()
-        if soloq_stats['tier'] is not None:
-            return soloq_stats['tier']
-        return 'SILVER'
+        if soloq_stats is None:
+            return 'SILVER'
+        return soloq_stats['tier']
+        
 
     def get_soloq_rank(self):
         soloq_stats = self.get_soloq_data()
-        if soloq_stats['rank'] is not None:
-            return soloq_stats['rank']
-        return 'II'
+        if soloq_stats is None:
+            return 'II'
+        return soloq_stats['rank']
+
 
     def get_soloq_lp(self):
         soloq_stats = self.get_soloq_data()
-        if soloq_stats['leaguePoints'] is not None:
-            return soloq_stats['leaguePoints']
-        return 0
+        if soloq_stats is None:
+            return 0
+        return soloq_stats['leaguePoints']
+
 
     def get_soloq_rank_weight(self, rank):
         return dict_rank[rank]
@@ -105,7 +109,7 @@ class Summoner():
                 return datetime.fromtimestamp(timestamp)
 
     def has_played_champ_by_name_in_last_n_days(self, name, n):
-        return self.get_last_time_played_by_name(self, name) \
+        return self.get_last_time_played_by_name(name) \
             > datetime.now() - timedelta(days=n)
 
     def get_champion_name_by_id(self, id):
@@ -119,7 +123,7 @@ class Summoner():
                 return int(value['key'])
 
     def get_rank_value(self):
-        self.rank_value = self.get_soloq_rank_weight(f'{self.get_soloq_tier()}-{self.get_soloq_rank()}') * 100 + self.get_soloq_lp()
+        return self.get_soloq_rank_weight(f'{self.get_soloq_tier()}-{self.get_soloq_rank()}') * 100 + self.get_soloq_lp()
 
     def get_soloq_rank_string(self):
         return f'{self.get_soloq_tier()}-{self.get_soloq_rank()} {self.get_soloq_lp()}LP'
