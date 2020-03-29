@@ -148,7 +148,7 @@ def create_embed(ctx):
     rank_strings = []
     white_space_pattern = '\u200b \u200b'
     for summoner in summoners:
-        rank_string = summoner.get_solo_rank_string()
+        rank_string = summoner.get_soloq_rank_string()
         length = len(rank_string)
         rank_string = rank_string + f' %!{summoner.get_soloq_winrate()}%'
         rank_string = rank_string.replace('%!', f'{white_space_pattern * (25 - length)}')
