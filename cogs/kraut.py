@@ -12,12 +12,14 @@ from core import (
     bot_utility as utility,
     ocr,
     checks,
-    exceptions
+    exceptions,
+    reminder
 )
 
 from riot import riot_commands
 
 from core.state import global_state as gstate
+from core.play_requests import PlayRequest, PlayRequestCategory
 
 logger = logging.getLogger(consts.LOG_NAME)
 
@@ -41,20 +43,42 @@ class KrautCog(commands.Cog):
             ctx.message.author.mention, arg
         ))
 
-    @commands.command(name='play-now')
+    @commands.command(name='play')
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS])
-    async def play_now(self, ctx):
-        gstate.tmp_message_author = ctx.message.author
-        await ctx.send(consts.MESSAGE_PLAY_NOW.format(gstate.tmp_message_author.mention))
+    async def play_(self, ctx, game_name, _time):
+        game_name = game_name.upper()
+        message = 'Something went wrong.'
+        if _time == 'now':
+            message = consts.MESSAGE_PLAY_NOW.format(ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]).mention, ctx.message.author.mention, consts.GAME_NAME_DICT[game_name])
+        else:
+            if len(re.findall('[0-2][0-9]:[0-5][0-9]', _time)) == 0:
+                raise exceptions.BadArgumentFormat()
+            message = consts.MESSAGE_PLAY_AT.format(ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]).mention, ctx.message.author.mention, consts.GAME_NAME_DICT[game_name], _time)
+        play_request_message = await ctx.send(message)
+        _category = None
+        if game_name == 'LOL':
+            _category = PlayRequestCategory.LOL
+        elif game_name == 'APEX':
+            _category = PlayRequestCategory.APEX
+        elif game_name == 'CSGO':
+            _category = PlayRequestCategory.CSGO
+        elif game_name == 'RKTL':
+            _category = PlayRequestCategory.RKTL
+        gstate.play_requests[play_request_message.id] = PlayRequest(play_request_message, ctx.message.author, category=_category)
+        await play_request_message.add_reaction(ctx.bot.get_emoji(consts.EMOJI_ID_LIST[5]))
+        await play_request_message.add_reaction(consts.EMOJI_PASS)
 
-    @commands.command(name='play-lol')
-    @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS])
-    async def play_lol(self, ctx, _time):
-        if len(re.findall('[0-2][0-9]:[0-5][0-9]', _time)) == 0:
-            raise exceptions.BadArgumentFormat()
-        gstate.tmp_message_author = ctx.message.author
-        await ctx.send(consts.MESSAGE_PLAY_LOL.format(
-            gstate.tmp_message_author.mention, _time))
+        if _time != 'now':
+            await self.auto_reminder(play_request_message)
+
+
+    async def auto_reminder(self, message):
+        time_difference = reminder.get_time_difference(message.content)
+        if time_difference > 0:
+            await asyncio.sleep(time_difference)
+            for player in gstate.play_requests[message.id].generate_all_players():
+                await player.send(consts.MESSAGE_PLAY_REQUEST_REMINDER)
+
 
     @commands.command(name='clash')
     @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
@@ -188,17 +212,27 @@ class KrautCog(commands.Cog):
         riot_commands.test_matplotlib()
         await ctx.send(file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/leaderboard.png'))
 
+    @commands.command(name='game-selector')
+    @commands.has_role(consts.ROLE_ADMIN_ID)
+    async def game_selector(self, ctx):
+        message = await ctx.send(consts.MESSAGE_GAME_SELECTOR)
+        for emoji in ctx.bot.emojis:
+            if emoji.name == 'rktl' or emoji.name == 'lol' or emoji.name == 'csgo' or emoji.name == 'apex':
+                await message.add_reaction(emoji)
+        gstate.game_selector_id = message.id
+
+        
+
 
     @create_team.error
     @create_clash.error
-    @play_now.error
-    @play_lol.error
+    @play_.error
     @clash_.error
     @enable_debug.error
     @print_.error
     @player_.error
     @smurf_.error
-    #@bans_.error
+    @bans_.error
     async def error_handler(self, ctx, error):
         logger.exception('Error handler got called.')
         if isinstance(error, commands.CheckFailure):
