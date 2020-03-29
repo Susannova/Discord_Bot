@@ -8,7 +8,8 @@ from core.state import global_state as gstate
 from core import (
     bot_utility as utility,
     consts,
-    reminder
+    reminder,
+    timers
 )
 from core.play_requests import PlayRequest
 from core.play_requests import PlayRequestCategory
@@ -51,15 +52,22 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        
+    
+
         # checks if a new lol patch is out and posts it if it is
         if riot_utility.update_current_patch():
             logger.info('Posted new Patch notes')
             annoucement_channel = discord.utils.find(lambda m: m.name == 'announcements', message.channel.guild.channels)
             await annoucement_channel.send(consts.MESSAGE_PATCH_NOTES.format(riot_utility.get_current_patch()))
-        
+
+        for tmp_channel in gstate.tmp_text_channels:
+            if timers.is_timer_done(tmp_channel[1]):
+                await tmp_channel[0].delete()
+                gstate.tmp_text_channels.remove(tmp_channel)
+
         if isinstance(message.channel, discord.DMChannel):
             return
+
 
         # add all messages in channel to gstate.message_cache
         if gstate.CONFIG["TOGGLE_AUTO_DELETE"] \
