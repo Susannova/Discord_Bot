@@ -32,10 +32,14 @@ class EventCog(commands.Cog):
         """
         self.play_requests = gstate.play_requests
         self.message_cache = gstate.message_cache
+        self.game_selection_message_id = None
 
     @commands.Cog.listener()
     async def on_ready(self):
             logger.info('We have logged in as {0.user}'.format(self.bot))
+            game_selection_channel = discord.utils.find(lambda x: x.name == 'game-selection', self.bot.guilds[0].channels)
+            game_selector_message_list = await game_selection_channel.history(limit=1).flatten()
+            self.game_selection_message_id = game_selector_message_list[0].id
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -57,46 +61,17 @@ class EventCog(commands.Cog):
         if isinstance(message.channel, discord.DMChannel):
             return
 
-
         # add all messages in channel to gstate.message_cache
         if gstate.CONFIG["TOGGLE_AUTO_DELETE"] \
         and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
             utility.update_message_cache(message, self.message_cache)
 
-        # auto react
-        if gstate.CONFIG["TOGGLE_AUTO_REACT"] and utility.has_any_pattern(message):
-            logger.info(f'Play-Request created with message: {message.content}')
-            await message.add_reaction(self.bot.get_emoji(consts.EMOJI_ID_LIST[5]))
-            await message.add_reaction(consts.EMOJI_PASS)
+        # auto delete all purgeable messages
+        purgeable_message_list = utility.get_purgeable_messages_list(message, self.message_cache)
+        for purgeable_message in purgeable_message_list:
+            utility.clear_message_cache(purgeable_message, self.message_cache)
+            await purgeable_message.delete()
 
-            _category = PlayRequestCategory.PLAY
-
-            if utility.has_pattern(message, consts.PATTERN_CLASH):
-                _category = PlayRequestCategory.CLASH
-                self.play_requests[message.id] = PlayRequest(message, gstate.tmp_message_author, category=_category)
-                self.play_requests[message.id].add_clash_date(gstate.clash_date)
-            else:
-                self.play_requests[message.id] = PlayRequest(message, gstate.tmp_message_author, category=_category)
-
-            # auto delete all purgeable messages
-            purgeable_message_list = utility.get_purgeable_messages_list(message, self.message_cache)
-            for purgeable_message in purgeable_message_list:
-                utility.clear_message_cache(purgeable_message, self.message_cache)
-                await purgeable_message.delete()
-
-            # auto reminder
-            if utility.has_pattern(message, consts.PATTERN_PLAY_REQUEST):
-                time_difference = reminder.get_time_difference(message.content)
-                if time_difference > 0:
-                    await asyncio.sleep(time_difference)
-                    for player in self.play_requests[message.id].generate_all_players():
-                        await player.send(consts.MESSAGE_PLAY_REQUEST_REMINDER)
-
-
-        # # command only
-        # if gstate.CONFIG["TOGGLE_COMMAND_ONLY"] \
-        # and utility.is_no_play_request_command(message, self.bot):
-        #     await message.delete()
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -108,10 +83,10 @@ class EventCog(commands.Cog):
     async def on_reaction_add(self, reaction, user):
         # auto dm
 
-        if not gstate.CONFIG["TOGGLE_AUTO_DM"]:
-            return
-
         if utility.is_user_bot(user, self.bot):
+            return
+        
+        if not gstate.CONFIG["TOGGLE_AUTO_DM"]:
             return
 
         play_request = self.play_requests[reaction.message.id]
@@ -153,3 +128,28 @@ class EventCog(commands.Cog):
         if len(play_request.subscribers) + 1 == 6 and play_request.category == PlayRequestCategory.INTERN:
             await reaction.channel.send(
                 utility.switch_to_internal_play_request(reaction.message, play_request))
+
+
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_add(self, payload):
+        if payload.message_id == self.game_selection_message_id:
+            member = discord.utils.find(lambda x: x.id == payload.user_id, list(self.bot.get_all_members()))
+            member_roles = member.roles.copy()
+            for role in member_roles:
+                if role.id == consts.GAME_NAME_TO_ROLE_ID_DICT[payload.emoji.name.upper()]:
+                    return
+            member_roles.append(discord.utils.find(lambda x: x.name == payload.emoji.name.upper(), member.guild.roles))
+            await member.edit(roles=member_roles)
+        return
+
+    @commands.Cog.listener()
+    async def on_raw_reaction_remove(self, payload):
+        if payload.message_id == self.game_selection_message_id:
+            member = discord.utils.find(lambda x: x.id == payload.user_id, list(self.bot.get_all_members()))
+            member_roles = member.roles.copy()
+            for role in member_roles:
+                if role.id == consts.GAME_NAME_TO_ROLE_ID_DICT[payload.emoji.name.upper()]:
+                    member_roles.remove(role)
+            await member.edit(roles=member_roles)
+        return

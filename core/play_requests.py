@@ -5,15 +5,18 @@ import discord
 
 
 class PlayRequestCategory(Enum):
-    PLAY = 1
+    LOL = 1
     CLASH = 2
     INTERN = 3
+    APEX = 4
+    CSGO = 5
+    RKTL = 6
 
 
 class PlayRequest():
     subscribers = []
 
-    def __init__(self, message: discord.Message, author: discord.User, category=PlayRequestCategory.PLAY):
+    def __init__(self, message: discord.Message, author: discord.User, category=PlayRequestCategory.LOL):
         self.message = message
         self.author = author
         self.timestamp_ = time.time()
