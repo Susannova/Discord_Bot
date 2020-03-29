@@ -8,8 +8,8 @@ EMOJI_PASS = '❌'
 MESSAGE_CREATE_INTERN_PLAY_REQUEST = '@everyone Das Play-Request von {0} hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!\nEs sind noch **__{1}__** Plätze frei. \nUhrzeit: {2} Uhr \nSpieler:\n'
 MESSAGE_AUTO_DM_CREATOR = '{0} hat auf dein Play-Request reagiert: {1} '
 MESSAGE_AUTO_DM_SUBSCRIBER = '{0} hat auch auf das Play-Request von {1} reagiert: {2} '
-MESSAGE_PLAY_NOW = '@everyone\n{0} spielt **__jetzt gerade__** League of Legends und sucht noch nach weiteren Spielern!'
-MESSAGE_PLAY_LOL = '@everyone\n{0} will League of Legends spielen. Kommt gegen **__{1}__** Uhr online!'
+MESSAGE_PLAY_NOW = '{0}\n{1} spielt **__jetzt gerade__** **{2}** und sucht noch nach weiteren Spielern!'
+MESSAGE_PLAY_AT = '{0}\n{1} will **{2}** spielen. Kommt gegen **__{3}__** Uhr online!'
 MESSAGE_PLAY_REQUEST_REMINDER = 'REMINDER: Der abonnierte Play-Request geht in 5 Minuten los!'
 MESSAGE_TEAM_HEADER = '\n@here\n**__===Teams===__**\n'
 MESSAGE_TEAM_1 = 'Team 1:\n'
@@ -32,18 +32,19 @@ MESSAGE_CLASH_CREATE = (
 MESSAGE_CLASH_FULL = 'Das Clash Team von {0} für den {1} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{1}'
 
 MESSAGE_PATCH_NOTES = '@here\nEin neuer LoL Patch ist da: {0}'
+MESSAGE_GAME_SELECTOR = "@everyone\nWähle hier durch das Klicken auf eine Reaktion aus zu welchen Spielen du Benachrichtungen erhalten willst!"
 
 COMMAND_LIST_INTERN_PLANING = ["?create-team", "?play-internal"]
 COMMAND_LIST_PLAY_REQUEST = ["?play-lol", "?play-now"]
 COMMAND_LIST_ALL = ["?create-team", "?play-internal", "?play-lol", "?play-now", "?player", "?bans"]
 
 
-PATTERN_LIST_AUTO_REACT = [" will League of Legends spielen. Kommt gegen ",
+PATTERN_LIST_AUTO_REACT = [" spielen. Kommt gegen ",
  "hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!",
-  " spielt **__jetzt gerade__** League of Legends und sucht noch nach weiteren Spielern!",
+  " und sucht noch nach weiteren Spielern!",
   " sucht nach Mitspielern für den Clash am "]
 
-PATTERN_PLAY_REQUEST = " will League of Legends spielen. Kommt gegen "
+PATTERN_PLAY_REQUEST = " spielen. Kommt gegen "
 PATTERN_CLASH = " sucht nach Mitspielern für den Clash am "
 
 COMMAND_PREFIX = '!'
@@ -75,8 +76,19 @@ TIMER_LAST_PLAY_REQUEST_DELETE = 86400.0
 ROLE_SETZLING_ID = 643169161236840449
 ROLE_EVERYONE_ID = 564481310417092629
 ROLE_ADMIN_ID = 564492616977088532
+ROLE_APEX_ID = 693817368937496596
+ROLE_CSGO_ID = 693817437623418911
+ROLE_LOL_ID = 693817391330623508
+ROLE_RKTL_ID = 693817406883233822
 FOLDER_CHAMP_ICON = './data/champ-icon/'
 FOLDER_CHAMP_SPLICED = './data/champ-spliced/'
+
+GAME_NAME_TO_ROLE_ID_DICT = {
+    "LOL" : ROLE_LOL_ID,
+    "APEX" : ROLE_APEX_ID,
+    "CSGO" : ROLE_CSGO_ID,
+    "RKTL" : ROLE_RKTL_ID
+}
 
 # source: https://na.leagueoflegends.com/en-us/news/game-updates/patch-10-1-notes/
 RIOT_SEASON_2020_START = '10.01.2020'
@@ -87,3 +99,12 @@ DATABASE_NAME = 'summoner_db'
 
 LOG_FILE = './log/log'
 LOG_NAME = 'kraut.log'
+
+GAME_NAME_DICT = {
+    "LOL" : "League of Legends",
+    "APEX" : "Apex",
+    "CSGO" : "CS:GO",
+    "RKTL" : "Rocket League"
+}
+
+GAME_SELECTOR_MESSAGE_ID = 693832367521005617

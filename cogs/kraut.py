@@ -40,8 +40,7 @@ class KrautCog(commands.Cog):
         gstate.tmp_message_author = ctx.message.author
         gstate.clash_date = arg
         await ctx.send(consts.MESSAGE_CLASH_CREATE.format(
-            ctx.message.author.mention, arg
-        ))
+            ctx.message.author.mention, arg))
 
     @commands.command(name='play')
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS])
@@ -55,6 +54,16 @@ class KrautCog(commands.Cog):
                 raise exceptions.BadArgumentFormat()
             message = consts.MESSAGE_PLAY_AT.format(ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]).mention, ctx.message.author.mention, consts.GAME_NAME_DICT[game_name], _time)
         play_request_message = await ctx.send(message)
+        _category = self.get_category(game_name)
+        gstate.play_requests[play_request_message.id] = PlayRequest(play_request_message, ctx.message.author, category=_category)
+        await play_request_message.add_reaction(ctx.bot.get_emoji(consts.EMOJI_ID_LIST[5]))
+        await play_request_message.add_reaction(consts.EMOJI_PASS)
+
+        if _time != 'now':
+            await self.auto_reminder(play_request_message)
+
+
+    def get_category(self, game_name):
         _category = None
         if game_name == 'LOL':
             _category = PlayRequestCategory.LOL
@@ -64,13 +73,7 @@ class KrautCog(commands.Cog):
             _category = PlayRequestCategory.CSGO
         elif game_name == 'RKTL':
             _category = PlayRequestCategory.RKTL
-        gstate.play_requests[play_request_message.id] = PlayRequest(play_request_message, ctx.message.author, category=_category)
-        await play_request_message.add_reaction(ctx.bot.get_emoji(consts.EMOJI_ID_LIST[5]))
-        await play_request_message.add_reaction(consts.EMOJI_PASS)
-
-        if _time != 'now':
-            await self.auto_reminder(play_request_message)
-
+        return _category
 
     async def auto_reminder(self, message):
         time_difference = reminder.get_time_difference(message.content)
@@ -212,6 +215,7 @@ class KrautCog(commands.Cog):
         riot_commands.test_matplotlib()
         await ctx.send(file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/leaderboard.png'))
 
+    # dont use this
     @commands.command(name='game-selector')
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def game_selector(self, ctx):
