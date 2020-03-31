@@ -41,6 +41,7 @@ class GlobalState(Singleton):
         self.message_cache = []
         self.clash_date = ''
         self.game_selector_id = None
+        self.tmp_text_channels = []
 
     def get_version(self):
         version_file = open("./.git/refs/heads/master", "r")

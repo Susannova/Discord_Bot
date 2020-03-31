@@ -13,7 +13,8 @@ from core import (
     ocr,
     checks,
     exceptions,
-    reminder
+    reminder,
+    timers
 )
 
 from riot import riot_commands
@@ -230,8 +231,15 @@ class KrautCog(commands.Cog):
                 await message.add_reaction(emoji)
         gstate.game_selector_id = message.id
 
-        
-
+    @commands.command(name='create-channel')
+    @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
+    async def create_channel(self, ctx, channel_name):
+        for tmp_channels in gstate.tmp_text_channels:
+            if tmp_channels[2] == ctx.message.author:
+                raise exceptions.LimitReachedException('Der Autor hat schon einen temprorären Channel erstellt.')
+        tmp_channel_category = discord.utils.find(lambda x: x.name == consts.CHANNEL_CATEGORY_TEMPORARY, self.bot.guilds[0].channels)
+        tmp_channel = await self.bot.guilds[0].create_text_channel(channel_name, category=tmp_channel_category)
+        gstate.tmp_text_channels.append((tmp_channel, timers.start_timer(hours=12), ctx.message.author))
 
     @create_team.error
     @create_clash.error
