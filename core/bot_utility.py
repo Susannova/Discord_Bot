@@ -28,7 +28,7 @@ def create_team(players):
     for player in team2:
         teams_message += player + "\n"
 
-    return teams_message
+    return teams_message, team1, team2
 
 # FIXME: this is bs
 def is_purgeable_message(message, cmds, channel, excepted_users):

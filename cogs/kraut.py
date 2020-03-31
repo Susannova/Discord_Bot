@@ -29,11 +29,30 @@ class KrautCog(commands.Cog):
 
     @commands.command(name='create-team')
     @checks.is_in_channels([consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_COMMANDS])
-    async def create_team(self, ctx: commands.Context):
-        voice_channel = utility.get_voice_channel(ctx.message, consts.CHANNEL_CREATE_TEAM_VOICE)
+    async def create_team(self, ctx: commands.Context, *player_names):
+        voice_channel = discord.utils.find(lambda x: len(x.members) >= 6, ctx.bot.guilds[0].voice_channels)
+        voice_channel = voice_channel if voice_channel is not None else utility.get_voice_channel(ctx.message, consts.CHANNEL_CREATE_TEAM_VOICE)
         players_list = utility.get_players_in_channel(voice_channel)
-        await ctx.send(utility.create_team(players_list))
+        if len(list(player_names)) != 0:
+            for player_name in player_names:
+                if player_name == 'mv':
+                    continue
+                players_list.append(player_name)
+        message, team1, team2 = utility.create_team(players_list)
+        await ctx.send(message)
 
+        role = discord.utils.find(lambda x: x.name == 'Wurzel', ctx.bot.guilds[0].roles)
+        if len(list(player_names)) == 0:
+            return
+        if player_names[0] == 'mv' and role in ctx.message.author.roles:
+            channel_team1 = discord.utils.find(lambda x: x.name == 'Team 1', ctx.bot.guilds[0].voice_channels)
+            channel_team2 = discord.utils.find(lambda x: x.name == 'Team 2', ctx.bot.guilds[0].voice_channels)
+            for member in voice_channel.members:
+                if member.name in team1:
+                    await member.move_to(channel_team1)
+                elif member.name in team2:
+                    await member.move_to(channel_team2)
+        
     @commands.command(name='create-clash')
     @checks.is_in_channels([consts.CHANNEL_CLASH])
     async def create_clash(self, ctx, arg):
