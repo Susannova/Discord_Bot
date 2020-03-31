@@ -3,6 +3,8 @@ import time
 import re
 import json
 
+import discord
+
 from core import consts, timers
 from core.state import global_state as gstate
 
@@ -111,11 +113,8 @@ def is_in_channel(message, channel):
     return message.channel.name == channel
 
 
-def get_voice_channel(message, name):
-    voice_channel = None
-    for voice_channel_iterator in message.guild.voice_channels:
-        if voice_channel_iterator.name == name:
-            voice_channel = voice_channel_iterator
+def get_voice_channel(message, id):
+    voice_channel = discord.utils.find(lambda x: x.id == id, message.guild.voice_channels)
     return voice_channel if voice_channel is not None else None
 
 

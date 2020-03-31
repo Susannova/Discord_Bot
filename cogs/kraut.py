@@ -31,8 +31,8 @@ class KrautCog(commands.Cog):
     @commands.command(name='create-team')
     @checks.is_in_channels([consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_COMMANDS])
     async def create_team(self, ctx: commands.Context, *player_names):
-        voice_channel = discord.utils.find(lambda x: len(x.members) >= 6, ctx.bot.guilds[0].voice_channels)
-        voice_channel = voice_channel if voice_channel is not None else utility.get_voice_channel(ctx.message, consts.CHANNEL_CREATE_TEAM_VOICE)
+        voice_channel = discord.utils.find(lambda x: len(x.members) >= 6, ctx.message.guild.voice_channels)
+        voice_channel = voice_channel if voice_channel is not None else utility.get_voice_channel(ctx.message, consts.CHANNEL_CREATE_TEAM_VOICE_ID)
         players_list = utility.get_players_in_channel(voice_channel)
         if len(list(player_names)) != 0:
             for player_name in player_names:
@@ -42,12 +42,13 @@ class KrautCog(commands.Cog):
         message, team1, team2 = utility.create_team(players_list)
         await ctx.send(message)
 
-        role = discord.utils.find(lambda x: x.name == 'Wurzel', ctx.bot.guilds[0].roles)
+        role = discord.utils.find(lambda x: x.name == 'Wurzel', ctx.message.guild.roles)
         if len(list(player_names)) == 0:
             return
+
         if player_names[0] == 'mv' and role in ctx.message.author.roles:
-            channel_team1 = discord.utils.find(lambda x: x.name == 'Team 1', ctx.bot.guilds[0].voice_channels)
-            channel_team2 = discord.utils.find(lambda x: x.name == 'Team 2', ctx.bot.guilds[0].voice_channels)
+            channel_team1 = discord.utils.find(lambda x: x.name == 'Team 1', ctx.message.guild.voice_channels)
+            channel_team2 = discord.utils.find(lambda x: x.name == 'Team 2', ctx.message.guild.voice_channels)
             for member in voice_channel.members:
                 if member.name in team1:
                     await member.move_to(channel_team1)
@@ -80,7 +81,7 @@ class KrautCog(commands.Cog):
         await play_request_message.add_reaction(consts.EMOJI_PASS)
 
         if not utility.is_in_channel(ctx.message, consts.CHANNEL_BOT):
-            for member in self.bot.guilds[0].members:
+            for member in ctx.message.guild.members:
                 for role in member.roles:
                     if role.id == consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]:
                         await member.send(consts.MESSAGE_PLAY_REQUEST_CREATED.format(ctx.message.author.name, consts.GAME_NAME_DICT[game_name], play_request_message.jump_url))
@@ -256,11 +257,11 @@ class KrautCog(commands.Cog):
         for tmp_channels in gstate.tmp_text_channels:
             if tmp_channels[2] == ctx.message.author:
                 raise exceptions.LimitReachedException('Der Autor hat schon einen temprorären Channel erstellt.')
-        tmp_channel_category = discord.utils.find(lambda x: x.name == consts.CHANNEL_CATEGORY_TEMPORARY, self.bot.guilds[0].channels)
-        tmp_channel = await self.bot.guilds[0].create_text_channel(channel_name, category=tmp_channel_category)
+        tmp_channel_category = discord.utils.find(lambda x: x.name == consts.CHANNEL_CATEGORY_TEMPORARY, ctx.message.guild.channels)
+        tmp_channel = await ctx.message0.guild.create_text_channel(channel_name, category=tmp_channel_category)
         gstate.tmp_text_channels.append((tmp_channel, timers.start_timer(hours=12), ctx.message.author))
 
-    @create_team.error
+    #@create_team.error
     @create_clash.error
     @play_.error
     @clash_.error
