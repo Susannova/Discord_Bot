@@ -10,7 +10,7 @@ class PlayRequestCategory(Enum):
     INTERN = 3
     APEX = 4
     CSGO = 5
-    RKTL = 6
+    RL = 6
 
 
 class PlayRequest():

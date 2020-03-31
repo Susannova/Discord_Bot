@@ -59,9 +59,14 @@ class KrautCog(commands.Cog):
         await play_request_message.add_reaction(ctx.bot.get_emoji(consts.EMOJI_ID_LIST[5]))
         await play_request_message.add_reaction(consts.EMOJI_PASS)
 
+        if not utility.is_in_channel(ctx.message, consts.CHANNEL_BOT):
+            for member in self.bot.guilds[0].members:
+                for role in member.roles:
+                    if role.id == consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]:
+                        await member.send(consts.MESSAGE_PLAY_REQUEST_CREATED.format(ctx.message.author.name, consts.GAME_NAME_DICT[game_name], play_request_message.jump_url))
+
         if _time != 'now':
             await self.auto_reminder(play_request_message)
-
 
     def get_category(self, game_name):
         _category = None
@@ -71,8 +76,8 @@ class KrautCog(commands.Cog):
             _category = PlayRequestCategory.APEX
         elif game_name == 'CSGO':
             _category = PlayRequestCategory.CSGO
-        elif game_name == 'RKTL':
-            _category = PlayRequestCategory.RKTL
+        elif game_name == 'RL':
+            _category = PlayRequestCategory.RL
         return _category
 
     async def auto_reminder(self, message):
@@ -221,7 +226,7 @@ class KrautCog(commands.Cog):
     async def game_selector(self, ctx):
         message = await ctx.send(consts.MESSAGE_GAME_SELECTOR)
         for emoji in ctx.bot.emojis:
-            if emoji.name == 'rktl' or emoji.name == 'lol' or emoji.name == 'csgo' or emoji.name == 'apex':
+            if emoji.name == 'rl' or emoji.name == 'lol' or emoji.name == 'csgo' or emoji.name == 'apex':
                 await message.add_reaction(emoji)
         gstate.game_selector_id = message.id
 

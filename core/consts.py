@@ -34,6 +34,8 @@ MESSAGE_CLASH_FULL = 'Das Clash Team von {0} für den {1} ist jetzt voll. Das Te
 MESSAGE_PATCH_NOTES = '@here\nEin neuer LoL Patch ist da: {0}'
 MESSAGE_GAME_SELECTOR = "@everyone\nWähle hier durch das Klicken auf eine Reaktion aus zu welchen Spielen du Benachrichtungen erhalten willst!"
 
+MESSAGE_PLAY_REQUEST_CREATED = '*{0}* hat ein Play-Request für das Spiel **{1}** erstellt. Wenn du interessiert daran bist, klicke hier: <{2}>'
+
 COMMAND_LIST_INTERN_PLANING = ["?create-team", "?play-internal"]
 COMMAND_LIST_PLAY_REQUEST = ["?play-lol", "?play-now"]
 COMMAND_LIST_ALL = ["?create-team", "?play-internal", "?play-lol", "?play-now", "?player", "?bans"]
@@ -79,7 +81,7 @@ ROLE_ADMIN_ID = 564492616977088532
 ROLE_APEX_ID = 693817368937496596
 ROLE_CSGO_ID = 693817437623418911
 ROLE_LOL_ID = 693817391330623508
-ROLE_RKTL_ID = 693817406883233822
+ROLE_RL_ID = 693817406883233822
 FOLDER_CHAMP_ICON = './data/champ-icon/'
 FOLDER_CHAMP_SPLICED = './data/champ-spliced/'
 
@@ -87,7 +89,7 @@ GAME_NAME_TO_ROLE_ID_DICT = {
     "LOL" : ROLE_LOL_ID,
     "APEX" : ROLE_APEX_ID,
     "CSGO" : ROLE_CSGO_ID,
-    "RKTL" : ROLE_RKTL_ID
+    "RL" : ROLE_RL_ID
 }
 
 # source: https://na.leagueoflegends.com/en-us/news/game-updates/patch-10-1-notes/
@@ -104,7 +106,7 @@ GAME_NAME_DICT = {
     "LOL" : "League of Legends",
     "APEX" : "Apex",
     "CSGO" : "CS:GO",
-    "RKTL" : "Rocket League"
+    "RL" : "Rocket League"
 }
 
 GAME_SELECTOR_MESSAGE_ID = 693832367521005617
