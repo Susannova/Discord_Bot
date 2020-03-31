@@ -43,3 +43,13 @@ class BadArgumentFormat(Exception):
     
     def __str__(self):
         return 'Das angegebene Argument ist falsch formatiert. (z.B. beim Command: play-lol)'
+
+class LimitReachedException(Exception):
+    """Exception that gets raised if a limit is reached. For example gets
+    used when a user already created one temporary channel, that still exists.
+    """
+    def __init__(self, message='Ein Limit wurde erreicht!'):
+        self.message = message
+
+    def __str__(self):
+        return self.message
