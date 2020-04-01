@@ -84,7 +84,8 @@ class KrautCog(commands.Cog):
             for member in ctx.message.guild.members:
                 for role in member.roles:
                     if role.id == consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]:
-                        await member.send(consts.MESSAGE_PLAY_REQUEST_CREATED.format(ctx.message.author.name, consts.GAME_NAME_DICT[game_name], play_request_message.jump_url))
+                        if member.id != ctx.message.author.id:
+                            await member.send(consts.MESSAGE_PLAY_REQUEST_CREATED.format(ctx.message.author.name, consts.GAME_NAME_DICT[game_name], play_request_message.jump_url))
 
         if _time != 'now':
             await self.auto_reminder(play_request_message)
@@ -261,7 +262,7 @@ class KrautCog(commands.Cog):
         tmp_channel = await ctx.message0.guild.create_text_channel(channel_name, category=tmp_channel_category)
         gstate.tmp_text_channels.append((tmp_channel, timers.start_timer(hours=12), ctx.message.author))
 
-    #@create_team.error
+    @create_team.error
     @create_clash.error
     @play_.error
     @clash_.error
