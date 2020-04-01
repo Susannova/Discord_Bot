@@ -227,12 +227,10 @@ class KrautCog(commands.Cog):
         exit_status = 2
         if str(arg) == "restart":
             await ctx.send('Bot will be restarted if systemd is configured to restart on success.')
-            # Is the "self" argument necessary?
-            await self.bot.logout(self, 0)
+            await self.bot.logout(0)
         elif str(arg) == "abort":
             await ctx.send('Bot will be aborted.')
-            # Is the "self" argument necessary?
-            await self.bot.logout(self, 3)
+            await self.bot.logout(3)
         else:
             # No escape characters needed?
             await ctx.send('Use "restart" or "abort".')
