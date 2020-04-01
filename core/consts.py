@@ -82,6 +82,7 @@ ROLE_APEX_ID = 693817368937496596
 ROLE_CSGO_ID = 693817437623418911
 ROLE_LOL_ID = 693817391330623508
 ROLE_RL_ID = 693817406883233822
+ROLE_VAL_ID = 694873734040780810
 FOLDER_CHAMP_ICON = './data/champ-icon/'
 FOLDER_CHAMP_SPLICED = './data/champ-spliced/'
 
@@ -89,7 +90,8 @@ GAME_NAME_TO_ROLE_ID_DICT = {
     "LOL" : ROLE_LOL_ID,
     "APEX" : ROLE_APEX_ID,
     "CSGO" : ROLE_CSGO_ID,
-    "RL" : ROLE_RL_ID
+    "RL" : ROLE_RL_ID,
+    "VAL" : ROLE_VAL_ID
 }
 
 # source: https://na.leagueoflegends.com/en-us/news/game-updates/patch-10-1-notes/

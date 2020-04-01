@@ -11,6 +11,7 @@ class PlayRequestCategory(Enum):
     APEX = 4
     CSGO = 5
     RL = 6
+    VAL = 7
 
 
 class PlayRequest():

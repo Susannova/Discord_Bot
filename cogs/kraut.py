@@ -100,6 +100,8 @@ class KrautCog(commands.Cog):
             _category = PlayRequestCategory.CSGO
         elif game_name == 'RL':
             _category = PlayRequestCategory.RL
+        elif game_name == 'VAL':
+            _category = PlayRequestCategory.VAL
         return _category
 
     async def auto_reminder(self, message):
@@ -248,7 +250,7 @@ class KrautCog(commands.Cog):
     async def game_selector(self, ctx):
         message = await ctx.send(consts.MESSAGE_GAME_SELECTOR)
         for emoji in ctx.bot.emojis:
-            if emoji.name == 'rl' or emoji.name == 'lol' or emoji.name == 'csgo' or emoji.name == 'apex':
+            if emoji.name == 'rl' or emoji.name == 'lol' or emoji.name == 'csgo' or emoji.name == 'apex' or emoji.name == 'val':
                 await message.add_reaction(emoji)
         gstate.game_selector_id = message.id
 
