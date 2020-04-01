@@ -1,6 +1,7 @@
 """Main module. Stars and defines the Discord Bot (KrautBot).
 """
 import logging
+import sys
 
 import discord
 from discord.ext import commands
