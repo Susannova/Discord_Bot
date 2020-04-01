@@ -19,8 +19,11 @@
 - automatically generate op.gg link from scanning clash scouting screen
 
 ## Commands:
+() = mandatory
+[] = optional
+
 ### General Commands:
-- `!create-team`
+- `!create-team [mv names | names]`
 - `!play game (time | "now")`
 - `!clash`
 
