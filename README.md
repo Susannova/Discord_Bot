@@ -20,24 +20,23 @@
 
 ## Commands:
 ### General Commands:
-- ?create-team
-- ?play-lol [Uhrzeit]
-- ?play-now
-- ?clash
+- `!create-team`
+- `!play game (time | "now")`
+- `!clash`
 
 ### Riot Commands:
-- ?bans
-- ?player
-- ?smurf
+- `!bans`
+- `!player`
+- `!smurf`
+- `!link summoner`
 
 ### DEBUG/DEV Commands:
-- ?version
-- ?enable-debug
-- ?reload-config
-- ?print
-- !end
+- `!version`
+- `!enable-debug`
+- `!reload-config`
+- `!print command`
+- `!end (restart | abort)`
 
 ## Known Bugs:
 
 ## Developer Wiki:
-

@@ -223,9 +223,18 @@ class KrautCog(commands.Cog):
     @checks.is_in_channels([])
     @commands.has_role(consts.ROLE_ADMIN_ID)
     @commands.is_owner()
-    async def end_(self, ctx):
-        await ctx.send('Bot is shut down!')
-        await self.bot.logout()
+    async def end_(self, ctx, arg):
+        exit_status = 2
+        if str(arg) == "restart":
+            await ctx.send('Bot will be restarted if systemd is configured to restart on success.')
+            await self.bot.logout(0)
+        elif str(arg) == "abort":
+            await ctx.send('Bot will be aborted.')
+            await self.bot.logout(3)
+        else:
+            # No escape characters needed?
+            await ctx.send('Use "restart" or "abort".')
+
 
     @commands.command(name='purge')
     @commands.has_role(consts.ROLE_ADMIN_ID)
