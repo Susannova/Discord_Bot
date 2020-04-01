@@ -34,6 +34,8 @@ class KrautBot(commands.Bot):
     """
     BOT_TOKEN = str(BOT_TOKENS['token'])
 
+    exit_status = 1
+
     def __init__(self):
         """ Sets the Command Prefix and then
         call the __init__ method of the commands.Bot
@@ -49,6 +51,15 @@ class KrautBot(commands.Bot):
             super().run(self.BOT_TOKEN)
         except KeyboardInterrupt:
             logger.exception('Stopped Bot due to Keyboard Interrupt.')
+            
+            # Does this work?
+            exit_status = KeyboardInterrupt
+
+    async def logout(self, exit_status_input):
+        """Aborts the bot and sets exit_status to exit_status_input"""
+        await super().logout()
+        exit_status = exit_status_input
+
 
 
 if __name__ == '__main__':
@@ -61,3 +72,6 @@ if __name__ == '__main__':
         logger.info("End")
     except discord.LoginFailure:
         logger.exception('Failed to login due to improper Token.')
+        bot.exit_status = 2
+    
+    sys.exit(bot.exit_status)
