@@ -28,9 +28,9 @@
 - `!clash`
 
 ### Riot Commands:
-- `!bans`
-- `!player`
-- `!smurf`
+- `!bans summoner x5`
+- `!player summoner`
+- `!smurf summoner`
 - `!link summoner`
 - `!unlink`
 - `!leaderboard`
