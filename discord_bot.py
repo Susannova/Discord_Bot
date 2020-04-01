@@ -52,14 +52,12 @@ class KrautBot(commands.Bot):
             super().run(self.BOT_TOKEN)
         except KeyboardInterrupt:
             logger.exception('Stopped Bot due to Keyboard Interrupt.')
-            
-            # Does this work?
-            exit_status = KeyboardInterrupt
+            self.exit_status = 2
 
     async def logout(self, exit_status_input):
         """Aborts the bot and sets exit_status to exit_status_input"""
         await super().logout()
-        exit_status = exit_status_input
+        self.exit_status = exit_status_input
 
 
 
