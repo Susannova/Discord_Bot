@@ -57,6 +57,11 @@ def format_summoner_name(name):
         return name.replace('%20', ' ')
     return name
 
+def get_current_patch_url():
+    current_patch_list = get_current_patch().split('.')
+    return consts.MESSAGE_PATCH_NOTES.format(current_patch_list[0], current_patch_list[1])
+
+
 def get_current_patch():
   with urllib.request.urlopen("https://ddragon.leagueoflegends.com/api/versions.json") as url:
         data = json.loads(url.read().decode())

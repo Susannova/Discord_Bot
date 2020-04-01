@@ -31,10 +31,12 @@ MESSAGE_CLASH_CREATE = (
 )
 MESSAGE_CLASH_FULL = 'Das Clash Team von {0} für den {1} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{1}'
 
-MESSAGE_PATCH_NOTES = '@here\nEin neuer LoL Patch ist da: {0}'
+MESSAGE_PATCH_NOTES_FORMATTED = '{0}\nEin neuer Patch ist da: {1}'
 MESSAGE_GAME_SELECTOR = "@everyone\nWähle hier durch das Klicken auf eine Reaktion aus zu welchen Spielen du Benachrichtungen erhalten willst!"
 
 MESSAGE_PLAY_REQUEST_CREATED = '*{0}* hat ein Play-Request für das Spiel **{1}** erstellt. Wenn du interessiert daran bist, klicke hier: <{2}>'
+
+MESSAGE_PATCH_NOTES = "https://oce.leagueoflegends.com/en-us/news/game-updates/patch-{0}-{1}-notes/"
 
 COMMAND_LIST_INTERN_PLANING = ["?create-team", "?play-internal"]
 COMMAND_LIST_PLAY_REQUEST = ["?play-lol", "?play-now"]

@@ -58,7 +58,7 @@ class EventCog(commands.Cog):
         if riot_utility.update_current_patch():
             logger.info('Posted new Patch notes')
             annoucement_channel = discord.utils.find(lambda m: m.name == 'announcements', message.channel.guild.channels)
-            await annoucement_channel.send(consts.MESSAGE_PATCH_NOTES.format(riot_utility.get_current_patch()))
+            await annoucement_channel.send(consts.MESSAGE_PATCH_NOTES_FORMATTED.format(message.guild.get_role(consts.ROLE_LOL_ID).mention, riot_utility.get_current_patch_url()))
 
         for tmp_channel in gstate.tmp_text_channels:
             if timers.is_timer_done(tmp_channel[1]):
