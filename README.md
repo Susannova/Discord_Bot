@@ -29,6 +29,8 @@
 - `!player`
 - `!smurf`
 - `!link summoner`
+- `!unlink`
+- `!leaderboard`
 
 ### DEBUG/DEV Commands:
 - `!version`
