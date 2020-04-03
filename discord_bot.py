@@ -12,11 +12,12 @@ from core import (
 )
 
 from cogs import (
-    kraut,
+    cog_debug,
+    cog_play_requests,
+    cog_riot,
+    cog_utility,
     events
 )
-
-
 
 logging.basicConfig(filename=consts.LOG_FILE,
                             filemode='a',
@@ -65,8 +66,11 @@ if __name__ == '__main__':
     bot = KrautBot()
     try:
         logger.info("Start Bot")
-        bot.add_cog(kraut.KrautCog(bot))
         bot.add_cog(events.EventCog(bot))
+        bot.add_cog(cog_debug.DebugCog(bot))
+        bot.add_cog(cog_play_requests.PlayRequestsCog())
+        bot.add_cog(cog_riot.RiotCog())
+        bot.add_cog(cog_utility.UtilityCog())
         bot.run()
         logger.info("End")
     except discord.LoginFailure:
