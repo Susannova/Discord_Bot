@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 import discord
@@ -8,14 +7,13 @@ from core.state import global_state as gstate
 from core import (
     bot_utility as utility,
     consts,
-    reminder,
     timers
 )
-from core.play_requests import PlayRequest
 from core.play_requests import PlayRequestCategory
 from riot import riot_utility
 
 logger = logging.getLogger(consts.LOG_NAME)
+
 
 class EventCog(commands.Cog):
     """Cog that handles all events. Used for
@@ -37,10 +35,10 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-            logger.info('We have logged in as {0.user}'.format(self.bot))
-            game_selection_channel = discord.utils.find(lambda x: x.name == 'game-selection', self.bot.guilds[0].channels)
-            game_selector_message_list = await game_selection_channel.history(limit=1).flatten()
-            self.game_selection_message_id = game_selector_message_list[0].id
+        logger.info('We have logged in as {0.user}'.format(self.bot))
+        game_selection_channel = discord.utils.find(lambda x: x.name == 'game-selection', self.bot.guilds[0].channels)
+        game_selector_message_list = await game_selection_channel.history(limit=1).flatten()
+        self.game_selection_message_id = game_selector_message_list[0].id
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -52,8 +50,6 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-    
-
         # checks if a new lol patch is out and posts it if it is
         if riot_utility.update_current_patch():
             logger.info('Posted new Patch notes')
@@ -67,7 +63,6 @@ class EventCog(commands.Cog):
 
         if isinstance(message.channel, discord.DMChannel):
             return
-
 
         # add all messages in channel to gstate.message_cache
         if gstate.CONFIG["TOGGLE_AUTO_DELETE"] \
