@@ -183,7 +183,7 @@ class KrautCog(commands.Cog):
     async def reload_config(self, ctx):
         global consts
         await ctx.send("Reload configuration.json:")
-        gstate.read_config()
+        gstate.reload_config()
         consts = reload(consts)
         gstate.get_version()
         await ctx.send("Done.")

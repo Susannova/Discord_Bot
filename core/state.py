@@ -50,11 +50,15 @@ class GlobalState(Singleton):
     def read_config(self):
         return json.load(open(f'./config/{self.CONFIG_FILENAME}.json', 'r'))
 
+    def reload_config(self):
+        self.CONFIG = self.read_config()
+
     def write_and_reload_config(self, data):
         with open(f'./config/{self.CONFIG_FILENAME}.json', 'w', encoding='utf-8') as file_:
             json.dump(data, file_, ensure_ascii=False, indent=4)
-        self.CONFIG = self.read_config()
+        self.reload_config()
 
+   
 
 global_state = GlobalState()
 

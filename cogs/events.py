@@ -52,8 +52,6 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-    
-
         # checks if a new lol patch is out and posts it if it is
         if riot_utility.update_current_patch():
             logger.info('Posted new Patch notes')
@@ -67,7 +65,6 @@ class EventCog(commands.Cog):
 
         if isinstance(message.channel, discord.DMChannel):
             return
-
 
         # add all messages in channel to gstate.message_cache
         if gstate.CONFIG["TOGGLE_AUTO_DELETE"] \
