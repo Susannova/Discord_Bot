@@ -80,13 +80,6 @@ class KrautCog(commands.Cog):
         await play_request_message.add_reaction(ctx.bot.get_emoji(consts.EMOJI_ID_LIST[5]))
         await play_request_message.add_reaction(consts.EMOJI_PASS)
 
-        if not utility.is_in_channel(ctx.message, consts.CHANNEL_BOT):
-            for member in ctx.message.guild.members:
-                for role in member.roles:
-                    if role.id == consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]:
-                        if member.id != ctx.message.author.id:
-                            await member.send(consts.MESSAGE_PLAY_REQUEST_CREATED.format(ctx.message.author.name, consts.GAME_NAME_DICT[game_name], play_request_message.jump_url))
-
         if _time != 'now':
             await self.auto_reminder(play_request_message)
 
