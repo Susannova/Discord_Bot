@@ -105,8 +105,8 @@ class UtilityCog(commands.Cog):
             if tmp_channels[2] == ctx.message.author:
                 raise exceptions.LimitReachedException('Der Autor hat schon einen temprorären Channel erstellt.')
         tmp_channel_category = discord.utils.find(lambda x: x.name == consts.CHANNEL_CATEGORY_TEMPORARY, ctx.message.guild.channels)
-        tmp_channel = await ctx.message0.guild.create_text_channel(channel_name, category=tmp_channel_category)
-        gstate.tmp_text_channels.append((tmp_channel, timers.start_timer(hours=12), ctx.message.author))
+        tmp_channel = await ctx.message.guild.create_text_channel(channel_name, category=tmp_channel_category)
+        gstate.tmp_text_channels.append((tmp_channel, timers.start_timer(hrs=12), ctx.message.author))
 
     @create_team.error
     async def error_handler(self, ctx, error):
