@@ -11,7 +11,7 @@ from core import (
     ocr,
     checks,
     exceptions,
-    reminder
+    timers
 )
 
 from core.state import global_state as gstate
@@ -71,7 +71,7 @@ class PlayRequestsCog(commands.Cog):
         return _category
 
     async def auto_reminder(self, message):
-        time_difference = reminder.get_time_difference(message.content)
+        time_difference = timers.get_time_difference(message.content)
         if time_difference > 0:
             await asyncio.sleep(time_difference)
             for player in gstate.play_requests[message.id].generate_all_players():

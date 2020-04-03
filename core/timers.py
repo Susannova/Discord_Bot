@@ -1,5 +1,8 @@
-from datetime import datetime, timedelta
 import time
+import re
+from datetime import datetime, timedelta
+
+REGEX_TIME = r"[0-2][0-9]:[0-5][0-9]"
 
 
 def start_timer(secs=0, mins=0, hrs=0):
@@ -17,6 +20,33 @@ def remove_finished_timers(timers):
             timers.remove(timer)
 
 
+def is_valid_time(time):
+    matches = re.finditer(REGEX_TIME, time)
+    for _, match in enumerate(matches, start=1):
+        match = match.group()
+        return match
+    return '-1'
+
+
+def get_time_difference(message_content):
+    time_now = datetime.now()
+    time = is_valid_time(message_content)
+    if time == '-1':
+        return -1
+    time_reminder = datetime(time_now.year, time_now.month, time_now.day, 00, 00, 00, 00) + timedelta(hours=int(time[:-3]), minutes=int(time[3:])-5)
+    time_difference = (time_reminder - time_now).total_seconds()
+    return time_difference if time_difference >= 0 else -1
+
+
+def convert_human_to_epoch_time(date: str) -> int:
+    """ Input date formated as dd.mm.YYYY. Returns that
+    date as epoch time.
+    """
+    date_time = f'{date}'
+    pattern = '%d.%m.%Y'
+    return int(time.mktime(time.strptime(date_time, pattern)))
+
+
 # === TEST === #
 def test_module():
     timers = []
@@ -32,12 +62,3 @@ def test_module():
 
 if __name__ == "__main__":
     test_module()
-
-
-def convert_human_to_epoch_time(date: str) -> int:
-    """ Input date formated as dd.mm.YYYY. Returns that
-    date as epoch time.
-    """
-    date_time = f'{date}'
-    pattern = '%d.%m.%Y'
-    return int(time.mktime(time.strptime(date_time, pattern)))
