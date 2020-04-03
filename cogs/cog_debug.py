@@ -25,6 +25,12 @@ class DebugCog(commands.Cog):
     async def version_(self, ctx):
         await ctx.send(gstate.VERSION)
 
+    @commands.command(name='status')
+    @checks.is_in_channels([])
+    @commands.has_role(consts.ROLE_ADMIN_ID)
+    async def status_(self, ctx):
+        await ctx.send("Bot is alive.")
+
     @commands.command(name='reload-config')
     @checks.is_in_channels([])
     @commands.has_role(consts.ROLE_ADMIN_ID)
