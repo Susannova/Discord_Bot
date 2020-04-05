@@ -70,6 +70,17 @@ class DebugCog(commands.Cog):
     @checks.is_in_channels([])
     @commands.has_role(consts.ROLE_ADMIN_ID)
     @commands.is_owner()
-    async def end_(self, ctx):
-        await ctx.send('Bot is shut down!')
-        await self.bot.logout()
+    async def end_(self, ctx, *arg):
+        if len(list(arg)) == 0:
+            await ctx.send('Use "restart" or "abort".')
+            return
+        exit_status = 2
+        if str(arg[0]) == "restart":
+            await ctx.send('Bot will be restarted if systemd is configured to restart on success.')
+            # Is the "self" argument necessary?
+            await self.bot.logout(0)
+        elif str(arg[0]) == "abort":
+            await ctx.send('Bot will be aborted.')
+            # Is the "self" argument necessary?
+            await self.bot.logout(3)
+            
