@@ -110,7 +110,8 @@ GAME_NAME_DICT = {
     "LOL" : "League of Legends",
     "APEX" : "Apex",
     "CSGO" : "CS:GO",
-    "RL" : "Rocket League"
+    "RL" : "Rocket League",
+    "VAL" : "Valorant"
 }
 
 GAME_SELECTOR_MESSAGE_ID = 693832367521005617
