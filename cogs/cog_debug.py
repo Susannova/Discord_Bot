@@ -15,7 +15,7 @@ from core.state import global_state as gstate
 logger = logging.getLogger(consts.LOG_NAME)
 
 
-class DebugCog(commands.Cog):
+class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
     def __init__(self, bot):
         self.bot = bot
 

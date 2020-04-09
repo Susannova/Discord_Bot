@@ -7,8 +7,6 @@ from discord.ext import commands
 
 from core import (
     consts,
-    bot_utility as utility,
-    ocr,
     checks,
     exceptions,
     timers
@@ -20,15 +18,7 @@ from core.play_requests import PlayRequest, PlayRequestCategory
 logger = logging.getLogger(consts.LOG_NAME)
 
 
-class PlayRequestsCog(commands.Cog):
-    @commands.command(name='create-clash')
-    @checks.is_in_channels([consts.CHANNEL_CLASH])
-    async def create_clash(self, ctx, arg):
-        gstate.tmp_message_author = ctx.message.author
-        gstate.clash_date = arg
-        await ctx.send(consts.MESSAGE_CLASH_CREATE.format(
-            ctx.message.author.mention, arg))
-
+class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     @commands.command(name='play')
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS])
     async def play_(self, ctx, game_name, _time):
@@ -70,15 +60,10 @@ class PlayRequestsCog(commands.Cog):
             for player in gstate.play_requests[message.id].generate_all_players():
                 await player.send(consts.MESSAGE_PLAY_REQUEST_REMINDER)
 
-    @commands.command(name='clash')
-    @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
-    @checks.has_n_attachments(1)
-    async def clash_(self, ctx):
-        attached_image = ctx.message.attachments[0]
-        attached_image_file_name = attached_image.filename
-        await attached_image.save(attached_image_file_name)
-        ocr.set_image_file_name(attached_image_file_name)
-        await ctx.send(ocr.run_ocr())
-        ocr.clean_up_image(attached_image_file_name)
-        await ctx.send(
-            consts.MESSAGE_BANS.format(ocr.get_formatted_summoner_names()))
+    @commands.command(name='create-clash')
+    @checks.is_in_channels([consts.CHANNEL_CLASH])
+    async def create_clash(self, ctx, arg):
+        gstate.tmp_message_author = ctx.message.author
+        gstate.clash_date = arg
+        await ctx.send(consts.MESSAGE_CLASH_CREATE.format(
+            ctx.message.author.mention, arg))

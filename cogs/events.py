@@ -102,7 +102,7 @@ class EventCog(commands.Cog):
             for player in play_request.generate_all_players():
                 if user == player:
                     play_request.remove_subscriber(user)
-            return  
+            return
 
         if utility.is_already_subscriber(user, play_request):
             return

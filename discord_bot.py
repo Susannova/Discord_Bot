@@ -27,9 +27,9 @@ logging.basicConfig(filename=consts.LOG_FILE,
 
 logger = logging.getLogger(consts.LOG_NAME)
 discord.voice_client.VoiceClient.warn_nacl = False
-
 BOT_TOKENS = utility.read_config_file('bot')
-
+help_command_ = discord.ext.commands.DefaultHelpCommand()
+help_command_.verify_checks = False
 
 class KrautBot(commands.Bot):
     """The actual bot.
@@ -44,6 +44,7 @@ class KrautBot(commands.Bot):
         class.
         """
         super().__init__(command_prefix=consts.COMMAND_PREFIX)
+        self.help_command = help_command_
 
     def run(self):
         """ Runs the Bot using the Token defined

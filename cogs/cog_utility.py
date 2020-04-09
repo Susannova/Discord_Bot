@@ -18,7 +18,7 @@ from core.state import global_state as gstate
 logger = logging.getLogger(consts.LOG_NAME)
 
 
-class UtilityCog(commands.Cog):
+class UtilityCog(commands.Cog, name='Utility Commands'):
     @commands.command(name='create-team')
     @checks.is_in_channels([consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_COMMANDS])
     async def create_team(self, ctx: commands.Context, *player_names):
@@ -71,7 +71,7 @@ class UtilityCog(commands.Cog):
             await ctx.message.author.send(
                 'Dein Lol-Account wurde erfolgreich von deinem Discord Account getrennt!')
 
-    @commands.command(name='purge')
+    @commands.command(name='purge', hidden=True)
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def purge_(self, ctx, count: int):
         last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
@@ -82,14 +82,14 @@ class UtilityCog(commands.Cog):
     async def test_embed(self, ctx):
         await ctx.send(embed=riot_commands.create_embed(ctx))
 
-    @commands.command(name='test-plt')
+    @commands.command(name='test-plt', hidden=True)
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def test_plt(self, ctx):
         riot_commands.test_matplotlib()
         await ctx.send(file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/leaderboard.png'))
 
     # dont use this
-    @commands.command(name='game-selector')
+    @commands.command(name='game-selector', hidden=True)
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def game_selector(self, ctx):
         message = await ctx.send(consts.MESSAGE_GAME_SELECTOR)
@@ -98,8 +98,9 @@ class UtilityCog(commands.Cog):
                 await message.add_reaction(emoji)
         gstate.game_selector_id = message.id
 
-    @commands.command(name='create-channel')
+    @commands.command(name='create-channel',brief='', help=consts.HELP_CREATE_CHANNEL)
     @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
+    @discord.ext.commands.cooldown(rate=3, per=3600)
     async def create_channel(self, ctx, channel_name):
         for tmp_channels in gstate.tmp_text_channels:
             if tmp_channels[2] == ctx.message.author:

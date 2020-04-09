@@ -115,3 +115,5 @@ GAME_NAME_DICT = {
 }
 
 GAME_SELECTOR_MESSAGE_ID = 693832367521005617
+
+HELP_CREATE_CHANNEL = 'Benutze dieses Command um einen Channel zu erstellen der für 12h aktiv ist und danach gelöscht wird. Der Channel ist in der Kategorie TEMPORARY CHANNELS zu finden. Der Name muss als Parameter des Commands angegeben werden.'
