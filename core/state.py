@@ -42,6 +42,7 @@ class GlobalState(Singleton):
         self.clash_date = ''
         self.game_selector_id = None
         self.tmp_text_channels = []
+        self.tmp_voice_channels = []
 
     def get_version(self):
         version_file = open("./.git/refs/heads/master", "r")
