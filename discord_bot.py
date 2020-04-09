@@ -62,7 +62,6 @@ class KrautBot(commands.Bot):
         self.exit_status = exit_status_input
 
 
-
 if __name__ == '__main__':
     bot = KrautBot()
     try:

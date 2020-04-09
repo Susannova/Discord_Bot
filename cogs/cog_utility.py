@@ -100,26 +100,21 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
     @commands.command(name='create-channel',brief='', help=consts.HELP_CREATE_CHANNEL)
     @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
-    @discord.ext.commands.cooldown(rate=3, per=3600)
-    async def create_channel(self, ctx, channel_name):
-        for tmp_channels in gstate.tmp_text_channels:
+    @discord.ext.commands.cooldown(rate=3, per=30)
+    async def create_channel(self, ctx, kind, channel_name, *user_limit):
+        for tmp_channels in gstate.tmp_channels:
             if tmp_channels[2] == ctx.message.author:
                 raise exceptions.LimitReachedException('Der Autor hat schon einen temprorären Channel erstellt.')
         tmp_channel_category = discord.utils.find(lambda x: x.name == consts.CHANNEL_CATEGORY_TEMPORARY, ctx.message.guild.channels)
-        tmp_channel = await ctx.message.guild.create_text_channel(channel_name, category=tmp_channel_category)
-        gstate.tmp_text_channels.append((tmp_channel, timers.start_timer(hrs=12), ctx.message.author))
-
-    # Caution: Untested!
-    @commands.command(name='create-voice-channel')
-    @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
-    async def create_voice_channel(self, ctx, channel_name, tmp_user_limit):
-        for tmp_channels in gstate.tmp_voice_channels:
-            if tmp_channels[2] == ctx.message.author:
-                raise exceptions.LimitReachedException('Der Autor hat schon einen temprorären Voice-Channel erstellt.')
-        tmp_channel_category = discord.utils.find(lambda x: x.name == consts.CHANNEL_CATEGORY_TEMPORARY, ctx.message.guild.channels)
-        # Copy-paste is not that nice.
-        tmp_channel = await ctx.message.guild.create_voice_channel(channel_name, category=tmp_channel_category, user_limit=tmp_user_limit) if tmp_user_limit != 0 else ctx.message.guild.create_voice_channel(channel_name, category=tmp_channel_category)
-        gstate.tmp_voice_channels.append((tmp_channel, timers.start_timer(hrs=12), ctx.message.author))
+        tmp_channel = None
+        if kind == 'text':
+            tmp_channel = await ctx.message.guild.create_text_channel(channel_name, category=tmp_channel_category)
+        elif kind == 'voice':
+            if len(user_limit) > 0 and int(user_limit[0]) > 0 and int(user_limit[0]) <= 99:
+                tmp_channel = await ctx.message.guild.create_voice_channel(channel_name, category=tmp_channel_category, user_limit=int(user_limit[0]))
+            else:
+                tmp_channel = await ctx.message.guild.create_voice_channel(channel_name, category=tmp_channel_category)
+        gstate.tmp_channels.append((tmp_channel, timers.start_timer(hrs=12), ctx.message.author))
 
     @create_team.error
     async def error_handler(self, ctx, error):

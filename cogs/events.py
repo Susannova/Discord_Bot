@@ -56,10 +56,10 @@ class EventCog(commands.Cog):
             annoucement_channel = discord.utils.find(lambda m: m.name == 'announcements', message.channel.guild.channels)
             await annoucement_channel.send(consts.MESSAGE_PATCH_NOTES_FORMATTED.format(message.guild.get_role(consts.ROLE_LOL_ID).mention, riot_utility.get_current_patch_url()))
 
-        for tmp_channel in gstate.tmp_text_channels:
+        for tmp_channel in gstate.tmp_channels:
             if timers.is_timer_done(tmp_channel[1]):
                 await tmp_channel[0].delete()
-                gstate.tmp_text_channels.remove(tmp_channel)
+                gstate.tmp_channels.remove(tmp_channel)
 
         if isinstance(message.channel, discord.DMChannel):
             return
@@ -156,3 +156,9 @@ class EventCog(commands.Cog):
                     member_roles.remove(role)
             await member.edit(roles=member_roles)
         return
+
+    @commands.Cog.listener()
+    async def on_guild_channel_delete(self, channel):
+        for tmp_channel in gstate.tmp_channels:
+            if channel.id == tmp_channel[0].id:
+                gstate.tmp_channels.remove(tmp_channel)
