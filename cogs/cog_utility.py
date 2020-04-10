@@ -22,7 +22,8 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @commands.command(name='create-team')
     @checks.is_in_channels([consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_COMMANDS])
     async def create_team(self, ctx: commands.Context, *player_names):
-        voice_channel = discord.utils.find(lambda x: len(x.members) >= 6, ctx.message.guild.voice_channels)
+        member = await discord.ext.commands.MemberConverter().convert(ctx, ctx.message.author.name)
+        voice_channel = discord.utils.find(lambda x: member in x.members, ctx.message.guild.voice_channels)
         voice_channel = voice_channel if voice_channel is not None else utility.get_voice_channel(ctx.message, consts.CHANNEL_CREATE_TEAM_VOICE_ID)
         players_list = utility.get_players_in_channel(voice_channel)
         if len(list(player_names)) != 0:
