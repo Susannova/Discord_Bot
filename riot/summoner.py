@@ -27,17 +27,20 @@ class Summoner():
     data_league: list
         basic league data from Riot API
     """
-    def __init__(self, name, data_summoner={}, data_mastery=[], data_league=[], discord_user_name=None):
+    def __init__(self, name, data_summoner={}, data_mastery=[], data_league=[]):
         self.name = name
         self.data_summoner = data_summoner
         self.data_mastery = data_mastery
         self.data_league = data_league
         self.needs_update_timer = timers.start_timer(hrs=1)
-        self.discord_user_name = None
         self.rank_value = self.get_rank_value()
+        self.discord_user_name = 'None'
 
     def __str__(self):
         return f'Summoner: {self.name}, Level: {self.get_level()}, Rank: {self.get_soloq_rank_string()}, Winrate: {self.get_soloq_winrate()}'
+
+    def __repr__(self):
+        return self.name
 
     def get_level(self):
         return int(self.data_summoner['summonerLevel'])

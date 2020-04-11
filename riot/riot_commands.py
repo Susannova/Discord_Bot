@@ -94,9 +94,6 @@ def calculate_bans_for_team(*names) -> str:
 
 
 def link_account(discord_user_name, summoner_name):
-    if utility.is_command_on_cooldown(_timers):
-        logger.exception('DataBaseException')
-        raise exceptions.DataBaseException('Command on cooldown')
     summoner = utility.create_summoner(summoner_name)
     summoner.discord_user_name = discord_user_name
     with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
@@ -111,17 +108,22 @@ def link_account(discord_user_name, summoner_name):
         database[str(discord_user_name)] = summoner
 
 
-def update_linked_account_data(discord_user_name):
-    summoner = utility.read_account(discord_user_name)
-    summoner = utility.create_summoner(summoner.name)
-    link_account(discord_user_name, summoner.name)
+def update_linked_account_data_by_discord_user_name(discord_user_name):
+    summoner = utility.create_summoner(utility.read_account(discord_user_name).name)
+    summoner.discord_user_name = discord_user_name
+    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
+        database[str(discord_user_name)] = summoner
+    return summoner
 
+def update_linked_summoners_data(summoners):
+    for summoner in summoners:
+        yield update_linked_account_data_by_discord_user_name(summoner.discord_user_name)
 
 def get_or_create_summoner(discord_user_name, summoner_name):
     if summoner_name is None:
-        summoner = utility.create_summoner(utility.read_account(discord_user_name).name)
+        summoner = utility.read_account(discord_user_name)
         if utility.is_in_need_of_update(summoner):
-            update_linked_account_data(discord_user_name)
+            update_linked_account_data_by_discord_user_name(discord_user_name)
         return summoner
     return utility.create_summoner(summoner_name)
 
@@ -132,11 +134,16 @@ def unlink_account(discord_user_name):
             if key == str(discord_user_name):
                 del database[key]
 
+
 # FIXME im still not happy with this
 def create_embed(ctx):
     summoners = list(utility.read_all_accounts())
-    [summoner.get_rank_value() for summoner in summoners]
+    old_summoners = summoners.copy()
+    summoners = list(update_linked_summoners_data(summoners))
     summoners.sort(key=lambda x: x.rank_value, reverse=True)
+
+
+    
     op_url = 'https://euw.op.gg/multi/query='
     for summoner in summoners:
         op_url = op_url + f'{summoner.name}%2C'
@@ -162,18 +169,16 @@ def create_embed(ctx):
 
 def test_matplotlib():
     summoners = list(utility.read_all_accounts())
-    [summoner.get_rank_value() for summoner in summoners]
+    old_summoners = summoners.copy()
+    summoners = list(update_linked_summoners_data(summoners))
     summoners.sort(key=lambda x: x.rank_value, reverse=True)
 
-    rank_strings = []
     for summoner in summoners:
-        rank_string = f'{summoner.get_soloq_tier()}-{summoner.get_soloq_rank()} {summoner.get_soloq_lp()}LP'
-        rank_strings.append(rank_string)
-    winrates = [f'{summoner.get_soloq_winrate()}%' for summoner in summoners]
-    discord_users = [summoner.discord_user_name for summoner in summoners]
-    summoner_names = [summoner.name for summoner in summoners]
-    
-    data = [[summoner.name, summoner.discord_user_name, f'{summoner.get_soloq_tier()}-{summoner.get_soloq_rank()} {summoner.get_soloq_lp()}LP', f'{summoner.get_soloq_winrate()}%'] for summoner in summoners]
+        for old_summoner in old_summoners:
+            if old_summoner.name == summoner.name:
+                summoner.rank_dt = summoner.rank_value - old_summoner.rank_value
+        
+    data = [[summoner.name, summoner.discord_user_name, summoner.get_soloq_rank_string(), f'{summoner.get_soloq_winrate()}%', summoner.rank_dt] for summoner in summoners]
     fig, ax = plt.subplots()
 
     # hide axes
@@ -181,15 +186,37 @@ def test_matplotlib():
     ax.axis('off')
     ax.axis('tight')
 
-    df = pd.DataFrame(data, columns=['Discord User', 'Summoner', 'Rank', 'Winrate'])
+    df = pd.DataFrame(data, columns=['Discord User', 'Summoner', 'Rank', 'Winrate', 'Progress in LP'])
+    inner_cell_colours = []
+    col_colors = []
+    for i in range(0, len(df.columns)):
+        inner_cell_colours.append('#2c2f33')
+        col_colors.append('#23272a')
 
-    ax.table(cellText=df.values, colLabels=df.columns, loc='center')
+    outer_cell_colours = []
+    for i in range(0, len(data)):
+        outer_cell_colours.append(inner_cell_colours)
+
+    table = ax.table(cellText=df.values, colLabels=df.columns, loc='center', cellLoc='center', colColours=col_colors, cellColours=outer_cell_colours)
+    table_props = table.properties()
+    table_cells = table_props['child_artists']
+    for cell in table_cells: 
+            cell.get_text().set_fontsize(30)
+            cell.get_text().set_color('white')
 
     fig.tight_layout()
 
+
     plt.savefig(f'./{consts.FOLDER_CHAMP_SPLICED}/leaderboard.png')
 
+    op_url = 'https://euw.op.gg/multi/query='
+    for summoner in summoners:
+        op_url = op_url + f'{summoner.name}%2C'
+    _embed = discord.Embed(
+        title='Kraut9 Leaderboard',
+        colour=discord.Color.from_rgb(62, 221, 22),
+        url=op_url[:-3])
+    return _embed
     
-
 
 # === INTERFACE END === #

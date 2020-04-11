@@ -1,6 +1,7 @@
 import time
 import re
 from datetime import datetime, timedelta
+import calendar
 
 REGEX_TIME = r"[0-2][0-9]:[0-5][0-9]"
 
@@ -46,6 +47,8 @@ def convert_human_to_epoch_time(date: str) -> int:
     pattern = '%d.%m.%Y'
     return int(time.mktime(time.strptime(date_time, pattern)))
 
+def get_current_weekday() -> str:
+    return datetime.today().strftime('%A')
 
 # === TEST === #
 def test_module():

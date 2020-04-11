@@ -86,8 +86,11 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @commands.command(name='test-plt', hidden=True)
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def test_plt(self, ctx):
-        riot_commands.test_matplotlib()
-        await ctx.send(file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/leaderboard.png'))
+        _embed = riot_commands.test_matplotlib()
+        message = await ctx.send(file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/leaderboard.png'))
+        _embed = _embed.set_image(url=message.attachments[0].url)
+        await ctx.send(embed=_embed)
+        await message.delete()
 
     # dont use this
     @commands.command(name='game-selector', hidden=True)
