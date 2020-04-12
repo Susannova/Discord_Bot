@@ -178,7 +178,7 @@ def test_matplotlib():
             if old_summoner.name == summoner.name:
                 summoner.rank_dt = summoner.rank_value - old_summoner.rank_value
         
-    data = [[summoner.name, summoner.discord_user_name, summoner.get_soloq_rank_string(), f'{summoner.get_soloq_winrate()}%', summoner.rank_dt] for summoner in summoners]
+    data = [[summoner.discord_user_name, summoner.name, summoner.get_soloq_rank_string(), f'{summoner.get_soloq_winrate()}%', summoner.rank_dt] for summoner in summoners]
     fig, ax = plt.subplots()
 
     # hide axes
