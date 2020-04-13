@@ -167,7 +167,7 @@ def create_embed(ctx):
     return _embed
 
 
-def test_matplotlib():
+def create_leaderboard_embed():
     summoners = list(utility.read_all_accounts())
     old_summoners = summoners.copy()
     summoners = list(update_linked_summoners_data(summoners))
@@ -177,7 +177,12 @@ def test_matplotlib():
         for old_summoner in old_summoners:
             if old_summoner.name == summoner.name:
                 summoner.rank_dt = summoner.rank_value - old_summoner.rank_value
-        
+                if summoner.rank_dt > 0:
+                    summoner.rank_dt = f'+{summoner.rank_dt}'
+                elif summoner.rank_dt < 0:
+                    summoner.rank_dt = f'-{summoner.rank_dt}'
+                elif summoner.rank_dt == 0:
+                    summoner.rank_dt = f'\u00B1{summoner.rank_dt}'
     data = [[summoner.discord_user_name, summoner.name, summoner.get_soloq_rank_string(), f'{summoner.get_soloq_winrate()}%', summoner.rank_dt] for summoner in summoners]
     fig, ax = plt.subplots()
 

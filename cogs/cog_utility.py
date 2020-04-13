@@ -78,19 +78,22 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
         [await message_.delete() for message_ in last_count_messages if not message_.pinned]
 
-    @commands.command(name='leaderboard')
+    @commands.command(name='leaderboard-old', hidden=True)
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def test_embed(self, ctx):
         await ctx.send(embed=riot_commands.create_embed(ctx))
 
-    @commands.command(name='test-plt', hidden=True)
+    @commands.command(name='leaderboard')
     @commands.has_role(consts.ROLE_ADMIN_ID)
-    async def test_plt(self, ctx):
-        _embed = riot_commands.test_matplotlib()
+    async def leaderboard_(self, ctx):
+        loading_message = await ctx.send("This will take a few seconds. Processing...")
+        _embed = riot_commands.create_leaderboard_embed()
         message = await ctx.send(file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/leaderboard.png'))
         _embed = _embed.set_image(url=message.attachments[0].url)
         await ctx.send(embed=_embed)
+        await loading_message.delete()
         await message.delete()
+        
 
     # dont use this
     @commands.command(name='game-selector', hidden=True)
