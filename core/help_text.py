@@ -3,8 +3,8 @@
 class Help_Text(object):
     """This class contains the brief and long help textes for the commands"""
     def __init__(self, command, text):
-        self.brief = 'Usage: ``' + brief + '``',
-        self.long = command + '\n' + text
+        self.brief = 'Usage: ``' + command + '``'
+        self.long = self.brief + '\n' + text
 
 link_help_text = Help_Text(
     '!link summonername',
