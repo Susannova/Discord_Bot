@@ -9,7 +9,8 @@ from core import (
     consts,
     checks,
     exceptions,
-    timers
+    timers,
+    help_text
 )
 
 from core.state import global_state as gstate
@@ -19,7 +20,7 @@ logger = logging.getLogger(consts.LOG_NAME)
 
 
 class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
-    @commands.command(name='play')
+    @commands.command(name='play', help = help_text.play_HelpText.text, brief = help_text.play_HelpText.brief, usage = help_text.play_HelpText.usage)
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS])
     async def play_(self, ctx, game_name, _time):
         game_name = game_name.upper()

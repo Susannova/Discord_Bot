@@ -48,7 +48,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
                 elif member.name in team2:
                     await member.move_to(channel_team2)
 
-    @commands.command(name='link', help = help_text.link_help_text.long)
+    @commands.command(name='link', help = help_text.link_HelpText.text, brief = help_text.link_HelpText.brief, usage = help_text.link_HelpText.usage)
     @checks.is_riot_enabled()
     @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
     async def link_(self, ctx, summoner_name):
@@ -60,7 +60,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             await ctx.message.author.send(
                 f'Dein Lol-Account wurde erfolgreich mit deinem Discord Account verbunden!\nFalls du deinen Account wieder entfernen möchtest benutze das {ctx.bot.command_prefix}unlink Command.')
 
-    @commands.command(name='unlink', help = help_text.unlink_help_text.long)
+    @commands.command(name='unlink', help = help_text.unlink_HelpText.text, brief = help_text.unlink_HelpText.brief, usage = help_text.unlink_HelpText.usage)
     @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
     async def unlink_(self, ctx, *summoner_names):
         try:
@@ -84,7 +84,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     async def test_embed(self, ctx):
         await ctx.send(embed=riot_commands.create_embed(ctx))
 
-    @commands.command(name='leaderboard', help = help_text.leaderboard_help_text.long)
+    @commands.command(name='leaderboard', help = help_text.leaderboard_HelpText.text, brief = help_text.leaderboard_HelpText.brief, usage = help_text.leaderboard_HelpText.usage)
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def leaderboard_(self, ctx):
         loading_message = await ctx.send("This will take a few seconds. Processing...")
@@ -106,7 +106,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
                 await message.add_reaction(emoji)
         gstate.game_selector_id = message.id
 
-    @commands.command(name='create-channel', help=help_text.create_channel_help_text.long)
+    @commands.command(name='create-channel', help = help_text.create_channel_HelpText.text, brief = help_text.create_channel_HelpText.brief, usage = help_text.create_channel_HelpText.usage)
     @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
     @discord.ext.commands.cooldown(rate=3, per=30)
     async def create_channel(self, ctx, kind, channel_name, *user_limit):
