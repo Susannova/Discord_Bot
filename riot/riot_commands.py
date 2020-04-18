@@ -183,7 +183,7 @@ def create_leaderboard_embed():
                     summoner.rank_dt = f'-{summoner.rank_dt}'
                 elif summoner.rank_dt == 0:
                     summoner.rank_dt = f'\u00B1{summoner.rank_dt}'
-    data = [[summoner.discord_user_name, summoner.name, summoner.get_soloq_rank_string(), f'{summoner.get_soloq_winrate()}%', summoner.rank_dt] for summoner in summoners]
+    data = [[summoner.discord_user_name, summoner.name, summoner.get_soloq_rank_string(), f'{summoner.get_soloq_winrate()}%', summoner.rank_dt, summoner.get_soloq_promo_string() if summoner.get_soloq_promo_string() is not None else '-' ] for summoner in summoners]
     fig, ax = plt.subplots()
 
     # hide axes
@@ -191,7 +191,7 @@ def create_leaderboard_embed():
     ax.axis('off')
     ax.axis('tight')
 
-    df = pd.DataFrame(data, columns=['Discord User', 'Summoner', 'Rank', 'Winrate', 'Progress in LP'])
+    df = pd.DataFrame(data, columns=['Discord User', 'Summoner', 'Rank', 'Winrate', 'Progress in LP', 'Promo Progress'])
     inner_cell_colours = []
     col_colors = []
     for i in range(0, len(df.columns)):

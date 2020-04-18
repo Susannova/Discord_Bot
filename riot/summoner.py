@@ -130,3 +130,18 @@ class Summoner():
 
     def get_soloq_rank_string(self):
         return f'{self.get_soloq_tier()}-{self.get_soloq_rank()} {self.get_soloq_lp()}LP'
+
+    def get_soloq_promo_string(self):
+        soloq_data = self.get_soloq_data()
+        soloq_promo_string = None if 'miniSeries' not in soloq_data else soloq_data['miniSeries']['progress']
+        new_soloq_promo_string = ''
+        if soloq_promo_string is not None:
+            for character in soloq_promo_string:
+                if character == 'N':
+                    new_soloq_promo_string += 'N'
+                elif character == 'W':
+                    new_soloq_promo_string += 'W'
+                elif character == 'F':
+                    new_soloq_promo_string += 'L'
+                new_soloq_promo_string += '-'
+        return None if soloq_promo_string is None else new_soloq_promo_string[:-1]
