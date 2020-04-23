@@ -23,7 +23,7 @@
 [] = optional
 
 ### General Commands:
-- `!create-team [mv] [names]`
+- `!create-team [mv] (names)`
 - `!play game (time | "now")`
 - `!clash`
 
