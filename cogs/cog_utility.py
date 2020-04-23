@@ -29,9 +29,8 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         players_list = utility.get_players_in_channel(voice_channel)
         if len(list(player_names)) != 0:
             for player_name in player_names:
-                if player_name == 'mv':
-                    continue
-                players_list.append(player_name)
+                if player_name != 'mv':
+                    players_list.append(player_name)
         message, team1, team2 = utility.create_team(players_list)
         await ctx.send(message)
 
