@@ -20,7 +20,7 @@ logger = logging.getLogger(consts.LOG_NAME)
 
 
 class UtilityCog(commands.Cog, name='Utility Commands'):
-    @commands.command(name='create-team')
+    @commands.command(name='create-team', help = help_text.create_team_HelpText.text, brief = help_text.create_team_HelpText.brief, usage = help_text.create_team_HelpText.usage)
     @checks.is_in_channels([consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_COMMANDS])
     async def create_team(self, ctx: commands.Context, *player_names):
         member = await discord.ext.commands.MemberConverter().convert(ctx, ctx.message.author.name)

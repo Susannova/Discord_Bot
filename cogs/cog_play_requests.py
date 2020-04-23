@@ -61,7 +61,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
             for player in gstate.play_requests[message.id].generate_all_players():
                 await player.send(consts.MESSAGE_PLAY_REQUEST_REMINDER)
 
-    @commands.command(name='create-clash')
+    @commands.command(name='create-clash', help = help_text.create_clash_HelpText.text, brief = help_text.create_clash_HelpText.brief, usage = help_text.create_clash_HelpText.usage)
     @checks.is_in_channels([consts.CHANNEL_CLASH])
     async def create_clash(self, ctx, arg):
         gstate.tmp_message_author = ctx.message.author
