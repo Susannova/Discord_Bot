@@ -1,5 +1,7 @@
 import logging
 
+import asyncio, time
+
 import discord
 from discord.ext import commands
 
@@ -122,6 +124,9 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             else:
                 tmp_channel = await ctx.message.guild.create_voice_channel(channel_name, category=tmp_channel_category)
         gstate.tmp_channels.append((tmp_channel, timers.start_timer(hrs=12), ctx.message.author))
+        await asyncio.sleep(60 * 60 * 12)
+        await tmp_channel.delete(reason = "Delete temporary channel because time is over")
+        # TODO Remove the channel from gstate.tmp_channels!
 
     @create_team.error
     async def error_handler(self, ctx, error):
