@@ -6,7 +6,8 @@ from discord.ext import commands
 from core import (
     consts,
     checks,
-    ocr
+    ocr,
+    help_text
 )
 
 from riot import riot_commands
@@ -15,7 +16,7 @@ logger = logging.getLogger(consts.LOG_NAME)
 
 
 class RiotCog(commands.Cog, name='Riot Commands'):
-    @commands.command(name='player')
+    @commands.command(name='player', help = help_text.player_HelpText.text, brief = help_text.player_HelpText.brief, usage = help_text.player_HelpText.usage)
 
     @checks.is_riot_enabled()
     @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
@@ -26,7 +27,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             arg = summoner_name[0]
         await ctx.send(riot_commands.get_player_stats(ctx.message.author.name, arg))
 
-    @commands.command(name='smurf')
+    @commands.command(name='smurf', help = help_text.smurf_HelpText.text, brief = help_text.smurf_HelpText.brief, usage = help_text.smurf_HelpText.usage)
     @checks.is_riot_enabled()
     @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
     async def smurf_(self, ctx, *summoner_name):
@@ -36,7 +37,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             arg = summoner_name[0]
         await ctx.send(riot_commands.get_smurf(ctx.message.author.name, arg))
 
-    @commands.command(name='bans')
+    @commands.command(name='bans', help = help_text.bans_HelpText.text, brief = help_text.bans_HelpText.brief, usage = help_text.bans_HelpText.usage)
     @checks.is_riot_enabled()
     @discord.ext.commands.cooldown(rate=1, per=5)
     @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
@@ -45,7 +46,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             riot_commands.calculate_bans_for_team(team_names), file=discord.File(
                 f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))
 
-    @commands.command(name='clash')
+    @commands.command(name='clash', help = help_text.clash_HelpText.text, brief = help_text.clash_HelpText.brief, usage = help_text.clash_HelpText.usage)
     @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
     @checks.has_n_attachments(1)
     async def clash_(self, ctx):

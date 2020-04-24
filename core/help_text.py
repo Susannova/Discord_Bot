@@ -3,8 +3,20 @@
 from core import consts
 
 class HelpText(object):
-    """This class contains the brief and long help textes for the commands"""
+    """
+    text : str
+        long version of help text
+    brief : str
+        short version of help text
+    usage : str
+        usage of the command
+    
+    This class contains the brief and long help textes for the commands
+    """
+
     def __init__(self, text, brief, usage = ''):
+        """ init for class. Sets long and brief help text and usage"""
+        
         self.text = text
         self.brief = brief
         self.usage = usage
@@ -48,5 +60,29 @@ play_HelpText = HelpText(
 create_clash_HelpText = HelpText(
     'Erstellt eine Clash-Anfrage für das gegebene Datum ' + play_HelpText_long,
     'Erstellt eine Clash-Anfrage',
-    'date'
+    'Datum'
+)
+
+
+player_HelpText = HelpText(
+    'Gibt den Rang und die Winrate eines LoL-Spielers in EUW aus.',
+    'Gibt Infos über LoL-Account aus.',
+    'summonername'
+)
+
+smurf_HelpText = HelpText(
+    'Überprüft, ob der angegebene Spieler wahrscheinlich ein Smurf ist.',
+    'Überprüft ob ein Spieler ein Smurf ist.',
+    'Spieler'
+)
+
+bans_HelpText = HelpText(
+    'Bestimmt die besten Bans für ein 5er LoL-Team.',
+    'Bestimmt Bans für LoL-Team.',
+    'name1 name2 name3 name4 name5'
+)
+
+clash_HelpText = HelpText(
+    'Liest aus einen Screenshot die Namen des Clashteams aus und gibt ihre op.gg-Links aus. Der Screenshot muss sich im Anhang befinden.',
+    'Gibt den op.gg Namen des Clashteams aus.'
 )
