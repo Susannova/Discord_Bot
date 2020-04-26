@@ -16,6 +16,7 @@ from cogs import (
     cog_play_requests,
     cog_riot,
     cog_utility,
+    cog_tasks,
     events
 )
 
@@ -71,6 +72,7 @@ if __name__ == '__main__':
         bot.add_cog(cog_play_requests.PlayRequestsCog())
         bot.add_cog(cog_riot.RiotCog())
         bot.add_cog(cog_utility.UtilityCog())
+        bot.add_cog(cog_tasks.LoopCog(bot))
         bot.run()
         logger.info("End")
     except discord.LoginFailure:
