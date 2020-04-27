@@ -125,7 +125,8 @@ def get_or_create_summoner(discord_user_name, summoner_name):
         if utility.is_in_need_of_update(summoner):
             update_linked_account_data_by_discord_user_name(discord_user_name)
         return summoner
-    return utility.create_summoner(summoner_name)
+    else:
+        return utility.create_summoner(summoner_name)
 
 
 def unlink_account(discord_user_name):
@@ -205,9 +206,9 @@ def create_leaderboard_embed():
     table = ax.table(cellText=df.values, colLabels=df.columns, loc='center', cellLoc='center', colColours=col_colors, cellColours=outer_cell_colours)
     table_props = table.properties()
     table_cells = table_props['child_artists']
-    for cell in table_cells: 
-            cell.get_text().set_fontsize(30)
-            cell.get_text().set_color('white')
+    for cell in table_cells:
+        cell.get_text().set_fontsize(30)
+        cell.get_text().set_color('white')
 
     fig.tight_layout()
 
@@ -222,6 +223,5 @@ def create_leaderboard_embed():
         colour=discord.Color.from_rgb(62, 221, 22),
         url=op_url[:-3])
     return _embed
-    
 
 # === INTERFACE END === #
