@@ -20,11 +20,13 @@ from cogs import (
     events
 )
 
-logging.basicConfig(filename=consts.LOG_FILE,
-                            filemode='a',
-                            format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-                            datefmt='%H:%M:%S',
-                            level=logging.INFO)
+logging.basicConfig(
+    filename=consts.LOG_FILE,
+    filemode='a',
+    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+    datefmt='%H:%M:%S',
+    level=logging.INFO
+)
 
 logger = logging.getLogger(consts.LOG_NAME)
 discord.voice_client.VoiceClient.warn_nacl = False
@@ -78,5 +80,5 @@ if __name__ == '__main__':
     except discord.LoginFailure:
         logger.exception('Failed to login due to improper Token.')
         bot.exit_status = 2
-    
+
     sys.exit(bot.exit_status)
