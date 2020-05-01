@@ -34,7 +34,7 @@ def update_summoners_data(file_path='./data/summoners_data.json'):
             summoners_data[summoner.discord_user_name]['winrate'].append(summoner_winrate)
 
     with open(file_path, 'w') as json_file:
-        json.dump(summoners_data, json_file)
+        json.dump(summoners_data, json_file, indent=4)
     
     return summoners_data
 
