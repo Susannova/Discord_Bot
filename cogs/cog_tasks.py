@@ -24,10 +24,14 @@ def update_summoners_data(file_path='./data/summoners_data.json'):
     for summoner in summoners:
         if summoner.discord_user_name not in summoners_data:
             summoners_data[summoner.discord_user_name] = {'date_time': [], 'rank_value': [], 'winrate': []}
+        
+        summoner_rank = summoner.get_rank_value()
+        summoner_winrate = summoner.get_soloq_winrate()
 
-        summoners_data[summoner.discord_user_name]['date_time'].append(time_updated)
-        summoners_data[summoner.discord_user_name]['rank_value'].append(summoner.get_rank_value())
-        summoners_data[summoner.discord_user_name]['winrate'].append(summoner.get_soloq_winrate())
+        if summoner_rank != summoners_data[summoner.discord_user_name]['rank_value'][-1] or summoner_winrate != summoners_data[summoner.discord_user_name]['winrate'][-1]:
+            summoners_data[summoner.discord_user_name]['date_time'].append(time_updated)
+            summoners_data[summoner.discord_user_name]['rank_value'].append(summoner_rank)
+            summoners_data[summoner.discord_user_name]['winrate'].append(summoner_winrate)
 
     with open(file_path, 'w') as json_file:
         json.dump(summoners_data, json_file)
