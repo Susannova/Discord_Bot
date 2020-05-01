@@ -1,4 +1,5 @@
-import time
+import time, datetime
+import asyncio
 import json
 
 from discord.ext import tasks, commands
@@ -44,7 +45,7 @@ class LoopCog(commands.Cog):
 
     # @tasks.loop(hours = 24 * 7)
     # @tasks.loop(seconds = 5)
-    @tasks.loop(hours=12)
+    @tasks.loop(hours=24)
     async def print_leaderboard_weekly(self):
         summoners_data = update_summoners_data()
 
@@ -82,7 +83,13 @@ class LoopCog(commands.Cog):
     
     @print_leaderboard_weekly.before_loop
     async def before_print_leaderboard_weekly(self):
+        datetime_now = datetime.datetime.now()
+        datetime_18 = datetime.datetime(datetime_now.year, datetime_now.month, datetime_now.day, 18)
+        time_delta = (datetime_18 - datetime_now).total_seconds()
+
+        await asyncio.sleep(time_delta)
         await self.bot.wait_until_ready()
+
         self.channel = self.bot.get_channel(639889605256019980)
 
 
