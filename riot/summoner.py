@@ -37,7 +37,7 @@ class Summoner():
         self.discord_user_name = 'None'
 
     def __str__(self):
-        return f'Summoner: {self.name}, Level: {self.get_level()}, Rank: {self.get_soloq_rank_string()}, Winrate: {self.get_soloq_winrate()}'
+        return f'Summoner: {self.name}, Level: {self.get_level()}, Rank: {self.get_soloq_rank_string()}, Winrate: {self.get_winrate()}'
 
     def __repr__(self):
         return self.name
@@ -46,20 +46,24 @@ class Summoner():
         return int(self.data_summoner['summonerLevel'])
 
     def is_smurf(self):
-        winrate = self.get_soloq_winrate()
-        rank = self.get_soloq_tier()
-        if self.get_level() < 40 and winrate >= 58 and self.get_soloq_rank_weight(rank) < 7:
+        winrate = self.get_winrate()
+        rank = self.get_tier()
+        if self.get_level() < 40 and winrate >= 58 and self.get_rank_weight(rank) < 7:
             return True
         else:
             return False
 
-    def get_soloq_data(self):
+    def get_data(self, queue_type='RANKED_SOLO_5x5'):
         for queue_data in self.data_league:
-            if queue_data['queueType'] == 'RANKED_SOLO_5x5':
+            # print(queue_data)
+            if queue_data['queueType'] == queue_type:
+                # print(queue_type, ": Start of data")
+                # print(queue_data)
                 return queue_data
+        # print(queue_type, ": Nothing returned!")
 
-    def get_soloq_winrate(self):
-        soloq_stats = self.get_soloq_data()
+    def get_winrate(self, queue_type='RANKED_SOLO_5x5'):
+        soloq_stats = self.get_data(queue_type)
         if soloq_stats is None:
             return 50.0
         games_played = int(soloq_stats['wins']) + int(
@@ -68,28 +72,28 @@ class Summoner():
         return winrate
     
 
-    def get_soloq_tier(self):
-        soloq_stats = self.get_soloq_data()
+    def get_tier(self, queue_type='RANKED_SOLO_5x5'):
+        soloq_stats = self.get_data(queue_type)
         if soloq_stats is None:
             return 'SILVER'
         return soloq_stats['tier']
         
 
-    def get_soloq_rank(self):
-        soloq_stats = self.get_soloq_data()
+    def get_rank(self, queue_type='RANKED_SOLO_5x5'):
+        soloq_stats = self.get_data(queue_type)
         if soloq_stats is None:
             return 'II'
         return soloq_stats['rank']
 
 
-    def get_soloq_lp(self):
-        soloq_stats = self.get_soloq_data()
+    def get_lp(self, queue_type='RANKED_SOLO_5x5'):
+        soloq_stats = self.get_data(queue_type)
         if soloq_stats is None:
             return 0
         return soloq_stats['leaguePoints']
 
 
-    def get_soloq_rank_weight(self, rank):
+    def get_rank_weight(self, rank):
         return dict_rank[rank]
 
     def get_most_played_champs(self, count):
@@ -125,14 +129,15 @@ class Summoner():
             if value["id"] == name:
                 return int(value['key'])
 
-    def get_rank_value(self):
-        return self.get_soloq_rank_weight(f'{self.get_soloq_tier()}-{self.get_soloq_rank()}') * 100 + self.get_soloq_lp()
+    def get_rank_value(self, queue_type = 'RANKED_SOLO_5x5'):
+        return self.get_rank_weight(f'{self.get_tier(queue_type)}-{self.get_rank(queue_type)}') * 100 + self.get_lp(queue_type)
+
 
     def get_soloq_rank_string(self):
-        return f'{self.get_soloq_tier()}-{self.get_soloq_rank()} {self.get_soloq_lp()}LP'
+        return f'{self.get_tier()}-{self.get_rank()} {self.get_lp()}LP'
 
     def get_soloq_promo_string(self):
-        soloq_data = self.get_soloq_data()
+        soloq_data = self.get_data()
         soloq_promo_string = None if 'miniSeries' not in soloq_data else soloq_data['miniSeries']['progress']
         new_soloq_promo_string = ''
         if soloq_promo_string is not None:
