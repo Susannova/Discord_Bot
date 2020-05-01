@@ -48,17 +48,37 @@ class LoopCog(commands.Cog):
     async def print_leaderboard_weekly(self):
         summoners_data = update_summoners_data()
 
-        plt.xlabel('Zeit')
-        plt.ylabel('Winrate')
+        fig1, ax1 = plt.subplots()
+        fig2, ax2 = plt.subplots()
+        
+        ax1.set_xlabel('Zeit')
+        ax1.set_ylabel('Winrate')
+        # ax1.xaxis_date()
 
+        ax2.set_xlabel('Zeit')
+        ax2.set_ylabel('Rang')
+        # ax2.xaxis_date()
+        ax2.set_yticks(list(range(0, 2300, 400)))
+        ax2.set_yticks(list(range(0, 2300, 100)), minor=True)
+        ranks_string = ["Eisen 4", "Bronze 4", "Silber 4", "Gold 4", "Platin 4", "Diamant 4"]
+        ax2.set_yticklabels(ranks_string)
+        ax2.grid(axis='y')
+        
         for summoner in summoners_data:
             # TODO Timezone is false
-            plt.plot_date([matplotlib.dates.epoch2num(time) for time in summoners_data[summoner]['date_time']], list(summoners_data[summoner]['winrate']), label=summoner, drawstyle='steps-post', ls='-')
-        plt.legend()
+            x_data = [matplotlib.dates.epoch2num(time) for time in summoners_data[summoner]['date_time']]
+            
+            ax1.plot_date(x_data, list(summoners_data[summoner]['winrate']), label=summoner, drawstyle='steps-post', ls='-')
+            ax2.plot_date(x_data, list(summoners_data[summoner]['rank_value']), label=summoner, drawstyle='steps-post', ls='-')
+        
+        ax1.legend()
+        ax2.legend()
 
-        plt.savefig('./temp/rank_graph.png')
+        fig1.savefig('./temp/winrate_graph.png')
+        fig2.savefig('./temp/rank_graph.png')
 
         await self.channel.send(file=discord.File('temp/rank_graph.png'))
+        await self.channel.send(file=discord.File('temp/winrate_graph.png'))
     
     @print_leaderboard_weekly.before_loop
     async def before_print_leaderboard_weekly(self):
