@@ -104,8 +104,10 @@ class LoopCog(commands.Cog):
     @print_leaderboard_weekly.before_loop
     async def before_print_leaderboard_weekly(self):
         datetime_now = datetime.datetime.now()
-        datetime_18 = datetime.datetime(datetime_now.year, datetime_now.month, datetime_now.day, 18)
+        offset_day = 0 if datetime_now.hour < 18 else 1
+        datetime_18 = datetime.datetime(datetime_now.year, datetime_now.month, datetime_now.day + offset_day, 18)
         time_delta = (datetime_18 - datetime_now).total_seconds()
+        print("Sekunden, bis geplottet wird:", time_delta)
 
         await asyncio.sleep(time_delta)
         await self.bot.wait_until_ready()
