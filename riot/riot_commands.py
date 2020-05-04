@@ -3,7 +3,6 @@ and transforms the received data in
 a user readable way.
 """
 import shelve
-import numpy as np
 import matplotlib.pyplot as plt
 import logging
 
@@ -144,7 +143,7 @@ def create_embed(ctx):
     summoners.sort(key=lambda x: x.rank_value['RANKED_SOLO_5x5'], reverse=True)
 
 
-    
+
     op_url = 'https://euw.op.gg/multi/query='
     for summoner in summoners:
         op_url = op_url + f'{summoner.name}%2C'

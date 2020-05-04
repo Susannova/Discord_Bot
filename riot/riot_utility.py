@@ -64,8 +64,8 @@ def get_current_patch_url():
 
 def get_current_patch():
   with urllib.request.urlopen("https://ddragon.leagueoflegends.com/api/versions.json") as url:
-        data = json.loads(url.read().decode())
-        return data[0]
+    data = json.loads(url.read().decode())
+    return data[0]
 
 def update_current_patch():
     current_patch_list = get_current_patch().split('.')
