@@ -128,7 +128,7 @@ def create_summoners(summoner_names: list):
                 data_summoner=data[0],
                 data_mastery=data[1],
                 data_league=data[2]
-                )
+            )
 
 
 def create_summoner(summoner_name: str):
@@ -149,11 +149,15 @@ def fetch_summoner(player, watcher):
     region = consts.RIOT_REGION
     try:
         data_summoner = watcher.summoner.by_name(region, player)
-        data_league = watcher.league.by_summoner(region, data_summoner['id'])
-        data_mastery = watcher.champion_mastery.by_summoner(
-            region, data_summoner['id'])
+        data_mastery = watcher.champion_mastery.by_summoner(region, data_summoner['id'])
+        data_league_unformated = watcher.league.by_summoner(region, data_summoner['id'])
     except HTTPError as e:
         print(e)
+    
+    data_league = {}
+    for queue_data in data_league_unformated:
+        data_league[queue_data['queueType']] = queue_data
+
     return [data_summoner, data_mastery, data_league]
 
 

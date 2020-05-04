@@ -48,7 +48,7 @@ def get_best_bans_for_team(team) -> list:
     ranks = []
     best_bans_for_player = []
     for player in team:
-        ranks.append(player.rank_value)
+        ranks.append(player.rank_value['RANKED_SOLO_5x5'])
         best_bans_for_player.append(get_best_ban(player))
     average_rank = utility.get_average_rank(ranks)
     for i in range(0, len(team)):
@@ -68,9 +68,9 @@ def get_best_bans_for_team(team) -> list:
 # === INTERFACE === #
 
 
-def get_player_stats(discord_user_name, summoner_name) -> str:
+def get_player_stats(discord_user_name, summoner_name, queue_type='RANKED_SOLO_5x5') -> str:
     summoner = get_or_create_summoner(discord_user_name, summoner_name)
-    return f'Rank: {summoner.get_soloq_tier()}-{summoner.get_soloq_rank()} {summoner.get_soloq_lp()}LP, Winrate {summoner.get_soloq_winrate()}%.'
+    return f'Rank: {summoner.get_rank_string(queue_type)}, Winrate {summoner.get_winrate(queue_type)}%.'
 
 
 def get_smurf(discord_user_name, summoner_name) -> str:
@@ -141,7 +141,7 @@ def create_embed(ctx):
     summoners = list(utility.read_all_accounts())
     old_summoners = summoners.copy()
     summoners = list(update_linked_summoners_data(summoners))
-    summoners.sort(key=lambda x: x.rank_value, reverse=True)
+    summoners.sort(key=lambda x: x.rank_value['RANKED_SOLO_5x5'], reverse=True)
 
 
     
@@ -156,9 +156,9 @@ def create_embed(ctx):
     rank_strings = []
     white_space_pattern = '\u200b \u200b'
     for summoner in summoners:
-        rank_string = summoner.get_soloq_rank_string()
+        rank_string = summoner.get_rank_string()
         length = len(rank_string)
-        rank_string = rank_string + f' %!{summoner.get_soloq_winrate()}%'
+        rank_string = rank_string + f' %!{summoner.get_winrate()}%'
         rank_string = rank_string.replace('%!', f'{white_space_pattern * (25 - length)}')
         rank_strings.append(rank_string)
 
@@ -172,19 +172,19 @@ def create_leaderboard_embed():
     summoners = list(utility.read_all_accounts())
     old_summoners = summoners.copy()
     summoners = list(update_linked_summoners_data(summoners))
-    summoners.sort(key=lambda x: x.rank_value, reverse=True)
+    summoners.sort(key=lambda x: x.rank_value['RANKED_SOLO_5x5'], reverse=True)
 
     for summoner in summoners:
         for old_summoner in old_summoners:
             if old_summoner.name == summoner.name:
-                summoner.rank_dt = summoner.rank_value - old_summoner.rank_value
+                summoner.rank_dt = summoner.rank_value['RANKED_SOLO_5x5'] - old_summoner.rank_value['RANKED_SOLO_5x5']
                 if summoner.rank_dt > 0:
                     summoner.rank_dt = f'+{summoner.rank_dt}'
                 elif summoner.rank_dt < 0:
                     summoner.rank_dt = f'-{summoner.rank_dt}'
                 elif summoner.rank_dt == 0:
                     summoner.rank_dt = f'\u00B1{summoner.rank_dt}'
-    data = [[summoner.discord_user_name, summoner.name, summoner.get_soloq_rank_string(), f'{summoner.get_soloq_winrate()}%', summoner.rank_dt, summoner.get_soloq_promo_string() if summoner.get_soloq_promo_string() is not None else '-' ] for summoner in summoners]
+    data = [[summoner.discord_user_name, summoner.name, summoner.get_rank_string(), f'{summoner.get_winrate()}%', summoner.rank_dt, summoner.get_promo_string() if summoner.get_promo_string() is not None else '-' ] for summoner in summoners if summoner.has_played_rankeds() ]
     fig, ax = plt.subplots()
 
     # hide axes
