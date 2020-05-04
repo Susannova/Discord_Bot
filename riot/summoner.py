@@ -52,8 +52,8 @@ class Summoner():
 
     def is_smurf(self):
         winrate = self.get_winrate()
-        rank = self.get_tier()
-        if self.get_level() < 40 and winrate >= 58 and self.get_rank_weight(rank) < 7:
+        
+        if self.has_played_rankeds() and self.get_level() < 40 and winrate >= 58 and self.rank_values['RANKED_SOLO_5x5'] < 700:
             return True
         else:
             return False
@@ -62,36 +62,37 @@ class Summoner():
         return queue_type in self.data_league
 
     def get_winrate(self, queue_type='RANKED_SOLO_5x5'):
-        if self.has_played_rankeds(self, queue_type):
+        if self.has_played_rankeds(queue_type):
             data = self.data_league[queue_type]
             games_played = int(data['wins']) + int(data['losses'])
             return round((int(data['wins']) / games_played) * 100, 1)
         else:
-            return math.NaN
+            return math.nan
 
     def get_rank_weight(self, rank):
         return dict_rank[rank]
 
     def get_rank_value(self, queue_type = 'RANKED_SOLO_5x5'):
-        if self.has_played_rankeds(self, queue_type):
+        if self.has_played_rankeds(queue_type):
             data = self.data_league[queue_type]
             tier_string = data['tier']
             rank_string = data['rank']
-            return self.get_rank_weight(tier_string + '-' + rank_string) * 100 + self.get_lp(queue_type)
+            return self.get_rank_weight(tier_string + '-' + rank_string) * 100 + data['leaguePoints']
         else:
-            return math.NaN
+            return math.nan
 
     def get_rank_string(self, queue_type='RANKED_SOLO_5x5'):
-        if self.has_played_rankeds(self, queue_type):
+        if self.has_played_rankeds(queue_type):
             data = self.data_league[queue_type]
             tier_string = data['tier']
             rank_string = data['rank']
-            return f'{tier_string}-{rank_string} {self.get_lp()}LP'
+            lp = data['leaguePoints']
+            return f'{tier_string}-{rank_string} {lp}LP'
         else:
             return None
 
     def get_promo_string(self, queue_type='RANKED_SOLO_5x5'):
-        if self.has_played_rankeds(self, queue_type):
+        if self.has_played_rankeds(queue_type):
             data = self.data_league[queue_type]
             promo_string = None if 'miniSeries' not in data else data['miniSeries']['progress']
             new_promo_string = ''
