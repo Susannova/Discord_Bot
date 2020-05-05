@@ -1,6 +1,7 @@
 import time, datetime
 import asyncio
 import json
+import logging
 
 from discord.ext import tasks, commands
 import discord
@@ -13,6 +14,15 @@ from riot import (
     riot_commands,
     riot_utility
 )
+
+from core.state import global_state as gstate
+
+from core import (
+    consts,
+    bot_utility as utility
+)
+
+logger = logging.getLogger(consts.LOG_NAME)
 
 def update_summoners_data(file_path='./data/summoners_data.json'):
     summoners = list(riot_utility.read_all_accounts())
@@ -110,11 +120,29 @@ class LoopCog(commands.Cog):
         print("Sekunden, bis geplottet wird:", time_delta)
 
         await asyncio.sleep(time_delta)
-        await self.bot.wait_until_ready()
 
         self.channel = self.bot.get_channel(639889605256019980)
 
+    @tasks.loop(hours=24)
+    async def check_LoL_patch(self):
+        if riot_utility.update_current_patch():
+            logger.info('Posted new Patch notes')
+            annoucement_channel = discord.utils.find(lambda m: m.name == 'announcements', message.channel.guild.channels)
+            await annoucement_channel.send(consts.MESSAGE_PATCH_NOTES_FORMATTED.format(message.guild.get_role(consts.ROLE_LOL_ID).mention, riot_utility.get_current_patch_url()))
+    
+    # auto delete all purgeable messages
+    @tasks.loop(hours=1)
+    async def auto_delete_purgeable_messages(self):
+        purgeable_message_list = utility.get_purgeable_messages_list(message, self.message_cache)
+        for purgeable_message in purgeable_message_list:
+            utility.clear_message_cache(purgeable_message, self.message_cache)
+            await purgeable_message.delete()
 
     def __init__(self, bot: commands.bot):
         self.bot = bot
+
+        await self.bot.wait_until_ready()
+
+        self.message_cache = gstate.message_cache
         self.print_leaderboard_weekly.start()
+        self.check_LoL_patch.start()
