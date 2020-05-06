@@ -148,7 +148,7 @@ def is_play_request_author(user, play_request):
     return False
 
 
-def get_purgeable_messages_list(message, message_cache):
+def get_purgeable_messages_list(message_cache):
     if not gstate.CONFIG["TOGGLE_AUTO_DELETE"]:
         return
     return [msg[0] for msg in message_cache if timers.is_timer_done(msg[1])]

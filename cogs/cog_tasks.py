@@ -125,15 +125,17 @@ class LoopCog(commands.Cog):
 
     @tasks.loop(hours=24)
     async def check_LoL_patch(self):
-        if riot_utility.update_current_patch():
-            logger.info('Posted new Patch notes')
-            annoucement_channel = discord.utils.find(lambda m: m.name == 'announcements', message.channel.guild.channels)
-            await annoucement_channel.send(consts.MESSAGE_PATCH_NOTES_FORMATTED.format(message.guild.get_role(consts.ROLE_LOL_ID).mention, riot_utility.get_current_patch_url()))
+        logger.info('New LoL patch notes')
+        # The for loop is not needed right now but if the bot will ever run on multiple servers this is needed.
+        for guild in self.bot.guilds:
+            if riot_utility.update_current_patch():
+                annoucement_channel = discord.utils.find(lambda m: m.name == 'announcements', guild.channels)
+                await annoucement_channel.send(consts.MESSAGE_PATCH_NOTES_FORMATTED.format(guild.get_role(consts.ROLE_LOL_ID).mention, riot_utility.get_current_patch_url()))
     
     # auto delete all purgeable messages
     @tasks.loop(hours=1)
     async def auto_delete_purgeable_messages(self):
-        purgeable_message_list = utility.get_purgeable_messages_list(message, self.message_cache)
+        purgeable_message_list = utility.get_purgeable_messages_list(self.message_cache)
         for purgeable_message in purgeable_message_list:
             utility.clear_message_cache(purgeable_message, self.message_cache)
             await purgeable_message.delete()
