@@ -51,6 +51,7 @@ def create_internal_play_request_message(message, play_request):
     """
     play_request_time = re.findall('\d\d:\d\d', message.content)
     intern_message = consts.MESSAGE_CREATE_INTERN_PLAY_REQUEST.format(
+        # Todo play_requests is undefined!
         play_request.message_author.name, 10 - len(play_requests[message.id]), play_request_time)
     for player_tuple in play_requests[message.id]:
         intern_message += player_tuple[0].name + '\n'
@@ -170,6 +171,7 @@ def clear_message_cache(message, message_cache):
 def clear_play_requests(message):
     if has_any_pattern(message):
         del play_requests[message.id]
+        # Todo play_requests is undefined!
 
 
 def pretty_print_list(*players) -> str:
