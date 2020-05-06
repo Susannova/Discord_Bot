@@ -1,4 +1,6 @@
-import time, datetime
+import time
+import datetime
+import shelve
 import asyncio
 import json
 import logging
@@ -89,6 +91,14 @@ def plot_summoners_data(summoners_data, queue_type, data, filename):
 class LoopCog(commands.Cog):
     """A class for background tasks"""
 
+    def __init__(self, bot: commands.bot):
+        self.bot = bot
+
+        self.message_cache = gstate.message_cache
+        self.print_leaderboard_weekly.start()
+        self.check_LoL_patch.start()
+
+
     # @tasks.loop(hours = 24 * 7)
     # @tasks.loop(seconds = 5)
     @tasks.loop(hours=24)
@@ -120,6 +130,7 @@ class LoopCog(commands.Cog):
         print("Sekunden, bis geplottet wird:", time_delta)
 
         await asyncio.sleep(time_delta)
+        await self.bot.wait_until_ready()
 
         self.channel = self.bot.get_channel(639889605256019980)
 
@@ -139,12 +150,3 @@ class LoopCog(commands.Cog):
         for purgeable_message in purgeable_message_list:
             utility.clear_message_cache(purgeable_message, self.message_cache)
             await purgeable_message.delete()
-
-    def __init__(self, bot: commands.bot):
-        self.bot = bot
-
-        await self.bot.wait_until_ready()
-
-        self.message_cache = gstate.message_cache
-        self.print_leaderboard_weekly.start()
-        self.check_LoL_patch.start()

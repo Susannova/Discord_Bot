@@ -2,13 +2,15 @@
 """
 import logging
 import sys
+import pickle
 
 import discord
 from discord.ext import commands
 
 from core import (
     bot_utility as utility,
-    consts
+    consts,
+    state
 )
 
 from cogs import (
@@ -61,6 +63,9 @@ class KrautBot(commands.Bot):
 
     async def logout(self, exit_status_input):
         """Aborts the bot and sets exit_status to exit_status_input"""
+        # state.global_state.write_state_to_file()
+        with open(f'{consts.DATABASE_DIRECTORY_GLOBAL_STATE}/{consts.DATABASE_NAME_GLOBAL_STATE}', 'wb') as file:
+            pickle.dump(state.global_state, file)
         await super().logout()
         self.exit_status = exit_status_input
 
