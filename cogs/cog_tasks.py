@@ -1,4 +1,6 @@
-import time, datetime
+import time
+import datetime
+import shelve
 import asyncio
 import json
 import logging
@@ -19,7 +21,8 @@ from core.state import global_state as gstate
 
 from core import (
     consts,
-    bot_utility as utility
+    bot_utility as utility,
+    timers
 )
 
 logger = logging.getLogger(consts.LOG_NAME)
@@ -134,6 +137,15 @@ def plot_all_summoners_data(summoners_data, filename):
 class LoopCog(commands.Cog):
     """A class for background tasks"""
 
+    def __init__(self, bot: commands.bot):
+        self.bot = bot
+
+        self.message_cache = gstate.message_cache
+        self.print_leaderboard_loop.start()
+        self.check_LoL_patch.start()
+        self.auto_delete_purgeable_messages.start()
+        self.auto_delete_tmp_channels.start()
+
     async def print_leaderboard(self):
         summoners_data = update_summoners_data()
 
@@ -165,6 +177,7 @@ class LoopCog(commands.Cog):
         print("Sekunden, bis geplottet wird:", time_delta)
 
         await asyncio.sleep(time_delta)
+        await self.bot.wait_until_ready()
 
     @tasks.loop(hours=24)
     async def check_LoL_patch(self):
@@ -179,13 +192,20 @@ class LoopCog(commands.Cog):
     @tasks.loop(hours=1)
     async def auto_delete_purgeable_messages(self):
         purgeable_message_list = utility.get_purgeable_messages_list(self.message_cache)
-        for purgeable_message in purgeable_message_list:
-            utility.clear_message_cache(purgeable_message, self.message_cache)
+        for purgeable_message_id in purgeable_message_list:
+            utility.clear_message_cache(purgeable_message_id, self.message_cache)
+            purgeable_message = self.bot.fetch_message(purgeable_message_id)
             await purgeable_message.delete()
 
-    def __init__(self, bot: commands.bot):
-        self.bot = bot
-
-        self.message_cache = gstate.message_cache
-        self.print_leaderboard_loop.start()
-        self.check_LoL_patch.start()
+    # auto delete all tmp_channels
+    @tasks.loop(hours=1)
+    async def auto_delete_tmp_channels(self):
+        deleted_channels = []
+        for temp_channel_id in gstate.tmp_channel_ids:
+            if timers.is_timer_done(gstate.tmp_channel_ids[temp_channel_id]["timer"]):
+                temp_channel = self.bot.get_channel(temp_channel_id)
+                await temp_channel.delete(reason = "Delete temporary channel because time is over")
+                deleted_channels.append(temp_channel_id)
+        
+        for channel in deleted_channels:
+            del gstate.tmp_channel_ids[channel]
