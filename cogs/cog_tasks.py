@@ -58,7 +58,7 @@ def update_summoners_data(file_path='./data/summoners_data.json'):
 
     return summoners_data
 
-def plot_summoners_data(summoners_data, queue_type, data, filename):
+def plot_summoners_data(summoners_data, queue_type, data):
     fig1, ax1 = plt.subplots()
 
     ax1.set_xlabel('Zeit')
@@ -77,11 +77,56 @@ def plot_summoners_data(summoners_data, queue_type, data, filename):
         # TODO Timezone is false
         x_data = [matplotlib.dates.epoch2num(time) for time in summoners_data[summoner][queue_type]['date_time']]
 
-        ax1.plot_date(x_data, list(summoners_data[summoner][queue_type][data]), label=summoner, drawstyle='steps-post', ls='-')
+        ax1.plot_date(x_data, list(summoners_data[summoner][queue_type][data]), label=summoner, ls='-')
 
     ax1.legend()
 
-    fig1.savefig(filename)
+    return fig1, ax1
+
+def plot_all_summoners_data(summoners_data, filename):
+    # fig, ax = plt.subplots(2, 2)
+    # fig[0], ax[0] = plot_summoners_data(summoners_data, 'soloq', 'Rang')
+    # fig[1], ax[1] = plot_summoners_data(summoners_data, 'soloq', 'Winrate')
+    # fig[2], ax[2] = plot_summoners_data(summoners_data, 'flex', 'Rang')
+    # fig[3], ax[3] = plot_summoners_data(summoners_data, 'flex', 'Winrate')
+
+    fig, ax = plt.subplots(2, 2)
+
+    args = (
+        ('soloq', 'Rang'),
+        ('soloq', 'Winrate'),
+        ('flex', 'Rang'),
+        ('flex', 'Winrate')
+    )
+    for i in range(4):
+        row = i % 2
+        col = int(i / 2)
+
+        queue_type = args[i][0]
+        data = args[i][1]
+
+        ax[row, col].set_xlabel('Zeit')
+        ax[row, col].set_ylabel(data)
+
+        ax[row, col].set_title(queue_type)
+
+        if data == 'Rang':
+            ax[row, col].set_yticks(list(range(0, 2300, 400)))
+            ax[row, col].set_yticks(list(range(0, 2300, 100)), minor=True)
+            ranks_string = ["Eisen 4", "Bronze 4", "Silber 4", "Gold 4", "Platin 4", "Diamant 4"]
+            ax[row, col].set_yticklabels(ranks_string)
+            ax[row, col].grid(axis='y')
+
+        for summoner in summoners_data:
+            # TODO Timezone is false
+            x_data = [matplotlib.dates.epoch2num(time) for time in summoners_data[summoner][queue_type]['date_time']]
+
+            ax[row, col].plot_date(x_data, list(summoners_data[summoner][queue_type][data]), label=summoner, ls='-')
+
+        ax[row, col].legend()
+
+    fig.set_size_inches(10, 10)
+    fig.savefig(filename)
 
 
 
@@ -89,30 +134,30 @@ def plot_summoners_data(summoners_data, queue_type, data, filename):
 class LoopCog(commands.Cog):
     """A class for background tasks"""
 
+    async def print_leaderboard(self):
+        summoners_data = update_summoners_data()
+
+        filename = 'temp/LoL_plot.png'
+        plot_all_summoners_data(summoners_data, filename)
+        await self.channel.send(file=discord.File(filename))
+
+
+    @commands.command(name='plot')
+    async def print_leaderboard_command(self, ctx):
+        await self.print_leaderboard()
+
     # @tasks.loop(hours = 24 * 7)
     # @tasks.loop(seconds = 5)
     @tasks.loop(hours=24)
-    async def print_leaderboard_weekly(self):
-        summoners_data = update_summoners_data()
+    async def print_leaderboard_loop(self):
+        await self.print_leaderboard()
+        
 
-        rank_plot_filename = 'temp/rank_graph.png'
-        plot_summoners_data(summoners_data, 'soloq', 'Rang', rank_plot_filename)
-        await self.channel.send(file=discord.File(rank_plot_filename))
+    @print_leaderboard_loop.before_loop
+    async def before_print_leaderboard_loop(self):
+        await self.bot.wait_until_ready()
+        self.channel = self.bot.get_channel(639889605256019980)
 
-        winrate_plot_filename = './temp/winrate_graph.png'
-        plot_summoners_data(summoners_data, 'soloq', 'Winrate', winrate_plot_filename)
-        await self.channel.send(file=discord.File(winrate_plot_filename))
-
-        flex_rank_plot_filename = 'temp/flex_rank_graph.png'
-        plot_summoners_data(summoners_data, 'flex', 'Rang', flex_rank_plot_filename)
-        await self.channel.send(file=discord.File(flex_rank_plot_filename))
-
-        flex_winrate_plot_filename = './temp/flex_winrate_graph.png'
-        plot_summoners_data(summoners_data, 'flex', 'Winrate', flex_winrate_plot_filename)
-        await self.channel.send(file=discord.File(flex_winrate_plot_filename))
-
-    @print_leaderboard_weekly.before_loop
-    async def before_print_leaderboard_weekly(self):
         datetime_now = datetime.datetime.now()
         offset_day = 0 if datetime_now.hour < 18 else 1
         datetime_18 = datetime.datetime(datetime_now.year, datetime_now.month, datetime_now.day + offset_day, 18)
@@ -120,8 +165,6 @@ class LoopCog(commands.Cog):
         print("Sekunden, bis geplottet wird:", time_delta)
 
         await asyncio.sleep(time_delta)
-
-        self.channel = self.bot.get_channel(639889605256019980)
 
     @tasks.loop(hours=24)
     async def check_LoL_patch(self):
@@ -143,8 +186,6 @@ class LoopCog(commands.Cog):
     def __init__(self, bot: commands.bot):
         self.bot = bot
 
-        await self.bot.wait_until_ready()
-
         self.message_cache = gstate.message_cache
-        self.print_leaderboard_weekly.start()
+        self.print_leaderboard_loop.start()
         self.check_LoL_patch.start()
