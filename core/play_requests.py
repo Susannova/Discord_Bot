@@ -17,9 +17,9 @@ class PlayRequestCategory(Enum):
 class PlayRequest():
     subscribers = []
 
-    def __init__(self, message: discord.Message, author: discord.User, category=PlayRequestCategory.LOL):
-        self.message = message
-        self.author = author
+    def __init__(self, message_id: int, author_id: int, category=PlayRequestCategory.LOL):
+        self.message_id = message_id
+        self.author_id = author_id
         self.timestamp_ = time.time()
         self.category = category
         self.clash_date = ''
@@ -28,13 +28,13 @@ class PlayRequest():
         if self.category == PlayRequestCategory.CLASH:
             self.clash_date = clash_date
 
-    def add_subscriber(self, user: discord.User):
-        self.subscribers.append(user)
+    def add_subscriber_id(self, user_id: int):
+        self.subscriber_ids.append(user_id)
 
-    def remove_subscriber(self, user: discord.User):
-        self.subscribers.remove(user)
+    def remove_subscriber_id(self, user_id: int):
+        self.subscriber_ids.remove(user_id)
 
     def generate_all_players(self):
-        for subscriber in self.subscribers:
+        for subscriber in self.subscriber_ids:
             yield subscriber
         yield self.author

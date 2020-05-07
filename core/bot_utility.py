@@ -150,9 +150,10 @@ def is_play_request_author(user, play_request):
 
 
 def get_purgeable_messages_list(message_cache):
-    if not gstate.CONFIG["TOGGLE_AUTO_DELETE"]:
-        return
-    return [msg[0] for msg in message_cache if timers.is_timer_done(msg[1])]
+    messages_list = []
+    if gstate.CONFIG["TOGGLE_AUTO_DELETE"]:
+        message_list = [msg for msg in message_cache if timers.is_timer_done(message_cache[msg])]
+    return messages_list
 
 
 def is_no_play_request_command(message, bot):
@@ -162,10 +163,9 @@ def is_no_play_request_command(message, bot):
     return False
 
 
-def clear_message_cache(message, message_cache):
-    for message_tuple in message_cache:
-        if message in message_tuple:
-            message_cache.remove(message_tuple)
+def clear_message_cache(message_id, message_cache):
+    if message_id in message_cache:
+        del message_cache[message_id]
 
 
 def clear_play_requests(message):
@@ -185,5 +185,5 @@ def pretty_print_list(*players) -> str:
             pretty_print += player + '\n'
     return pretty_print
 
-def update_message_cache(message, message_cache,  time=18):
-    message_cache.append((message, timers.start_timer(hrs=18)))
+def update_message_cache(message_id, message_cache,  time=18):
+    message_cache[message_id] = timers.start_timer(hrs=18)

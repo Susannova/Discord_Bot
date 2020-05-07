@@ -63,9 +63,6 @@ class KrautBot(commands.Bot):
 
     async def logout(self, exit_status_input):
         """Aborts the bot and sets exit_status to exit_status_input"""
-        # state.global_state.write_state_to_file()
-        with open(f'{consts.DATABASE_DIRECTORY_GLOBAL_STATE}/{consts.DATABASE_NAME_GLOBAL_STATE}', 'wb') as file:
-            pickle.dump(state.global_state, file)
         await super().logout()
         self.exit_status = exit_status_input
 
@@ -76,7 +73,7 @@ if __name__ == '__main__':
         logger.info("Start Bot")
         bot.add_cog(events.EventCog(bot))
         bot.add_cog(cog_debug.DebugCog(bot))
-        bot.add_cog(cog_play_requests.PlayRequestsCog())
+        bot.add_cog(cog_play_requests.PlayRequestsCog(bot))
         bot.add_cog(cog_riot.RiotCog())
         bot.add_cog(cog_utility.UtilityCog())
         bot.add_cog(cog_tasks.LoopCog(bot))
@@ -86,4 +83,5 @@ if __name__ == '__main__':
         logger.exception('Failed to login due to improper Token.')
         bot.exit_status = 2
 
+    state.global_state.write_state_to_file()
     sys.exit(bot.exit_status)

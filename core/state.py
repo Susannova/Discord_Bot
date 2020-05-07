@@ -1,8 +1,11 @@
 import json
 import pickle
 import sys
+import logging
 
 from core import consts
+
+logger = logging.getLogger(consts.LOG_NAME)
 
 
 class SingletonBase(type):
@@ -42,10 +45,10 @@ class GlobalState(Singleton):
         self.debug = False
         self.play_requests = {}
         self.tmp_message_author = None
-        self.message_cache = []
+        self.message_cache = {}
         self.clash_date = ''
         self.game_selector_id = None
-        self.tmp_channels = []
+        self.tmp_channel_ids = {}
 
     def get_version(self):
         version_file = open("./.git/refs/heads/master", "r")
@@ -62,20 +65,20 @@ class GlobalState(Singleton):
             json.dump(data, file_, ensure_ascii=False, indent=4)
         self.reload_config()
     
-    # def write_state_to_file(self):
-    #     with open(f'{consts.DATABASE_DIRECTORY_GLOBAL_STATE}/{consts.DATABASE_NAME_GLOBAL_STATE}', 'w') as file:
-    #         pickle.dump(self, file)
+    def write_state_to_file(self):
+        with open(f'{consts.DATABASE_DIRECTORY_GLOBAL_STATE}/{consts.DATABASE_NAME_GLOBAL_STATE}', 'wb') as file:
+            pickle.dump(self, file)
+        logger.info('Global state saved')
 
-
+    # TODO Doesn't work?
     # def __del__(self):
-    #     self.write_state_to_file()
+    #    self.write_state_to_file()
 
    
 try:
     file = open(f'{consts.DATABASE_DIRECTORY_GLOBAL_STATE}/{consts.DATABASE_NAME_GLOBAL_STATE}', 'rb')
     global_state = pickle.load(file)
     print('Global State reinitialized.')
-    print(global_state.message_cache)
 except FileNotFoundError:
     print('No old global state found!', file=sys.stderr)
     global_state = GlobalState()

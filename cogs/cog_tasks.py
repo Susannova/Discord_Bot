@@ -21,7 +21,8 @@ from core.state import global_state as gstate
 
 from core import (
     consts,
-    bot_utility as utility
+    bot_utility as utility,
+    timers
 )
 
 logger = logging.getLogger(consts.LOG_NAME)
@@ -97,6 +98,8 @@ class LoopCog(commands.Cog):
         self.message_cache = gstate.message_cache
         self.print_leaderboard_weekly.start()
         self.check_LoL_patch.start()
+        self.auto_delete_purgeable_messages.start()
+        self.auto_delete_tmp_channels.start()
 
 
     # @tasks.loop(hours = 24 * 7)
@@ -147,6 +150,20 @@ class LoopCog(commands.Cog):
     @tasks.loop(hours=1)
     async def auto_delete_purgeable_messages(self):
         purgeable_message_list = utility.get_purgeable_messages_list(self.message_cache)
-        for purgeable_message in purgeable_message_list:
-            utility.clear_message_cache(purgeable_message, self.message_cache)
+        for purgeable_message_id in purgeable_message_list:
+            utility.clear_message_cache(purgeable_message_id, self.message_cache)
+            purgeable_message = self.bot.fetch_message(purgeable_message_id)
             await purgeable_message.delete()
+
+    # auto delete all tmp_channels
+    @tasks.loop(hours=1)
+    async def auto_delete_tmp_channels(self):
+        deleted_channels = []
+        for temp_channel_id in gstate.tmp_channel_ids:
+            if timers.is_timer_done(gstate.tmp_channel_ids[temp_channel_id]["timer"]):
+                temp_channel = self.bot.get_channel(temp_channel_id)
+                await temp_channel.delete(reason = "Delete temporary channel because time is over")
+                deleted_channels.append(temp_channel_id)
+        
+        for channel in deleted_channels:
+            del gstate.tmp_channel_ids[channel]

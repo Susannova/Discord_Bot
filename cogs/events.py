@@ -57,19 +57,13 @@ class EventCog(commands.Cog):
         #     annoucement_channel = discord.utils.find(lambda m: m.name == 'announcements', message.channel.guild.channels)
         #     await annoucement_channel.send(consts.MESSAGE_PATCH_NOTES_FORMATTED.format(message.guild.get_role(consts.ROLE_LOL_ID).mention, riot_utility.get_current_patch_url()))
 
-        # TODO gstate.tmp_channels is not needed anymore
-        for tmp_channel in gstate.tmp_channels:
-            if timers.is_timer_done(tmp_channel[1]):
-                await tmp_channel[0].delete()
-                gstate.tmp_channels.remove(tmp_channel)
-
         if isinstance(message.channel, discord.DMChannel):
             return
 
         # add all messages in channel to gstate.message_cache
         if gstate.CONFIG["TOGGLE_AUTO_DELETE"] \
         and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
-            utility.update_message_cache(message, self.message_cache)
+            utility.update_message_cache(message.id, self.message_cache)
 
         # # TODO Moved to tasks
         # # auto delete all purgeable messages
@@ -83,7 +77,7 @@ class EventCog(commands.Cog):
     async def on_message_delete(self, message):
         logger.info(f'Maually deleted a message')
         utility.clear_play_requests(message)
-        [utility.clear_message_cache(message, self.message_cache) for msg in self.message_cache if message in msg]
+        [utility.clear_message_cache(message.id, self.message_cache) for msg in self.message_cache if message.id in msg]
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
@@ -160,9 +154,8 @@ class EventCog(commands.Cog):
             await member.edit(roles=member_roles)
         return
 
-    # TODO again?
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
-        for tmp_channel in gstate.tmp_channels:
-            if channel.id == tmp_channel[0].id:
-                gstate.tmp_channels.remove(tmp_channel)
+        if channel.id in gstate.tmp_channel_ids:
+            del gstate.tmp_channel_ids[channel.id]
+
