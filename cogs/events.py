@@ -61,9 +61,8 @@ class EventCog(commands.Cog):
             return
 
         # add all messages in channel to gstate.message_cache
-        if gstate.CONFIG["TOGGLE_AUTO_DELETE"] \
-        and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
-            utility.update_message_cache(message.id, self.message_cache)
+        if gstate.CONFIG["TOGGLE_AUTO_DELETE"] and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
+            utility.insert_in_message_cache(self.message_cache, message.id, message.channel.id)
 
         # # TODO Moved to tasks
         # # auto delete all purgeable messages
@@ -75,9 +74,11 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
+        # TODO Also triggered when a purgeable message is deleted automatically!
         logger.info(f'Maually deleted a message')
         utility.clear_play_requests(message)
-        [utility.clear_message_cache(message.id, self.message_cache) for msg in self.message_cache if message.id in msg]
+        if message.id in self.message_cache:
+            utility.clear_message_cache(message.id, self.message_cache)
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
@@ -91,7 +92,7 @@ class EventCog(commands.Cog):
 
         play_request = self.play_requests[reaction.message.id]
 
-        if utility.is_play_request_author(user, play_request):
+        if utility.is_play_request_author(user.id, play_request):
             await reaction.remove(user)
             return
 

@@ -1,6 +1,5 @@
 import time
 import datetime
-import shelve
 import asyncio
 import json
 import logging
@@ -193,8 +192,12 @@ class LoopCog(commands.Cog):
     async def auto_delete_purgeable_messages(self):
         purgeable_message_list = utility.get_purgeable_messages_list(self.message_cache)
         for purgeable_message_id in purgeable_message_list:
+            channel = self.bot.get_channel(self.message_cache[purgeable_message_id]["channel"])
+            if channel is None:
+                logger.error("Message with id: " + purgeable_message_id + "can't be deleted. Channel is None.")
+                return
+            purgeable_message = await channel.fetch_message(purgeable_message_id)
             utility.clear_message_cache(purgeable_message_id, self.message_cache)
-            purgeable_message = self.bot.fetch_message(purgeable_message_id)
             await purgeable_message.delete()
 
     # auto delete all tmp_channels
@@ -209,3 +212,7 @@ class LoopCog(commands.Cog):
         
         for channel in deleted_channels:
             del gstate.tmp_channel_ids[channel]
+    
+    @auto_delete_purgeable_messages.before_loop
+    async def before_auto_delete_purgeable_messages(self):
+        await self.bot.wait_until_ready()
