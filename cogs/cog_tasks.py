@@ -181,10 +181,10 @@ class LoopCog(commands.Cog):
 
     @tasks.loop(hours=24)
     async def check_LoL_patch(self):
-        logger.info('New LoL patch notes')
         # The for loop is not needed right now but if the bot will ever run on multiple servers this is needed.
         for guild in self.bot.guilds:
             if riot_utility.update_current_patch():
+                logger.info('New LoL patch notes')
                 annoucement_channel = discord.utils.find(lambda m: m.name == 'announcements', guild.channels)
                 await annoucement_channel.send(consts.MESSAGE_PATCH_NOTES_FORMATTED.format(guild.get_role(consts.ROLE_LOL_ID).mention, riot_utility.get_current_patch_url()))
     
