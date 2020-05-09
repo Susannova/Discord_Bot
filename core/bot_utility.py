@@ -51,6 +51,7 @@ def create_internal_play_request_message(message, play_request):
     """
     play_request_time = re.findall('\d\d:\d\d', message.content)
     intern_message = consts.MESSAGE_CREATE_INTERN_PLAY_REQUEST.format(
+        # Todo play_requests is undefined!
         play_request.message_author.name, 10 - len(play_requests[message.id]), play_request_time)
     for player_tuple in play_requests[message.id]:
         intern_message += player_tuple[0].name + '\n'
@@ -142,16 +143,17 @@ def is_already_subscriber(user, play_request):
     return False
 
 
-def is_play_request_author(user, play_request):
-    if user == play_request.author:
+def is_play_request_author(user_id, play_request):
+    if user_id == play_request.author:
         return True
     return False
 
 
-def get_purgeable_messages_list(message, message_cache):
-    if not gstate.CONFIG["TOGGLE_AUTO_DELETE"]:
-        return
-    return [msg[0] for msg in message_cache if timers.is_timer_done(msg[1])]
+def get_purgeable_messages_list(message_cache):
+    messages_list = []
+    if gstate.CONFIG["TOGGLE_AUTO_DELETE"]:
+        messages_list = [msg for msg in message_cache if timers.is_timer_done(message_cache[msg]["timer"])]
+    return messages_list
 
 
 def is_no_play_request_command(message, bot):
@@ -161,15 +163,14 @@ def is_no_play_request_command(message, bot):
     return False
 
 
-def clear_message_cache(message, message_cache):
-    for message_tuple in message_cache:
-        if message in message_tuple:
-            message_cache.remove(message_tuple)
+def clear_message_cache(message_id, message_cache):
+    if message_id in message_cache:
+        del message_cache[message_id]
 
 
 def clear_play_requests(message):
     if has_any_pattern(message):
-        del play_requests[message.id]
+        del gstate.play_requests[message.id]
 
 
 def pretty_print_list(*players) -> str:
@@ -183,5 +184,8 @@ def pretty_print_list(*players) -> str:
             pretty_print += player + '\n'
     return pretty_print
 
-def update_message_cache(message, message_cache,  time=18):
-    message_cache.append((message, timers.start_timer(hrs=18)))
+def insert_in_message_cache(message_cache, message_id, channel_id, time=18):
+    message_cache[message_id] = {
+        "timer": timers.start_timer(hrs=time),
+        "channel": channel_id
+    }

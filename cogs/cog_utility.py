@@ -111,22 +111,24 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
     @discord.ext.commands.cooldown(rate=3, per=30)
     async def create_channel(self, ctx, kind, channel_name, *user_limit):
-        for tmp_channels in gstate.tmp_channels:
-            if tmp_channels[2] == ctx.message.author:
+        for tmp_channels in gstate.tmp_channel_ids:
+            if tmp_channels["author"] == ctx.message.author.id:
                 raise exceptions.LimitReachedException('Der Autor hat schon einen temprorären Channel erstellt.')
         tmp_channel_category = discord.utils.find(lambda x: x.name == consts.CHANNEL_CATEGORY_TEMPORARY, ctx.message.guild.channels)
         tmp_channel = None
-        if kind == 'text':
+        if channel_name == None:
+            return
+        elif kind == 'text':
             tmp_channel = await ctx.message.guild.create_text_channel(channel_name, category=tmp_channel_category)
         elif kind == 'voice':
             if len(user_limit) > 0 and int(user_limit[0]) > 0 and int(user_limit[0]) <= 99:
                 tmp_channel = await ctx.message.guild.create_voice_channel(channel_name, category=tmp_channel_category, user_limit=int(user_limit[0]))
             else:
                 tmp_channel = await ctx.message.guild.create_voice_channel(channel_name, category=tmp_channel_category)
-        gstate.tmp_channels.append((tmp_channel, timers.start_timer(hrs=12), ctx.message.author))
-        await asyncio.sleep(60 * 60 * 12)
-        await tmp_channel.delete(reason = "Delete temporary channel because time is over")
-        # TODO Remove the channel from gstate.tmp_channels!
+        gstate.tmp_channel_ids[tmp_channel.id] = {
+            "timer": timers.start_timer(hrs=12),
+            "author": ctx.message.author.id
+        }
 
     @create_team.error
     async def error_handler(self, ctx, error):

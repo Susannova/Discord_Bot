@@ -50,37 +50,35 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        # checks if a new lol patch is out and posts it if it is
-        if riot_utility.update_current_patch():
-            logger.info('Posted new Patch notes')
-            annoucement_channel = discord.utils.find(lambda m: m.name == 'announcements', message.channel.guild.channels)
-            await annoucement_channel.send(consts.MESSAGE_PATCH_NOTES_FORMATTED.format(message.guild.get_role(consts.ROLE_LOL_ID).mention, riot_utility.get_current_patch_url()))
-
-        for tmp_channel in gstate.tmp_channels:
-            if timers.is_timer_done(tmp_channel[1]):
-                await tmp_channel[0].delete()
-                gstate.tmp_channels.remove(tmp_channel)
+        # # TODO Moved to tasks
+        # # checks if a new lol patch is out and posts it if it is
+        # if riot_utility.update_current_patch():
+        #     logger.info('Posted new Patch notes')
+        #     annoucement_channel = discord.utils.find(lambda m: m.name == 'announcements', message.channel.guild.channels)
+        #     await annoucement_channel.send(consts.MESSAGE_PATCH_NOTES_FORMATTED.format(message.guild.get_role(consts.ROLE_LOL_ID).mention, riot_utility.get_current_patch_url()))
 
         if isinstance(message.channel, discord.DMChannel):
             return
 
         # add all messages in channel to gstate.message_cache
-        if gstate.CONFIG["TOGGLE_AUTO_DELETE"] \
-        and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
-            utility.update_message_cache(message, self.message_cache)
+        if gstate.CONFIG["TOGGLE_AUTO_DELETE"] and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
+            utility.insert_in_message_cache(self.message_cache, message.id, message.channel.id)
 
-        # auto delete all purgeable messages
-        purgeable_message_list = utility.get_purgeable_messages_list(message, self.message_cache)
-        for purgeable_message in purgeable_message_list:
-            utility.clear_message_cache(purgeable_message, self.message_cache)
-            await purgeable_message.delete()
+        # # TODO Moved to tasks
+        # # auto delete all purgeable messages
+        # purgeable_message_list = utility.get_purgeable_messages_list(message, self.message_cache)
+        # for purgeable_message in purgeable_message_list:
+        #     utility.clear_message_cache(purgeable_message, self.message_cache)
+        #     await purgeable_message.delete()
 
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
+        # TODO Also triggered when a purgeable message is deleted automatically!
         logger.info(f'Maually deleted a message')
         utility.clear_play_requests(message)
-        [utility.clear_message_cache(message, self.message_cache) for msg in self.message_cache if message in msg]
+        if message.id in self.message_cache:
+            utility.clear_message_cache(message.id, self.message_cache)
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
@@ -94,7 +92,7 @@ class EventCog(commands.Cog):
 
         play_request = self.play_requests[reaction.message.id]
 
-        if utility.is_play_request_author(user, play_request):
+        if utility.is_play_request_author(user.id, play_request):
             await reaction.remove(user)
             return
 
@@ -159,6 +157,6 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
-        for tmp_channel in gstate.tmp_channels:
-            if channel.id == tmp_channel[0].id:
-                gstate.tmp_channels.remove(tmp_channel)
+        if channel.id in gstate.tmp_channel_ids:
+            del gstate.tmp_channel_ids[channel.id]
+
