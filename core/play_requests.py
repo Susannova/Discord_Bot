@@ -15,7 +15,7 @@ class PlayRequestCategory(Enum):
 
 
 class PlayRequest():
-    subscribers = []
+    subscriber_ids = []
 
     def __init__(self, message_id: int, author_id: int, category=PlayRequestCategory.LOL):
         self.message_id = message_id
@@ -37,4 +37,4 @@ class PlayRequest():
     def generate_all_players(self):
         for subscriber in self.subscriber_ids:
             yield subscriber
-        yield self.author
+        yield self.author_id
