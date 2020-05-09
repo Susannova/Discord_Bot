@@ -28,7 +28,7 @@ class Summoner():
     data_league: dict
         formatted basic league data from Riot API
     """
-    def __init__(self, name, data_summoner={}, data_mastery=[], data_league=[]):
+    def __init__(self, name, data_summoner={}, data_mastery=[], data_league={}):
         self.name = name
         self.discord_user_name = 'None'
 
