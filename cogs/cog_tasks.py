@@ -179,6 +179,7 @@ class LoopCog(commands.Cog):
         time_delta = (datetime_18 - datetime_now).total_seconds()
         print("Sekunden, bis geplottet wird:", time_delta)
 
+        # TODO Causes an error when aborting the program before timer is finished
         await asyncio.sleep(time_delta)
         await self.bot.wait_until_ready()
 
