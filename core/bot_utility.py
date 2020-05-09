@@ -4,7 +4,7 @@ import json
 
 import discord
 
-from core import consts, timers
+from core import consts, timers, play_requests
 from core.state import global_state as gstate
 
 
@@ -126,8 +126,8 @@ def get_players_in_channel(channel):
     return list(generate_players_in_channel(channel))
 
 
-def add_subscriber_to_play_request(user, play_request):
-    play_request.add_subscriber(user)
+def add_subscriber_to_play_request(user, play_request: play_requests.PlayRequest):
+    play_request.add_subscriber_id(user.id)
 
 
 def is_user_bot(user, bot):
@@ -136,13 +136,13 @@ def is_user_bot(user, bot):
     return False
 
 
-def is_already_subscriber(user, play_request):
-    if user in play_request.subscribers:
+def is_already_subscriber(user, play_request: play_requests.PlayRequest):
+    if user.id in play_request.subscriber_ids:
         return True
     return False
 
 
-def is_play_request_author(user_id, play_request):
+def is_play_request_author(user_id, play_request: play_requests.PlayRequest):
     if user_id == play_request.author_id:
         return True
     return False
