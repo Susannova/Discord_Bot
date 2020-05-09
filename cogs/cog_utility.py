@@ -78,6 +78,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def purge_(self, ctx, count: int):
         last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
+        # TODO Bad, it is not neccesary to create a list here if we never use it.
         [await message_.delete() for message_ in last_count_messages if not message_.pinned]
 
     @commands.command(name='leaderboard-old', hidden=True)

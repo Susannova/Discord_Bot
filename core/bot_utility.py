@@ -4,7 +4,7 @@ import json
 
 import discord
 
-from core import consts, timers
+from core import consts, timers, play_requests
 from core.state import global_state as gstate
 
 
@@ -51,9 +51,8 @@ def create_internal_play_request_message(message, play_request):
     """
     play_request_time = re.findall('\d\d:\d\d', message.content)
     intern_message = consts.MESSAGE_CREATE_INTERN_PLAY_REQUEST.format(
-        # Todo play_requests is undefined!
-        play_request.message_author.name, 10 - len(play_requests[message.id]), play_request_time)
-    for player_tuple in play_requests[message.id]:
+        play_request.message_author.name, 10 - len(gstate.play_requests[message.id]), play_request_time)
+    for player_tuple in gstate.play_requests[message.id]:
         intern_message += player_tuple[0].name + '\n'
     return intern_message
 
@@ -127,8 +126,8 @@ def get_players_in_channel(channel):
     return list(generate_players_in_channel(channel))
 
 
-def add_subscriber_to_play_request(user, play_request):
-    play_request.add_subscriber(user)
+def add_subscriber_to_play_request(user, play_request: play_requests.PlayRequest):
+    play_request.add_subscriber_id(user.id)
 
 
 def is_user_bot(user, bot):
@@ -137,14 +136,14 @@ def is_user_bot(user, bot):
     return False
 
 
-def is_already_subscriber(user, play_request):
-    if user in play_request.subscribers:
+def is_already_subscriber(user, play_request: play_requests.PlayRequest):
+    if user.id in play_request.subscriber_ids:
         return True
     return False
 
 
-def is_play_request_author(user_id, play_request):
-    if user_id == play_request.author:
+def is_play_request_author(user_id, play_request: play_requests.PlayRequest):
+    if user_id == play_request.author_id:
         return True
     return False
 

@@ -117,7 +117,7 @@ def plot_all_summoners_data(summoners_data, filename):
             ax[row, col].set_yticks(list(range(0, 2300, 100)), minor=True)
             ranks_string = ["Eisen 4", "Bronze 4", "Silber 4", "Gold 4", "Platin 4", "Diamant 4"]
             ax[row, col].set_yticklabels(ranks_string)
-            ax[row, col].grid(axis='y')
+            ax[row, col].grid(axis='y', which='both')
 
         for summoner in summoners_data:
             # TODO Timezone is false
@@ -144,18 +144,22 @@ class LoopCog(commands.Cog):
         self.check_LoL_patch.start()
         self.auto_delete_purgeable_messages.start()
         self.auto_delete_tmp_channels.start()
+        self.channel = None
 
-    async def print_leaderboard(self):
+    async def print_leaderboard(self, channel_to_print=None):
         summoners_data = update_summoners_data()
+
+        if channel_to_print is None:
+            channel_to_print = self.channel
 
         filename = 'temp/LoL_plot.png'
         plot_all_summoners_data(summoners_data, filename)
-        await self.channel.send(file=discord.File(filename))
+        await channel_to_print.send(file=discord.File(filename))
 
 
     @commands.command(name='plot')
     async def print_leaderboard_command(self, ctx):
-        await self.print_leaderboard()
+        await self.print_leaderboard(ctx.channel)
 
     # @tasks.loop(hours = 24 * 7)
     # @tasks.loop(seconds = 5)
@@ -175,7 +179,11 @@ class LoopCog(commands.Cog):
         time_delta = (datetime_18 - datetime_now).total_seconds()
         print("Sekunden, bis geplottet wird:", time_delta)
 
-        await asyncio.sleep(time_delta)
+        try:
+            await asyncio.sleep(time_delta)
+        except asyncio.CancelledError:
+            return
+        
         await self.bot.wait_until_ready()
 
     @tasks.loop(hours=24)

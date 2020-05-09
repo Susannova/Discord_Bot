@@ -7,7 +7,8 @@ from core.state import global_state as gstate
 from core import (
     bot_utility as utility,
     consts,
-    timers
+    timers,
+    play_requests
 )
 from core.play_requests import PlayRequestCategory
 from riot import riot_utility
@@ -90,6 +91,9 @@ class EventCog(commands.Cog):
         if not gstate.CONFIG["TOGGLE_AUTO_DM"]:
             return
 
+        if reaction.message.id not in self.play_requests:
+            return
+        
         play_request = self.play_requests[reaction.message.id]
 
         if utility.is_play_request_author(user.id, play_request):
@@ -97,9 +101,9 @@ class EventCog(commands.Cog):
             return
 
         if str(reaction.emoji) == consts.EMOJI_PASS:
-            for player in play_request.generate_all_players():
-                if user == player:
-                    play_request.remove_subscriber(user)
+            for player_id in play_request.generate_all_players():
+                if user.id == player_id:
+                    play_request.remove_subscriber(user.id)
             return
 
         if utility.is_already_subscriber(user, play_request):
@@ -107,26 +111,29 @@ class EventCog(commands.Cog):
         
         utility.add_subscriber_to_play_request(user, play_request)
 
+        author = self.bot.get_user(play_request.author_id)
         # send auto dms to subscribers and author
-        for player in play_request.generate_all_players():
-            if player == play_request.author and player != user:
-                await play_request.author.send(
-                    consts.MESSAGE_AUTO_DM_CREATOR.format(user.name, str(reaction.emoji)))
-            elif player != user:
+        for player_id in play_request.generate_all_players():
+            if player_id == play_request.author_id and player_id != user.id:
+                await author.send(
+                    consts.MESSAGE_AUTO_DM_CREATOR.format(user.name, str(reaction.emoji))
+                    )
+            elif player_id != user.id:
+                player = self.bot.get_user(player_id)
                 await player.send(
                     consts.MESSAGE_AUTO_DM_SUBSCRIBER.format(
-                        user.name, play_request.author.name, str(reaction.emoji)))
+                        user.name, author.name, str(reaction.emoji)))
 
-        if len(play_request.subscribers) + 1 == 5 and play_request.category == PlayRequestCategory.CLASH:
+        if len(play_request.subscriber_ids) + 1 == 5 and play_request.category == PlayRequestCategory.CLASH:
             await reaction.channel.send(consts.MESSAGE_CLASH_FULL.format(
-                play_request.author, play_request.clash_date, utility.pretty_print_list(play_request.subscribers, play_request.author)
+                author, play_request.clash_date, utility.pretty_print_list([self.bot.get_user(player_id) for player_id in play_request.subscriber_ids], author)
             ))
 
-        if len(play_request.subscribers) + 1 > 5 and play_request.category == PlayRequestCategory.CLASH:
+        if len(play_request.subscriber_ids) + 1 > 5 and play_request.category == PlayRequestCategory.CLASH:
             await reaction.remove(user)
             await user.send('Das Clash Team ist zur Zeit leider schon voll.')
 
-        if len(play_request.subscribers) + 1 == 6 and play_request.category == PlayRequestCategory.INTERN:
+        if len(play_request.subscriber_ids) + 1 == 6 and play_request.category == PlayRequestCategory.INTERN:
             await reaction.channel.send(
                 utility.switch_to_internal_play_request(reaction.message, play_request))
 
