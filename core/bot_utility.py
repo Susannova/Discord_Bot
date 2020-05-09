@@ -143,7 +143,7 @@ def is_already_subscriber(user, play_request):
 
 
 def is_play_request_author(user_id, play_request):
-    if user_id == play_request.author:
+    if user_id == play_request.author_id:
         return True
     return False
 
