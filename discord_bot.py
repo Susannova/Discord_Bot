@@ -6,7 +6,7 @@ from core import consts
 logging.basicConfig(
     filename=consts.LOG_FILE,
     filemode='a',
-    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+    format='%(asctime)s,%(msecs)d %(levelname)s %(name)s %(message)s',
     level=logging.INFO
 )
 logger = logging.getLogger('main')
