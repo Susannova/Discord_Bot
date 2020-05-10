@@ -204,6 +204,7 @@ class LoopCog(commands.Cog):
         purgeable_message_list = utility.get_purgeable_messages_list(self.message_cache)
         for purgeable_message_id in purgeable_message_list:
             channel = self.bot.get_channel(self.message_cache[purgeable_message_id]["channel"])
+            utility.clear_message_cache(purgeable_message_id, self.message_cache)
             if channel is None:
                 logger.error("Message with id: %s can't be deleted. Channel is None.", purgeable_message_id)
                 return
