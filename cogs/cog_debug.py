@@ -12,7 +12,7 @@ from core import (
 
 from core.state import global_state as gstate
 
-logger = logging.getLogger(consts.LOG_NAME)
+logger = logging.getLogger('cog_debug')
 
 
 class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
@@ -23,12 +23,14 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
     @checks.is_in_channels([])
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def version_(self, ctx):
+        logger.debug('!version called')
         await ctx.send(gstate.VERSION)
 
     @commands.command(name='status')
     @checks.is_in_channels([])
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def status_(self, ctx):
+        logger.debug('!status called')
         await ctx.send("Bot is alive.")
 
     @commands.command(name='reload-config')
@@ -36,11 +38,13 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def reload_config(self, ctx):
         global consts
+        logger.info('Try to reload the configuration.')
         await ctx.send("Reload configuration.json:")
         gstate.read_config()
         consts = reload(consts)
         gstate.get_version()
         await ctx.send("Done.")
+        logger.info('configuration reloaded.')
 
     @commands.command(name='enable-debug')
     @checks.is_in_channels([])
@@ -48,18 +52,23 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def enable_debug(self, ctx):
         gstate.debug = True
-        await ctx.send("Debugging is activated for one hour.")
+        str_debug_activated="Debugging is activated for one hour."
+        await ctx.send(str_debug_activated)
+        logger.info(str_debug_activated)
         await asyncio.sleep(3600)
         gstate.debug = False
         gstate.CONFIG["TOGGLE_DEBUG"] = False
         gstate.write_and_reload_config(gstate.CONFIG)
-        await ctx.send("Debugging is deactivated.")
+        str_debug_deactivated="Debugging is deactivated."
+        await ctx.send(str_debug_deactivated)
+        logger.info(str_debug_deactivated)
 
     @commands.command(name='print')
     @checks.is_in_channels([])
     @checks.is_debug_enabled()
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def print_(self, ctx, arg):
+        logger.debug('!print %s called', arg)
         # return_string = ast.literal_eval(arg)
         # less safe but more powerful
         return_string = eval(arg)

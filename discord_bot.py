@@ -26,11 +26,10 @@ logging.basicConfig(
     filename=consts.LOG_FILE,
     filemode='a',
     format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-    datefmt='%H:%M:%S',
     level=logging.INFO
 )
+logger = logging.getLogger('main')
 
-logger = logging.getLogger(consts.LOG_NAME)
 discord.voice_client.VoiceClient.warn_nacl = False
 BOT_TOKENS = utility.read_config_file('bot')
 help_command_ = discord.ext.commands.DefaultHelpCommand()
@@ -64,6 +63,7 @@ class KrautBot(commands.Bot):
     async def logout(self, exit_status_input):
         """Aborts the bot and sets exit_status to exit_status_input"""
         await super().logout()
+        logger.info('Logout')
         self.exit_status = exit_status_input
 
 

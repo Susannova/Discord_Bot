@@ -23,7 +23,7 @@ from . import (
 )
 
 
-logger = logging.getLogger(consts.LOG_NAME)
+logger = logging.getLogger('riot_commands')
 SEASON_2020_START_EPOCH = timers.convert_human_to_epoch_time(consts.RIOT_SEASON_2020_START)
 
 _timers = []
