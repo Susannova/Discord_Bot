@@ -141,24 +141,25 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         }
         logger.info("Temporary %s-channel %s created", kind, channel_name)
 
-    @create_team.error
-    async def error_handler(self, ctx, error):
-        logger.exception('Error handler got called.')
-        if isinstance(error, commands.CheckFailure):
-            if str(ctx.command) == 'enable-debug':
-                await ctx.send(
-                    'Der Debug Toggle in der Konfiguration ist nicht eingeschaltet.')
-            elif str(ctx.command) == 'purge':
-                await ctx.send(
-                    'Du hast nicht die benötigten Rechte um dieses Command auszuführen.')
-            elif str(ctx.command) == 'print':
-                await ctx.send(
-                    f'Der Debug Modus ist zur Zeit nicht aktiviert. Versuche es mit {ctx.bot.command_prefix}enable-debug zu aktivieren.')
-            else:
-                await ctx.send(
-                    'Das hat nicht funktioniert. (Überprüfe, ob du im richtigen Channel bist.)')
-        elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(
-                'Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
-        else: 
-            await ctx.send(error)
+# TODO I don't think this should be used like this..
+    # @create_team.error
+    # async def error_handler(self, ctx, error):
+    #     logger.exception('Error handler got called: %s', error)
+    #     if isinstance(error, commands.CheckFailure):
+    #         if str(ctx.command) == 'enable-debug':
+    #             await ctx.send(
+    #                 'Der Debug Toggle in der Konfiguration ist nicht eingeschaltet.')
+    #         elif str(ctx.command) == 'purge':
+    #             await ctx.send(
+    #                 'Du hast nicht die benötigten Rechte um dieses Command auszuführen.')
+    #         elif str(ctx.command) == 'print':
+    #             await ctx.send(
+    #                 f'Der Debug Modus ist zur Zeit nicht aktiviert. Versuche es mit {ctx.bot.command_prefix}enable-debug zu aktivieren.')
+    #         else:
+    #             await ctx.send(
+    #                 'Das hat nicht funktioniert. (Überprüfe, ob du im richtigen Channel bist.)')
+    #     elif isinstance(error, commands.MissingRequiredArgument):
+    #         await ctx.send(
+    #             'Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
+    #     else:
+    #         await ctx.send(error)
