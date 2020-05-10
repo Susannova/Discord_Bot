@@ -183,7 +183,7 @@ class LoopCog(commands.Cog):
         try:
             await asyncio.sleep(time_delta)
         except asyncio.CancelledError:
-            self.print_leaderboard_loop.stop()
+            self.print_leaderboard_loop.cancel()
             return
         
         await self.bot.wait_until_ready()
