@@ -233,3 +233,7 @@ class LoopCog(commands.Cog):
     @auto_delete_purgeable_messages.before_loop
     async def before_auto_delete_purgeable_messages(self):
         await self.bot.wait_until_ready()
+
+def setup(bot: commands.Bot):
+    bot.add_cog(LoopCog(bot))
+    logger.info('Loop cogs loaded')

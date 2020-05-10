@@ -61,3 +61,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
         ocr.clean_up_image(attached_image_file_name)
         await ctx.send(
             consts.MESSAGE_BANS.format(ocr.get_formatted_summoner_names()))
+
+def setup(bot: commands.Bot):
+    bot.add_cog(RiotCog())
+    logger.info('Riot cogs loaded')

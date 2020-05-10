@@ -178,3 +178,6 @@ class EventCog(commands.Cog):
             logger.info("Temporary channel was deleted manually.")
             del gstate.tmp_channel_ids[channel.id]
 
+def setup(bot: commands.Bot):
+    bot.add_cog(EventCog(bot))
+    logger.info('Event cogs loaded')

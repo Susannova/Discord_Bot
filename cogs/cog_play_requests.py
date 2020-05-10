@@ -79,3 +79,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         gstate.clash_date = arg
         await ctx.send(consts.MESSAGE_CLASH_CREATE.format(
             ctx.message.author.mention, arg))
+
+def setup(bot: commands.Bot):
+    bot.add_cog(PlayRequestsCog(bot))
+    logger.info('Play request cogs loaded')

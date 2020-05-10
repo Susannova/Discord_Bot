@@ -163,3 +163,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     #             'Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
     #     else:
     #         await ctx.send(error)
+
+def setup(bot: commands.Bot):
+    bot.add_cog(UtilityCog())
+    logger.info('Utility cogs loaded')

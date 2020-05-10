@@ -25,6 +25,29 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
     async def version_(self, ctx):
         logger.debug('!version called')
         await ctx.send(gstate.VERSION)
+    
+    @commands.command(name='reload-ext')
+    @checks.is_in_channels([])
+    @commands.has_role(consts.ROLE_ADMIN_ID)
+    async def reload_ext_(self, ctx, ext):
+        logger.info('!reload-ext called')
+        try:
+            self.bot.reload_extension(ext)
+            log_str = "Extension " + ext + " is reloaded"
+            logger.info(log_str)
+        except commands.ExtensionNotLoaded:
+            log_str = "Extension " + ext + " was not loaded!"
+            logger.error(log_str)
+        except commands.ExtensionNotFound:
+            log_str = "Extension " + ext + " was not found!"
+            logger.error(log_str)
+        except Exception as error:
+            log_str = "Unknown error reloading extension " + ext
+            logger.error(log_str)
+            await ctx.send(log_str)
+            raise error
+
+        await ctx.send(log_str)
 
     @commands.command(name='status')
     @checks.is_in_channels([])
@@ -97,3 +120,8 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
         
         logger.info("Try to abort bot with exit status %s", exit_status)
         await self.bot.logout(exit_status)
+
+
+def setup(bot: commands.Bot):
+    bot.add_cog(DebugCog(bot))
+    logger.info('Debug cogs loaded')

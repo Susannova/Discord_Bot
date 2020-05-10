@@ -71,12 +71,14 @@ if __name__ == '__main__':
     bot = KrautBot()
     try:
         logger.info("Start Bot")
-        bot.add_cog(events.EventCog(bot))
-        bot.add_cog(cog_debug.DebugCog(bot))
-        bot.add_cog(cog_play_requests.PlayRequestsCog(bot))
-        bot.add_cog(cog_riot.RiotCog())
-        bot.add_cog(cog_utility.UtilityCog())
-        bot.add_cog(cog_tasks.LoopCog(bot))
+
+        bot.load_extension('cogs.cog_debug')
+        bot.load_extension('cogs.cog_play_requests')
+        bot.load_extension('cogs.cog_riot')
+        bot.load_extension('cogs.cog_utility')
+        bot.load_extension('cogs.events')
+        bot.load_extension('cogs.cog_tasks')
+        
         bot.run()
         logger.info("End")
     except discord.LoginFailure:
