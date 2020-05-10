@@ -24,7 +24,7 @@ from core import (
     timers
 )
 
-logger = logging.getLogger(consts.LOG_NAME)
+logger = logging.getLogger('cog_tasks')
 
 def update_summoners_data(file_path='./data/summoners_data.json'):
     summoners = list(riot_utility.read_all_accounts())
@@ -159,6 +159,7 @@ class LoopCog(commands.Cog):
 
     @commands.command(name='plot')
     async def print_leaderboard_command(self, ctx):
+        logger.debug('!plot command called')
         await self.print_leaderboard(ctx.channel)
 
     # @tasks.loop(hours = 24 * 7)
@@ -182,12 +183,14 @@ class LoopCog(commands.Cog):
         try:
             await asyncio.sleep(time_delta)
         except asyncio.CancelledError:
+            self.print_leaderboard_loop.stop()
             return
         
         await self.bot.wait_until_ready()
 
     @tasks.loop(hours=24)
     async def check_LoL_patch(self):
+        logger.info("Look for new LoL patch")
         # The for loop is not needed right now but if the bot will ever run on multiple servers this is needed.
         for guild in self.bot.guilds:
             if riot_utility.update_current_patch():
@@ -198,27 +201,33 @@ class LoopCog(commands.Cog):
     # auto delete all purgeable messages
     @tasks.loop(hours=1)
     async def auto_delete_purgeable_messages(self):
+        logger.info('Look for purgeable messages')
         purgeable_message_list = utility.get_purgeable_messages_list(self.message_cache)
         for purgeable_message_id in purgeable_message_list:
             channel = self.bot.get_channel(self.message_cache[purgeable_message_id]["channel"])
+            utility.clear_message_cache(purgeable_message_id, self.message_cache)
             if channel is None:
-                logger.error("Message with id: " + purgeable_message_id + "can't be deleted. Channel is None.")
+                logger.error("Message with id: %s can't be deleted. Channel is None.", purgeable_message_id)
                 return
             purgeable_message = await channel.fetch_message(purgeable_message_id)
-            utility.clear_message_cache(purgeable_message_id, self.message_cache)
             await purgeable_message.delete()
+            logger.info("Message with id %s was deleted automatically", purgeable_message_id)
 
     # auto delete all tmp_channels
     @tasks.loop(hours=1)
     async def auto_delete_tmp_channels(self):
+        logger.info('Look for expired temp channels')
         deleted_channels = []
         for temp_channel_id in gstate.tmp_channel_ids:
             if timers.is_timer_done(gstate.tmp_channel_ids[temp_channel_id]["timer"]):
                 temp_channel = self.bot.get_channel(temp_channel_id)
-                await temp_channel.delete(reason = "Delete temporary channel because time is over")
+                temp_channel_name = temp_channel.name
+                await temp_channel.delete(reason = "Delete expired temporary channel")
+                logger.info('Temp channel %s is deleted', temp_channel_name)
                 deleted_channels.append(temp_channel_id)
         
         for channel in deleted_channels:
+            logger.debug("Remove temp channel %s from gstate", temp_channel_name)
             del gstate.tmp_channel_ids[channel]
     
     @auto_delete_purgeable_messages.before_loop

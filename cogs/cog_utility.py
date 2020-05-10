@@ -18,13 +18,14 @@ from riot import riot_commands
 
 from core.state import global_state as gstate
 
-logger = logging.getLogger(consts.LOG_NAME)
+logger = logging.getLogger('cog_utility')
 
 
 class UtilityCog(commands.Cog, name='Utility Commands'):
     @commands.command(name='create-team', help = help_text.create_team_HelpText.text, brief = help_text.create_team_HelpText.brief, usage = help_text.create_team_HelpText.usage)
     @checks.is_in_channels([consts.CHANNEL_INTERN_PLANING, consts.CHANNEL_COMMANDS])
     async def create_team(self, ctx: commands.Context, *player_names):
+        logger.debug('!create-team command called')
         member = await discord.ext.commands.MemberConverter().convert(ctx, ctx.message.author.name)
         voice_channel = discord.utils.find(lambda x: member in x.members, ctx.message.guild.voice_channels)
         voice_channel = voice_channel if voice_channel is not None else utility.get_voice_channel(ctx.message, consts.CHANNEL_CREATE_TEAM_VOICE_ID)
@@ -55,28 +56,33 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     async def link_(self, ctx, summoner_name):
         try:
             riot_commands.link_account(ctx.message.author.name, summoner_name)
-        except commands.CommandInvokeError:
-            pass
+        except Exception as error:
+            logger.error("Error linking %s: %s", summoner_name, error)
+            #TODO Add a link to our accounts
+            await ctx.message.author.send(f'Dein Lol-Account konnte nicht mit deinem Discord Account verbunden werden. Richtiger Umgang mit ``!link`` ist unter ``{ctx.bot.command_prefix}help link`` zu finden. Falls das nicht weiterhilft, wende dich bitte an Jan oder Nick')
+            raise error
         else:
-            await ctx.message.author.send(
-                f'Dein Lol-Account wurde erfolgreich mit deinem Discord Account verbunden!\nFalls du deinen Account wieder entfernen möchtest benutze das {ctx.bot.command_prefix}unlink Command.')
+            await ctx.message.author.send(f'Dein Lol-Account wurde erfolgreich mit deinem Discord Account verbunden!\nFalls du deinen Account wieder entfernen möchtest benutze das ``{ctx.bot.command_prefix}unlink`` Command.')
+            logger.info("%s was linked.", summoner_name)
 
     @commands.command(name='unlink', help = help_text.unlink_HelpText.text, brief = help_text.unlink_HelpText.brief, usage = help_text.unlink_HelpText.usage)
     @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
     async def unlink_(self, ctx, *summoner_names):
-        try:
-            if len(list(summoner_names)) != 0:
-                raise commands.CommandInvokeError
-            riot_commands.unlink_account(ctx.message.author.name)
-        except commands.CommandInvokeError:
-            pass
-        else:
-            await ctx.message.author.send(
-                'Dein Lol-Account wurde erfolgreich von deinem Discord Account getrennt!')
+        logger.debug("!unlink called")
+        
+        #Todo Why???
+        if len(list(summoner_names)) != 0:
+            raise commands.CommandInvokeError
+        
+        riot_commands.unlink_account(ctx.message.author.name)
+        await ctx.message.author.send(
+            'Dein Lol-Account wurde erfolgreich von deinem Discord Account getrennt!')
+        logger.info("%s was unlinked", ctx.message.author.name)
 
     @commands.command(name='purge', hidden=True)
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def purge_(self, ctx, count: int):
+        logger.info("!purge %s called in channel %s", count, ctx.message.channel.name)
         last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
         # TODO Bad, it is not neccesary to create a list here if we never use it.
         [await message_.delete() for message_ in last_count_messages if not message_.pinned]
@@ -84,11 +90,13 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @commands.command(name='leaderboard-old', hidden=True)
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def test_embed(self, ctx):
+        logger.debug("!leaderboard-old called")
         await ctx.send(embed=riot_commands.create_embed(ctx))
 
     @commands.command(name='leaderboard', help = help_text.leaderboard_HelpText.text, brief = help_text.leaderboard_HelpText.brief, usage = help_text.leaderboard_HelpText.usage)
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def leaderboard_(self, ctx):
+        logger.debug("!leaderboard-debug called")
         loading_message = await ctx.send("This will take a few seconds. Processing...")
         _embed = riot_commands.create_leaderboard_embed()
         message = await ctx.send(file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/leaderboard.png'))
@@ -112,12 +120,13 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
     @discord.ext.commands.cooldown(rate=3, per=30)
     async def create_channel(self, ctx, kind, channel_name, *user_limit):
+        logger.debug("!create-channel %s %s called", kind, channel_name)
         for tmp_channels in gstate.tmp_channel_ids:
             if tmp_channels["author"] == ctx.message.author.id:
                 raise exceptions.LimitReachedException('Der Autor hat schon einen temprorären Channel erstellt.')
         tmp_channel_category = discord.utils.find(lambda x: x.name == consts.CHANNEL_CATEGORY_TEMPORARY, ctx.message.guild.channels)
         tmp_channel = None
-        if channel_name == None:
+        if channel_name is None:
             return
         elif kind == 'text':
             tmp_channel = await ctx.message.guild.create_text_channel(channel_name, category=tmp_channel_category)
@@ -130,25 +139,27 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             "timer": timers.start_timer(hrs=12),
             "author": ctx.message.author.id
         }
+        logger.info("Temporary %s-channel %s created", kind, channel_name)
 
-    @create_team.error
-    async def error_handler(self, ctx, error):
-        logger.exception('Error handler got called.')
-        if isinstance(error, commands.CheckFailure):
-            if str(ctx.command) == 'enable-debug':
-                await ctx.send(
-                    'Der Debug Toggle in der Konfiguration ist nicht eingeschaltet.')
-            elif str(ctx.command) == 'purge':
-                await ctx.send(
-                    'Du hast nicht die benötigten Rechte um dieses Command auszuführen.')
-            elif str(ctx.command) == 'print':
-                await ctx.send(
-                    f'Der Debug Modus ist zur Zeit nicht aktiviert. Versuche es mit {ctx.bot.command_prefix}enable-debug zu aktivieren.')
-            else:
-                await ctx.send(
-                    'Das hat nicht funktioniert. (Überprüfe, ob du im richtigen Channel bist.)')
-        elif isinstance(error, commands.MissingRequiredArgument):
-            await ctx.send(
-                'Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
-        else: 
-            await ctx.send(error)
+# TODO I don't think this should be used like this..
+    # @create_team.error
+    # async def error_handler(self, ctx, error):
+    #     logger.exception('Error handler got called: %s', error)
+    #     if isinstance(error, commands.CheckFailure):
+    #         if str(ctx.command) == 'enable-debug':
+    #             await ctx.send(
+    #                 'Der Debug Toggle in der Konfiguration ist nicht eingeschaltet.')
+    #         elif str(ctx.command) == 'purge':
+    #             await ctx.send(
+    #                 'Du hast nicht die benötigten Rechte um dieses Command auszuführen.')
+    #         elif str(ctx.command) == 'print':
+    #             await ctx.send(
+    #                 f'Der Debug Modus ist zur Zeit nicht aktiviert. Versuche es mit {ctx.bot.command_prefix}enable-debug zu aktivieren.')
+    #         else:
+    #             await ctx.send(
+    #                 'Das hat nicht funktioniert. (Überprüfe, ob du im richtigen Channel bist.)')
+    #     elif isinstance(error, commands.MissingRequiredArgument):
+    #         await ctx.send(
+    #             'Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
+    #     else:
+    #         await ctx.send(error)
