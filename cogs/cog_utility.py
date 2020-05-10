@@ -56,9 +56,13 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     async def link_(self, ctx, summoner_name):
         try:
             riot_commands.link_account(ctx.message.author.name, summoner_name)
-        except commands.CommandInvokeError:
-            pass
+        except Exception as error:
+            logger.error("Error linking %s: %s", summoner_name, error)
+            #TODO Add a link to our accounts
+            await ctx.message.author.send(f'Dein Lol-Account konnte nicht mit deinem Discord Account verbunden werden. Richtiger Umgang mit ``!link`` ist unter ``{ctx.bot.command_prefix}help link`` zu finden. Falls das nicht weiterhilft, wende dich bitte an Jan oder Nick')
+            raise error
         else:
+            await ctx.message.author.send(f'Dein Lol-Account wurde erfolgreich mit deinem Discord Account verbunden!\nFalls du deinen Account wieder entfernen möchtest benutze das ``{ctx.bot.command_prefix}unlink`` Command.')
             logger.info("%s was linked.", summoner_name)
 
     @commands.command(name='unlink', help = help_text.unlink_HelpText.text, brief = help_text.unlink_HelpText.brief, usage = help_text.unlink_HelpText.usage)
