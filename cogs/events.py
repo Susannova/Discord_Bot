@@ -107,7 +107,7 @@ class EventCog(commands.Cog):
             for player_id in play_request.generate_all_players():
                 if user.id == player_id:
                     logger.info("Remove %s from play_request %s", user.name, reaction.message.id)
-                    play_request.remove_subscriber(user.id)
+                    play_request.remove_subscriber_id(user.id)
             return
 
         if utility.is_already_subscriber(user, play_request):
