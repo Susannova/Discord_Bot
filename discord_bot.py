@@ -1,6 +1,16 @@
 """Main module. Stars and defines the Discord Bot (KrautBot).
 """
 import logging
+from core import consts
+
+logging.basicConfig(
+    filename=consts.LOG_FILE,
+    filemode='a',
+    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
+    level=logging.INFO
+)
+logger = logging.getLogger('main')
+
 import sys
 import pickle
 
@@ -9,7 +19,6 @@ from discord.ext import commands
 
 from core import (
     bot_utility as utility,
-    consts,
     state
 )
 
@@ -21,14 +30,6 @@ from cogs import (
     cog_tasks,
     events
 )
-
-logging.basicConfig(
-    filename=consts.LOG_FILE,
-    filemode='a',
-    format='%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s',
-    level=logging.INFO
-)
-logger = logging.getLogger('main')
 
 discord.voice_client.VoiceClient.warn_nacl = False
 BOT_TOKENS = utility.read_config_file('bot')
