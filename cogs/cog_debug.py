@@ -85,9 +85,15 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
             return
         exit_status = 2
         if str(arg[0]) == "restart":
+            exit_status=0
             await ctx.send('Bot will be restarted if systemd is configured to restart on success.')
-            await self.bot.logout(0)
         elif str(arg[0]) == "abort":
+            exit_status=3
             await ctx.send('Bot will be aborted.')
-            await self.bot.logout(3)
-            
+        else:
+            await ctx.send('Use "restart" or "abort".')
+            return
+
+        
+        logger.info("Try to abort bot with exit status %s", exit_status)
+        await self.bot.logout(exit_status)
