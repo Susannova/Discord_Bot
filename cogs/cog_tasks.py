@@ -221,9 +221,16 @@ class LoopCog(commands.Cog):
         for temp_channel_id in gstate.tmp_channel_ids:
             if timers.is_timer_done(gstate.tmp_channel_ids[temp_channel_id]["timer"]):
                 temp_channel = self.bot.get_channel(temp_channel_id)
-                temp_channel_name = temp_channel.name
-                await temp_channel.delete(reason = "Delete expired temporary channel")
-                logger.info('Temp channel %s is deleted', temp_channel_name)
+                temp_channel_name = gstate.tmp_channel_ids[temp_channel_id]["name"]
+
+                if gstate.tmp_channel_ids[temp_channel_id]["deleted"]:
+                    logger.debug("Temporary channel %s with id %s already deleted.", temp_channel_name, temp_channel_id)
+                elif temp_channel is None:
+                    logger.error("Temporary channel %s with id %s not found and can't be deleted.", temp_channel_name, temp_channel_id)
+                else:
+                    await temp_channel.delete(reason="Delete expired temporary channel")
+                    logger.info('Temp channel %s is deleted', temp_channel_name)
+
                 deleted_channels.append(temp_channel_id)
         
         for channel in deleted_channels:

@@ -176,7 +176,7 @@ class EventCog(commands.Cog):
     async def on_guild_channel_delete(self, channel):
         if channel.id in gstate.tmp_channel_ids:
             logger.info("Temporary channel was deleted manually.")
-            del gstate.tmp_channel_ids[channel.id]
+            gstate.tmp_channel_ids[channel.id]["deleted"] = True
 
 def setup(bot: commands.Bot):
     bot.add_cog(EventCog(bot))

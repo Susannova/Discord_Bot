@@ -137,7 +137,9 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
                 tmp_channel = await ctx.message.guild.create_voice_channel(channel_name, category=tmp_channel_category)
         gstate.tmp_channel_ids[tmp_channel.id] = {
             "timer": timers.start_timer(hrs=12),
-            "author": ctx.message.author.id
+            "author": ctx.message.author.id,
+            "deleted": False,
+            "name": channel_name
         }
         logger.info("Temporary %s-channel %s created", kind, channel_name)
 
