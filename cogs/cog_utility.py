@@ -122,7 +122,9 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     async def create_channel(self, ctx, kind, channel_name, *user_limit):
         logger.debug("!create-channel %s %s called", kind, channel_name)
         for tmp_channels in gstate.tmp_channel_ids:
-            if tmp_channels["author"] == ctx.message.author.id:
+            logger.debug("Check if channel %s with id %s is already created by user %s.", gstate.tmp_channel_ids[tmp_channels]["name"], tmp_channels, ctx.message.author.name)
+            if not gstate.tmp_channel_ids[tmp_channels]['deleted'] and gstate.tmp_channel_ids[tmp_channels]['author'] == ctx.message.author.id:
+                logger.info("%s wanted to create a new temporary channel but already has created channel %s with id %s.", ctx.message.author.name, gstate.tmp_channel_ids[tmp_channels]['name'], tmp_channels)
                 raise exceptions.LimitReachedException('Der Autor hat schon einen temprorären Channel erstellt.')
         tmp_channel_category = discord.utils.find(lambda x: x.name == consts.CHANNEL_CATEGORY_TEMPORARY, ctx.message.guild.channels)
         tmp_channel = None
