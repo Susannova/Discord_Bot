@@ -5,7 +5,7 @@ import logging
 
 from core import consts
 
-logger = logging.getLogger(consts.LOG_NAME)
+logger = logging.getLogger('state')
 
 
 class SingletonBase(type):
@@ -78,10 +78,15 @@ class GlobalState(Singleton):
 try:
     file = open(f'{consts.DATABASE_DIRECTORY_GLOBAL_STATE}/{consts.DATABASE_NAME_GLOBAL_STATE}', 'rb')
     global_state = pickle.load(file)
-    print('Global State reinitialized.')
+    logger.info('Global State reinitialized.')
 except FileNotFoundError:
-    print('No old global state found!', file=sys.stderr)
+    no_global_state_found_text = "No global state found! Create new global state."
+    logger.warning(no_global_state_found_text)
+    print(no_global_state_found_text, file=sys.stderr)
     global_state = GlobalState()
 except:
-    print('Unknown error when reinitialzing the global state', file=sys.stderr)
+    unknown_error_global_state_text = "Unknown error reading the global state! Create new global state."
+    logger.error(unknown_error_global_state_text)
+    print(unknown_error_global_state_text, file=sys.stderr)
+    # Todo Backup the old state
     global_state = GlobalState()

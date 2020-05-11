@@ -17,7 +17,7 @@ def load_json(file_name, folder='config'):
         return json.load(all_data)
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('riot_utility')
 tokens = load_json("bot")
 data_champ = load_json("champion")
 

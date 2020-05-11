@@ -24,12 +24,13 @@ from core import (
     timers
 )
 
-logger = logging.getLogger(consts.LOG_NAME)
+logger = logging.getLogger('cog_tasks')
 
-def update_summoners_data(file_path='./data/summoners_data.json'):
+def get_summoners_data(update=True, file_path='./data/summoners_data.json'):
     summoners = list(riot_utility.read_all_accounts())
-    time_updated = time.time()
-    summoners = list(riot_commands.update_linked_summoners_data(summoners))
+    if update:
+        time_updated = time.time()
+        summoners = list(riot_commands.update_linked_summoners_data(summoners))
 
     with open(file_path) as json_file:
         summoners_data = json.load(json_file)
@@ -144,10 +145,11 @@ class LoopCog(commands.Cog):
         self.check_LoL_patch.start()
         self.auto_delete_purgeable_messages.start()
         self.auto_delete_tmp_channels.start()
+        self.update_summoners.start()
         self.channel = None
 
     async def print_leaderboard(self, channel_to_print=None):
-        summoners_data = update_summoners_data()
+        summoners_data = get_summoners_data()
 
         if channel_to_print is None:
             channel_to_print = self.channel
@@ -159,12 +161,21 @@ class LoopCog(commands.Cog):
 
     @commands.command(name='plot')
     async def print_leaderboard_command(self, ctx):
+        logger.debug('!plot command called')
         await self.print_leaderboard(ctx.channel)
 
-    # @tasks.loop(hours = 24 * 7)
-    # @tasks.loop(seconds = 5)
-    @tasks.loop(hours=24)
+    @tasks.loop(hours=1)
+    async def update_summoners(self):
+        logger.info("Update the summoners")
+        get_summoners_data()
+    
+    @update_summoners.before_loop
+    async def before_update_summoners(self):
+        await self.bot.wait_until_ready()
+
+    @tasks.loop(hours = 24 * 7)
     async def print_leaderboard_loop(self):
+        logger.info("Print the LoL-plot")
         await self.print_leaderboard()
         
 
@@ -174,20 +185,26 @@ class LoopCog(commands.Cog):
         self.channel = self.bot.get_channel(639889605256019980)
 
         datetime_now = datetime.datetime.now()
-        offset_day = 0 if datetime_now.hour < 18 else 1
-        datetime_18 = datetime.datetime(datetime_now.year, datetime_now.month, datetime_now.day + offset_day, 18)
-        time_delta = (datetime_18 - datetime_now).total_seconds()
-        print("Sekunden, bis geplottet wird:", time_delta)
+        datetime_mon_18 = datetime_now
+        while datetime_mon_18.weekday() != 0:
+            datetime_mon_18 += datetime.timedelta(days=1)
+        
+        datetime_mon_18 = datetime_mon_18.replace(hour=18, minute=0, second=0, microsecond=0)
+        
+        time_delta = (datetime_mon_18 - datetime_now).total_seconds()
+        logger.info("Wait %s hours to print the LoL-plot", time_delta / 60 / 60)
 
         try:
             await asyncio.sleep(time_delta)
         except asyncio.CancelledError:
+            self.print_leaderboard_loop.cancel()
             return
         
         await self.bot.wait_until_ready()
 
     @tasks.loop(hours=24)
     async def check_LoL_patch(self):
+        logger.info("Look for new LoL patch")
         # The for loop is not needed right now but if the bot will ever run on multiple servers this is needed.
         for guild in self.bot.guilds:
             if riot_utility.update_current_patch():
@@ -198,29 +215,46 @@ class LoopCog(commands.Cog):
     # auto delete all purgeable messages
     @tasks.loop(hours=1)
     async def auto_delete_purgeable_messages(self):
+        logger.info('Look for purgeable messages')
         purgeable_message_list = utility.get_purgeable_messages_list(self.message_cache)
         for purgeable_message_id in purgeable_message_list:
             channel = self.bot.get_channel(self.message_cache[purgeable_message_id]["channel"])
+            utility.clear_message_cache(purgeable_message_id, self.message_cache)
             if channel is None:
-                logger.error("Message with id: " + purgeable_message_id + "can't be deleted. Channel is None.")
+                logger.error("Message with id: %s can't be deleted. Channel is None.", purgeable_message_id)
                 return
             purgeable_message = await channel.fetch_message(purgeable_message_id)
-            utility.clear_message_cache(purgeable_message_id, self.message_cache)
             await purgeable_message.delete()
+            logger.info("Message with id %s was deleted automatically", purgeable_message_id)
 
     # auto delete all tmp_channels
     @tasks.loop(hours=1)
     async def auto_delete_tmp_channels(self):
+        logger.info('Look for expired temp channels')
         deleted_channels = []
         for temp_channel_id in gstate.tmp_channel_ids:
             if timers.is_timer_done(gstate.tmp_channel_ids[temp_channel_id]["timer"]):
                 temp_channel = self.bot.get_channel(temp_channel_id)
-                await temp_channel.delete(reason = "Delete temporary channel because time is over")
+                temp_channel_name = gstate.tmp_channel_ids[temp_channel_id]["name"]
+
+                if gstate.tmp_channel_ids[temp_channel_id]["deleted"]:
+                    logger.debug("Temporary channel %s with id %s already deleted.", temp_channel_name, temp_channel_id)
+                elif temp_channel is None:
+                    logger.error("Temporary channel %s with id %s not found and can't be deleted.", temp_channel_name, temp_channel_id)
+                else:
+                    await temp_channel.delete(reason="Delete expired temporary channel")
+                    logger.info('Temp channel %s is deleted', temp_channel_name)
+
                 deleted_channels.append(temp_channel_id)
         
         for channel in deleted_channels:
+            logger.debug("Remove temp channel %s from gstate", temp_channel_name)
             del gstate.tmp_channel_ids[channel]
     
     @auto_delete_purgeable_messages.before_loop
     async def before_auto_delete_purgeable_messages(self):
         await self.bot.wait_until_ready()
+
+def setup(bot: commands.Bot):
+    bot.add_cog(LoopCog(bot))
+    logger.info('Loop cogs loaded')

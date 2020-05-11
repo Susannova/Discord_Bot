@@ -13,7 +13,7 @@ from core import (
 from core.play_requests import PlayRequestCategory
 from riot import riot_utility
 
-logger = logging.getLogger(consts.LOG_NAME)
+logger = logging.getLogger('events')
 
 
 class EventCog(commands.Cog):
@@ -36,7 +36,7 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        logger.info('We have logged in as {0.user}'.format(self.bot))
+        logger.info('We have logged in as %s', self.bot.user)
         game_selection_channel = discord.utils.find(lambda x: x.name == 'game-selection', self.bot.guilds[0].channels)
         game_selector_message_list = await game_selection_channel.history(limit=1).flatten()
         self.game_selection_message_id = game_selector_message_list[0].id
@@ -46,7 +46,7 @@ class EventCog(commands.Cog):
         """Automatically assigns lowest role to
         anyone that joins the server.
         """
-        logger.info(f'New member joined: {member.name}')
+        logger.info('New member joined: %s', member.name)
         await member.edit(roles=utility.get_auto_role_list(member))
 
     @commands.Cog.listener()
@@ -75,15 +75,16 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
-        # TODO Also triggered when a purgeable message is deleted automatically!
-        logger.info(f'Maually deleted a message')
         utility.clear_play_requests(message)
         if message.id in self.message_cache:
             utility.clear_message_cache(message.id, self.message_cache)
+        else:
+            logger.info('Manually deleted message %s', message.id)
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
         # auto dm
+        logger.debug("Reaction added to %s by %s", reaction.message.id, user.name)
 
         if utility.is_user_bot(user, self.bot):
             return
@@ -92,18 +93,21 @@ class EventCog(commands.Cog):
             return
 
         if reaction.message.id not in self.play_requests:
+            logger.debug("Message is not a play request. Ignore reaction")
             return
         
         play_request = self.play_requests[reaction.message.id]
 
         if utility.is_play_request_author(user.id, play_request):
+            logger.info("Remove reaction from a play_request_author")
             await reaction.remove(user)
             return
 
         if str(reaction.emoji) == consts.EMOJI_PASS:
             for player_id in play_request.generate_all_players():
                 if user.id == player_id:
-                    play_request.remove_subscriber(user.id)
+                    logger.info("Remove %s from play_request %s", user.name, reaction.message.id)
+                    play_request.remove_subscriber_id(user.id)
             return
 
         if utility.is_already_subscriber(user, play_request):
@@ -112,7 +116,9 @@ class EventCog(commands.Cog):
         utility.add_subscriber_to_play_request(user, play_request)
 
         author = self.bot.get_user(play_request.author_id)
+        
         # send auto dms to subscribers and author
+        logger.info("Send auto dms to play_request subscribers")
         for player_id in play_request.generate_all_players():
             if player_id == play_request.author_id and player_id != user.id:
                 await author.send(
@@ -125,20 +131,24 @@ class EventCog(commands.Cog):
                         user.name, author.name, str(reaction.emoji)))
 
         if len(play_request.subscriber_ids) + 1 == 5 and play_request.category == PlayRequestCategory.CLASH:
+            logger.info("Clash has 5 Members")
             await reaction.channel.send(consts.MESSAGE_CLASH_FULL.format(
                 author, play_request.clash_date, utility.pretty_print_list([self.bot.get_user(player_id) for player_id in play_request.subscriber_ids], author)
             ))
 
         if len(play_request.subscriber_ids) + 1 > 5 and play_request.category == PlayRequestCategory.CLASH:
+            logger.info("Remove reaction because clash has 5 Members")
             await reaction.remove(user)
             await user.send('Das Clash Team ist zur Zeit leider schon voll.')
 
         if len(play_request.subscriber_ids) + 1 == 6 and play_request.category == PlayRequestCategory.INTERN:
+            logger.info("Create internal play request")
             await reaction.channel.send(
                 utility.switch_to_internal_play_request(reaction.message, play_request))
 
 
 
+    # TODO no logging
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         if payload.message_id == self.game_selection_message_id:
@@ -165,5 +175,9 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
         if channel.id in gstate.tmp_channel_ids:
-            del gstate.tmp_channel_ids[channel.id]
+            logger.info("Temporary channel was deleted manually.")
+            gstate.tmp_channel_ids[channel.id]["deleted"] = True
 
+def setup(bot: commands.Bot):
+    bot.add_cog(EventCog(bot))
+    logger.info('Event cogs loaded')
