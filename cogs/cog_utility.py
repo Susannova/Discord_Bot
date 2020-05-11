@@ -120,7 +120,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
     @discord.ext.commands.cooldown(rate=3, per=30)
     async def create_channel(self, ctx, kind, channel_name, *user_limit):
-        logger.debug("!create-channel %s %s called", kind, channel_name)
+        logger.debug("!create-channel %s %s called by %s", kind, channel_name, ctx.message.author.name)
         for tmp_channels in gstate.tmp_channel_ids:
             logger.debug("Check if channel %s with id %s is already created by user %s.", gstate.tmp_channel_ids[tmp_channels]["name"], tmp_channels, ctx.message.author.name)
             if not gstate.tmp_channel_ids[tmp_channels]['deleted'] and gstate.tmp_channel_ids[tmp_channels]['author'] == ctx.message.author.id:
@@ -129,6 +129,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         tmp_channel_category = discord.utils.find(lambda x: x.name == consts.CHANNEL_CATEGORY_TEMPORARY, ctx.message.guild.channels)
         tmp_channel = None
         if channel_name is None:
+            logger.error("!create-channel is called by user %s without a name.", ctx.message.author.name)
             return
         elif kind == 'text':
             tmp_channel = await ctx.message.guild.create_text_channel(channel_name, category=tmp_channel_category)
@@ -137,13 +138,16 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
                 tmp_channel = await ctx.message.guild.create_voice_channel(channel_name, category=tmp_channel_category, user_limit=int(user_limit[0]))
             else:
                 tmp_channel = await ctx.message.guild.create_voice_channel(channel_name, category=tmp_channel_category)
+        else:
+            logger.error("!create-channel is called by user %s with invalid type %s.", ctx.message.author.name, kind)
+            return
         gstate.tmp_channel_ids[tmp_channel.id] = {
             "timer": timers.start_timer(hrs=12),
             "author": ctx.message.author.id,
             "deleted": False,
             "name": channel_name
         }
-        logger.info("Temporary %s-channel %s created", kind, channel_name)
+        logger.info("Temporary %s-channel %s with id %s created", kind, channel_name, tmp_channel.id)
 
 # TODO I don't think this should be used like this..
     # @create_team.error
