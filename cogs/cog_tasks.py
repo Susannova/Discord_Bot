@@ -26,10 +26,11 @@ from core import (
 
 logger = logging.getLogger('cog_tasks')
 
-def update_summoners_data(file_path='./data/summoners_data.json'):
+def get_summoners_data(update=True, file_path='./data/summoners_data.json'):
     summoners = list(riot_utility.read_all_accounts())
-    time_updated = time.time()
-    summoners = list(riot_commands.update_linked_summoners_data(summoners))
+    if update:
+        time_updated = time.time()
+        summoners = list(riot_commands.update_linked_summoners_data(summoners))
 
     with open(file_path) as json_file:
         summoners_data = json.load(json_file)
@@ -144,10 +145,11 @@ class LoopCog(commands.Cog):
         self.check_LoL_patch.start()
         self.auto_delete_purgeable_messages.start()
         self.auto_delete_tmp_channels.start()
+        self.update_summoners.start()
         self.channel = None
 
     async def print_leaderboard(self, channel_to_print=None):
-        summoners_data = update_summoners_data()
+        summoners_data = get_summoners_data()
 
         if channel_to_print is None:
             channel_to_print = self.channel
@@ -162,10 +164,18 @@ class LoopCog(commands.Cog):
         logger.debug('!plot command called')
         await self.print_leaderboard(ctx.channel)
 
-    # @tasks.loop(hours = 24 * 7)
-    # @tasks.loop(seconds = 5)
-    @tasks.loop(hours=24)
+    @tasks.loop(hours=1)
+    async def update_summoners(self):
+        logger.info("Update the summoners")
+        get_summoners_data()
+    
+    @update_summoners.before_loop
+    async def before_update_summoners(self):
+        await self.bot.wait_until_ready()
+
+    @tasks.loop(hours = 24 * 7)
     async def print_leaderboard_loop(self):
+        logger.info("Print the LoL-plot")
         await self.print_leaderboard()
         
 
@@ -175,10 +185,14 @@ class LoopCog(commands.Cog):
         self.channel = self.bot.get_channel(639889605256019980)
 
         datetime_now = datetime.datetime.now()
-        offset_day = 0 if datetime_now.hour < 18 else 1
-        datetime_18 = datetime.datetime(datetime_now.year, datetime_now.month, datetime_now.day + offset_day, 18)
-        time_delta = (datetime_18 - datetime_now).total_seconds()
-        print("Sekunden, bis geplottet wird:", time_delta)
+        datetime_mon_18 = datetime_now
+        while datetime_mon_18.weekday() != 0:
+            datetime_mon_18 += datetime.timedelta(days=1)
+        
+        datetime_mon_18 = datetime_mon_18.replace(hour=18, minute=0, second=0, microsecond=0)
+        
+        time_delta = (datetime_mon_18 - datetime_now).total_seconds()
+        logger.info("Wait %s hours to print the LoL-plot", time_delta / 60 / 60)
 
         try:
             await asyncio.sleep(time_delta)
