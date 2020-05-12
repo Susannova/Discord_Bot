@@ -66,9 +66,17 @@ class GlobalState(Singleton):
         self.reload_config()
     
     def write_state_to_file(self):
-        with open(f'{consts.DATABASE_DIRECTORY_GLOBAL_STATE}/{consts.DATABASE_NAME_GLOBAL_STATE}', 'wb') as file:
-            pickle.dump(self, file)
-        logger.info('Global state saved')
+        filename = f'{consts.DATABASE_DIRECTORY_GLOBAL_STATE}/{consts.DATABASE_NAME_GLOBAL_STATE}'
+        try:
+            with open(filename, 'wb') as file:
+                pickle.dump(self, file)
+            logger.info('Global state saved')
+        except pickle.PicklingError:
+            filename_failed = filename + '_failed_content'
+            with open(filename_failed, 'w') as file_failed:
+                file_failed.write(self)
+            logger.error('Global state was not pickable. Content was written to %s', filename_failed)
+            
 
     # TODO Doesn't work?
     # def __del__(self):
