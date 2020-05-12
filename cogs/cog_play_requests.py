@@ -83,7 +83,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         gstate.tmp_message_author = ctx.message.author
         gstate.clash_date = arg
         await ctx.send(consts.MESSAGE_CLASH_CREATE.format(
-            ctx.message.author.mention, arg))
+            ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT["LOL"]).mention, ctx.message.author.mention, arg))
 
 def setup(bot: commands.Bot):
     bot.add_cog(PlayRequestsCog(bot))

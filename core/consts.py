@@ -27,7 +27,7 @@ MESSAGE_BANS = (
 )
 
 MESSAGE_CLASH_CREATE = (
-    '@everyone\n{0} sucht nach Mitspielern für den Clash am {1}.'
+    '{0}\n{1} sucht nach Mitspielern für den Clash am {2}.'
 )
 MESSAGE_CLASH_FULL = 'Das Clash Team von {0} für den {1} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{1}'
 
