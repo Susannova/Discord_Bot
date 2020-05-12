@@ -37,7 +37,7 @@ class Summoner():
         self.data_league = data_league
 
         self.rank_values = {}
-        for queue_type in data_mastery:
+        for queue_type in data_league:
             self.rank_values[queue_type] = self.get_rank_value(queue_type)
 
 
@@ -59,7 +59,8 @@ class Summoner():
             return False
 
     def has_played_rankeds(self, queue_type='RANKED_SOLO_5x5'):
-        return queue_type in self.data_league
+        # return queue_type in self.data_league #Doesn't work?
+        return True if queue_type in self.data_league else False
 
     def get_winrate(self, queue_type='RANKED_SOLO_5x5'):
         if self.has_played_rankeds(queue_type):

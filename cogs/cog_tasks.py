@@ -41,20 +41,22 @@ def get_summoners_data(update=True, file_path='./data/summoners_data.json'):
         if summoner.discord_user_name not in summoners_data:
             summoners_data[summoner.discord_user_name] = {'soloq': queue_data_empty_dict, 'flex': queue_data_empty_dict}
 
-        summoner_soloq_rank = summoner.get_rank_value()
-        summoner_flex_rank = summoner.get_rank_value('RANKED_FLEX_SR')
-        summoner_soloq_winrate = summoner.get_winrate()
-        summoner_flex_winrate = summoner.get_winrate('RANKED_FLEX_SR')
-
         # TODO Bad copy paste!
-        if len(summoners_data[summoner.discord_user_name]['soloq']['date_time']) == 0 or summoner_soloq_rank != summoners_data[summoner.discord_user_name]['soloq']['Rang'][-1] or summoner_soloq_winrate != summoners_data[summoner.discord_user_name]['soloq']['Winrate'][-1]:
-            summoners_data[summoner.discord_user_name]['soloq']['date_time'].append(time_updated)
-            summoners_data[summoner.discord_user_name]['soloq']['Rang'].append(summoner_soloq_rank)
-            summoners_data[summoner.discord_user_name]['soloq']['Winrate'].append(summoner_soloq_winrate)
-        if len(summoners_data[summoner.discord_user_name]['flex']['date_time']) == 0 or summoner_flex_rank != summoners_data[summoner.discord_user_name]['flex']['Rang'][-1] or summoner_flex_winrate != summoners_data[summoner.discord_user_name]['flex']['Winrate'][-1]:
-            summoners_data[summoner.discord_user_name]['flex']['date_time'].append(time_updated)
-            summoners_data[summoner.discord_user_name]['flex']['Rang'].append(summoner_flex_rank)
-            summoners_data[summoner.discord_user_name]['flex']['Winrate'].append(summoner_flex_winrate)
+        if summoner.has_played_rankeds():
+            summoner_soloq_rank = summoner.get_rank_value()
+            summoner_soloq_winrate = summoner.get_winrate()
+            if len(summoners_data[summoner.discord_user_name]['soloq']['date_time']) == 0 or summoner_soloq_rank != summoners_data[summoner.discord_user_name]['soloq']['Rang'][-1] or summoner_soloq_winrate != summoners_data[summoner.discord_user_name]['soloq']['Winrate'][-1]:
+                summoners_data[summoner.discord_user_name]['soloq']['date_time'].append(time_updated)
+                summoners_data[summoner.discord_user_name]['soloq']['Rang'].append(summoner_soloq_rank)
+                summoners_data[summoner.discord_user_name]['soloq']['Winrate'].append(summoner_soloq_winrate)
+        
+        if summoner.has_played_rankeds('RANKED_FLEX_SR'):
+            summoner_flex_rank = summoner.get_rank_value('RANKED_FLEX_SR')
+            summoner_flex_winrate = summoner.get_winrate('RANKED_FLEX_SR')
+            if len(summoners_data[summoner.discord_user_name]['flex']['date_time']) == 0 or summoner_flex_rank != summoners_data[summoner.discord_user_name]['flex']['Rang'][-1] or summoner_flex_winrate != summoners_data[summoner.discord_user_name]['flex']['Winrate'][-1]:
+                summoners_data[summoner.discord_user_name]['flex']['date_time'].append(time_updated)
+                summoners_data[summoner.discord_user_name]['flex']['Rang'].append(summoner_flex_rank)
+                summoners_data[summoner.discord_user_name]['flex']['Winrate'].append(summoner_flex_winrate)
 
     with open(file_path, 'w') as json_file:
         json.dump(summoners_data, json_file, indent=4)
