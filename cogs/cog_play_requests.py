@@ -23,6 +23,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     @commands.command(name='play', help = help_text.play_HelpText.text, brief = help_text.play_HelpText.brief, usage = help_text.play_HelpText.usage)
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS])
     async def play_(self, ctx, game_name, _time, *added_time):
+        is_not_now = True
         logger.info('Create a play request')
         game_name = game_name.upper()
         message = 'Something went wrong.'
@@ -32,9 +33,10 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                 play_request_time = timers.add_to_current_time(int(arg[1:]))
                 message = consts.MESSAGE_PLAY_AT.format(ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]).mention, ctx.message.author.mention, consts.GAME_NAME_DICT[game_name], play_request_time)
             else:
+                is_not_now = False
                 message = consts.MESSAGE_PLAY_NOW.format(ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]).mention, ctx.message.author.mention, consts.GAME_NAME_DICT[game_name])
         else:
-            if len(re.findall('[0-2][0-9]:[0-5][0-9]', _time)) == 0:
+            if len(re.findall('([0-2])?[0-9]:[0-5][0-9]', _time)) == 0:
                 exception_str = exceptions.BadArgumentFormat()
                 logger.error(exception_str)
                 raise exception_str
@@ -46,7 +48,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         await self.add_play_request_to_gstate(play_request)
         await self.add_auto_reaction(ctx, play_request_message)
 
-        if _time != 'now' and arg == None:
+        if is_not_now:
             await self.auto_reminder(play_request_message)
 
     async def add_auto_reaction(self, ctx, play_request_message):

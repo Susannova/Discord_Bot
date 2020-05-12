@@ -3,7 +3,7 @@ import re
 from datetime import datetime, timedelta
 import calendar
 
-REGEX_TIME = r"[0-2][0-9]:[0-5][0-9]"
+REGEX_TIME = r"([0-2])?[0-9]:[0-5][0-9]"
 
 
 def start_timer(secs=0, mins=0, hrs=0):
@@ -32,6 +32,9 @@ def is_valid_time(time):
 def get_time_difference(message_content):
     time_now = datetime.now()
     time = is_valid_time(message_content)
+    if len(time) == 4:
+        time = '0' + time
+    print(time)
     if time == '-1':
         return -1
     time_reminder = datetime(time_now.year, time_now.month, time_now.day, 00, 00, 00, 00) + timedelta(hours=int(time[:-3]), minutes=int(time[3:])-5)
@@ -67,6 +70,7 @@ def test_module():
     remove_finished_timers(timers)
     assert(len(timers) == 0)
     print(add_to_current_time(5))
+    print(get_time_difference('9:55'))
 
 if __name__ == "__main__":
     test_module()
