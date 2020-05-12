@@ -34,7 +34,6 @@ def get_time_difference(message_content):
     time = is_valid_time(message_content)
     if len(time) == 4:
         time = '0' + time
-    print(time)
     if time == '-1':
         return -1
     time_reminder = datetime(time_now.year, time_now.month, time_now.day, 00, 00, 00, 00) + timedelta(hours=int(time[:-3]), minutes=int(time[3:])-5)
