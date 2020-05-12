@@ -7,8 +7,10 @@ import logging
 from discord.ext import tasks, commands
 import discord
 
-import matplotlib
+# import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.dates import MO
+import matplotlib.dates as mdates
 
 
 from riot import (
@@ -80,7 +82,7 @@ def plot_summoners_data(summoners_data, queue_type, data):
 
     for summoner in summoners_data:
         # TODO Timezone is false
-        x_data = [matplotlib.dates.epoch2num(time) for time in summoners_data[summoner][queue_type]['date_time']]
+        x_data = [mdates.epoch2num(time) for time in summoners_data[summoner][queue_type]['date_time']]
 
         ax1.plot_date(x_data, list(summoners_data[summoner][queue_type][data]), label=summoner, ls='-')
 
@@ -103,6 +105,11 @@ def plot_all_summoners_data(summoners_data, filename):
         ('flex', 'Rang'),
         ('flex', 'Winrate')
     )
+
+    locator = mdates.AutoDateLocator(minticks=3, maxticks=5)
+    # Does not work because is no object of module??? https://matplotlib.org/api/dates_api.html#matplotlib.dates.ConciseDateFormatter
+    # formatter = mdates.ConciseDateFormatter(locator)
+
     for i in range(4):
         row = i % 2
         col = int(i / 2)
@@ -120,11 +127,16 @@ def plot_all_summoners_data(summoners_data, filename):
             ax[row, col].set_yticks(list(range(0, 2300, 100)), minor=True)
             ranks_string = ["Eisen 4", "Bronze 4", "Silber 4", "Gold 4", "Platin 4", "Diamant 4"]
             ax[row, col].set_yticklabels(ranks_string)
-            ax[row, col].grid(axis='y', which='both')
+        
+        ax[row, col].grid(axis='y', which='both')            
+        ax[row, col].xaxis.set_major_locator(locator)
+        ax[row, col].xaxis.set_major_formatter(mdates.DateFormatter('%d.%m'))
+        # ax[row, col].xaxis.set_major_locator(locator)
+        # ax[row, col].xaxis.set_major_formatter(formatter)
 
         for summoner in summoners_data:
             # TODO Timezone is false
-            x_data = [matplotlib.dates.epoch2num(time) for time in summoners_data[summoner][queue_type]['date_time']]
+            x_data = [mdates.epoch2num(time) for time in summoners_data[summoner][queue_type]['date_time']]
 
             ax[row, col].plot_date(x_data, list(summoners_data[summoner][queue_type][data]), label=summoner, ls='-')
 
