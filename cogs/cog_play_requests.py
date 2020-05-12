@@ -22,12 +22,17 @@ logger = logging.getLogger('cog_play_request')
 class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     @commands.command(name='play', help = help_text.play_HelpText.text, brief = help_text.play_HelpText.brief, usage = help_text.play_HelpText.usage)
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS])
-    async def play_(self, ctx, game_name, _time):
+    async def play_(self, ctx, game_name, _time, *added_time):
         logger.info('Create a play request')
         game_name = game_name.upper()
         message = 'Something went wrong.'
         if _time == 'now':
-            message = consts.MESSAGE_PLAY_NOW.format(ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]).mention, ctx.message.author.mention, consts.GAME_NAME_DICT[game_name])
+            arg = None if len(list(added_time)) == 0 else added_time[0]
+            if arg != None:
+                play_request_time = timers.add_to_current_time(int(arg[1:]))
+                message = consts.MESSAGE_PLAY_AT.format(ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]).mention, ctx.message.author.mention, consts.GAME_NAME_DICT[game_name], play_request_time)
+            else:
+                message = consts.MESSAGE_PLAY_NOW.format(ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]).mention, ctx.message.author.mention, consts.GAME_NAME_DICT[game_name])
         else:
             if len(re.findall('[0-2][0-9]:[0-5][0-9]', _time)) == 0:
                 exception_str = exceptions.BadArgumentFormat()

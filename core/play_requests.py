@@ -38,3 +38,14 @@ class PlayRequest():
         for subscriber in self.subscriber_ids:
             yield subscriber
         yield self.author_id
+
+
+    def is_already_subscriber(self, user):
+        if user.id in self.subscriber_ids:
+            return True
+        return False
+
+    def is_play_request_author(self, user):
+        if user.id == self.author_id:
+            return True
+        return False

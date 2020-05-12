@@ -50,6 +50,11 @@ def convert_human_to_epoch_time(date: str) -> int:
 def get_current_weekday() -> str:
     return datetime.today().strftime('%A')
 
+
+def add_to_current_time(mins):
+    return (datetime.now() + timedelta(minutes=mins)).strftime('%H:%M')
+
+
 # === TEST === #
 def test_module():
     timers = []
@@ -61,7 +66,7 @@ def test_module():
         remove_finished_timers(timers)
     remove_finished_timers(timers)
     assert(len(timers) == 0)
-
+    print(add_to_current_time(5))
 
 if __name__ == "__main__":
     test_module()
