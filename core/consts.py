@@ -2,7 +2,7 @@
 and constant strings. Dont change any variables from outside.
 """
 
-
+COMMAND_PREFIX = '!'
 EMOJI_ID_LIST = [644252873672359946, 644254018377482255, 644252861827514388, 644252853644296227, 644252146023530506, 644575356908732437]
 EMOJI_PASS = '❌'
 MESSAGE_CREATE_INTERN_PLAY_REQUEST = '@everyone Das Play-Request von {0} hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!\nEs sind noch **__{1}__** Plätze frei. \nUhrzeit: {2} Uhr \nSpieler:\n'
@@ -23,7 +23,7 @@ MESSAGE_SERVER_WELCOME = (
 MESSAGE_BANS = (
     'If you want to receive the best bans \
     for the scouted team copy the following Command: \n \
-    ?bans {0}'
+    ' + COMMAND_PREFIX + 'bans {0}'
 )
 
 MESSAGE_CLASH_CREATE = (
@@ -51,7 +51,7 @@ PATTERN_LIST_AUTO_REACT = [" spielen. Kommt gegen ",
 PATTERN_PLAY_REQUEST = " spielen. Kommt gegen "
 PATTERN_CLASH = " sucht nach Mitspielern für den Clash am "
 
-COMMAND_PREFIX = '!'
+
 COMMAND_CREATE_TEAM = f'{COMMAND_PREFIX}create-team'
 COMMAND_PLAY_LOL = f'{COMMAND_PREFIX}play-lol'
 COMMAND_PLAY_NOW = f'{COMMAND_PREFIX}play-now'
