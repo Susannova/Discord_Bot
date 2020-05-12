@@ -85,8 +85,22 @@ except FileNotFoundError:
     print(no_global_state_found_text, file=sys.stderr)
     global_state = GlobalState()
 except:
-    unknown_error_global_state_text = "Unknown error reading the global state! Create new global state."
+    unknown_error_global_state_text = "Unknown error reading the global state!"
     logger.error(unknown_error_global_state_text)
     print(unknown_error_global_state_text, file=sys.stderr)
-    # Todo Backup the old state
+    backuped = False
+    for i in range(10):
+        try:
+            filename = f'{consts.DATABASE_DIRECTORY_GLOBAL_STATE}/{consts.DATABASE_NAME_GLOBAL_STATE}'
+            with open(filename, 'x') as file_backup:
+                file_backup.write(file)
+            logger.info("Old State was backuped to %s", filename)
+            backuped = True
+            break
+        except FileExistsError:
+            filename += str(i)
+    
+    if not backuped:
+        logger.error("Failed to backup old global state 10 times. Are there 10 or more backupfiles already?")
+    
     global_state = GlobalState()
