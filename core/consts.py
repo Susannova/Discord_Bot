@@ -27,7 +27,7 @@ MESSAGE_BANS = (
 )
 
 MESSAGE_CLASH_CREATE = (
-    '{0}\n{1} sucht nach Mitspielern für den Clash am {2}.'
+    '{0}\n{1} sucht nach Mitspielern für den LoL Clash am {2}.'
 )
 MESSAGE_CLASH_FULL = 'Das Clash Team von {0} für den {1} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{1}'
 
@@ -37,6 +37,8 @@ MESSAGE_GAME_SELECTOR = "@everyone\nWähle hier durch das Klicken auf eine Reakt
 MESSAGE_PLAY_REQUEST_CREATED = '*{0}* hat ein Play-Request für das Spiel **{1}** erstellt. Wenn du interessiert daran bist, klicke hier: <{2}>'
 
 MESSAGE_PATCH_NOTES = "https://oce.leagueoflegends.com/en-us/news/game-updates/patch-{0}-{1}-notes/"
+
+
 
 COMMAND_LIST_INTERN_PLANING = ["?create-team", "?play-internal"]
 COMMAND_LIST_PLAY_REQUEST = ["?play-lol", "?play-now"]
@@ -63,7 +65,6 @@ COMMAND_SMURF = f'{COMMAND_PREFIX}smurf'
 COMMAND_LIST_RIOT = [COMMAND_PLAYER, COMMAND_SMURF]
 
 CHANNEL_CREATE_TEAM_VOICE_ID = 564481311432245265
-CHANNEL_INTERN_PLANING = 'intern-planing'
 CHANNEL_PLAY_REQUESTS = 'play-requests'
 CHANNEL_BOT = 'bot'
 CHANNEL_MEMBER_ONLY = 'member-only'

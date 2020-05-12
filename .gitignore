@@ -8,3 +8,4 @@ test-sequence
 /env/
 .pylintrc
 /log/log
+/strings/

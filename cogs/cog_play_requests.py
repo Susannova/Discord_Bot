@@ -22,13 +22,16 @@ logger = logging.getLogger('cog_play_request')
 class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     @commands.command(name='play', help = help_text.play_HelpText.text, brief = help_text.play_HelpText.brief, usage = help_text.play_HelpText.usage)
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS])
-    async def play_(self, ctx, game_name, _time, *added_time):
+    async def play_(self, ctx, game_name, _time, *args):
         is_not_now = True
         logger.info('Create a play request')
         game_name = game_name.upper()
         message = 'Something went wrong.'
+        if game_name == 'CLASH':
+            await self.create_clash(ctx, _time)
+            return
         if _time == 'now':
-            arg = None if len(list(added_time)) == 0 else added_time[0]
+            arg = None if len(list(args)) == 0 else args[0]
             if arg != None:
                 play_request_time = timers.add_to_current_time(int(arg[1:]))
                 message = consts.MESSAGE_PLAY_AT.format(ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]).mention, ctx.message.author.mention, consts.GAME_NAME_DICT[game_name], play_request_time)
@@ -88,14 +91,12 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                 player = self.bot.get_user(player_id)
                 await player.send(consts.MESSAGE_PLAY_REQUEST_REMINDER)
 
-    @commands.command(name='create-clash', help = help_text.create_clash_HelpText.text, brief = help_text.create_clash_HelpText.brief, usage = help_text.create_clash_HelpText.usage)
-    @checks.is_in_channels([consts.CHANNEL_CLASH])
-    async def create_clash(self, ctx, arg):
+    async def create_clash(self, ctx, date):
         logger.debug('Create a clash request')
         gstate.tmp_message_author = ctx.message.author
-        gstate.clash_date = arg
+        gstate.clash_date = date
         play_request_message = await ctx.send(consts.MESSAGE_CLASH_CREATE.format(
-            ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT["LOL"]).mention, ctx.message.author.mention, arg))
+            ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT["LOL"]).mention, ctx.message.author.mention, date))
         _category = self.get_category("CLASH")
         play_request = PlayRequest(play_request_message.id, ctx.message.author.id, category=_category)
         await self.add_play_request_to_gstate(play_request)
