@@ -189,11 +189,16 @@ class LoopCog(commands.Cog):
         datetime_now = datetime.datetime.now()
         datetime_mon_18 = datetime_now
         while datetime_mon_18.weekday() != 0:
-            datetime_mon_18 += datetime.timedelta(days=1)
+            datetime_mon_18 = datetime_mon_18 + datetime.timedelta(days=1)
         
         datetime_mon_18 = datetime_mon_18.replace(hour=18, minute=0, second=0, microsecond=0)
         
         time_delta = (datetime_mon_18 - datetime_now).total_seconds()
+
+        # Check if it is monday today and after 18:00
+        if time_delta < 0:
+            time_delta += 7 * 24 * 60 * 60
+
         logger.info("Wait %s hours to print the LoL-plot", time_delta / 60 / 60)
 
         try:
