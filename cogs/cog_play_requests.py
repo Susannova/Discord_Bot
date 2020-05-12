@@ -39,17 +39,25 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                 logger.error(exception_str)
                 raise exception_str
             message = consts.MESSAGE_PLAY_AT.format(ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]).mention, ctx.message.author.mention, consts.GAME_NAME_DICT[game_name], _time)
+        
         play_request_message = await ctx.send(message)
         _category = self.get_category(game_name)
+        play_request = PlayRequest(play_request_message.id, ctx.message.author.id, category=_category)
+        await self.add_play_request_to_gstate(play_request)
+        await self.add_auto_reaction(ctx, play_request_message)
 
-        logger.debug("Add the message id %s to the global state", play_request_message.id)
-        gstate.play_requests[play_request_message.id] = PlayRequest(play_request_message.id, ctx.message.author.id, category=_category)
+        if _time != 'now' and arg == None:
+            await self.auto_reminder(play_request_message)
+
+    async def add_auto_reaction(self, ctx, play_request_message):
         await play_request_message.add_reaction(ctx.bot.get_emoji(consts.EMOJI_ID_LIST[5]))
         await play_request_message.add_reaction(consts.EMOJI_PASS)
 
-        if _time != 'now':
-            await self.auto_reminder(play_request_message)
 
+    async def add_play_request_to_gstate(self, play_request):
+        logger.debug("Add the message id %s to the global state", play_request.message_id)
+        gstate.play_requests[play_request.message_id] = play_request
+    
     def get_category(self, game_name):
         _category = None
         if game_name == 'LOL':
@@ -62,6 +70,8 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
             _category = PlayRequestCategory.RL
         elif game_name == 'VAL':
             _category = PlayRequestCategory.VAL
+        elif game_name == 'CLASH':
+            _category = PlayRequestCategory.CLASH
         return _category
 
     def __init__(self, bot: commands.bot):
@@ -82,8 +92,15 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         logger.debug('Create a clash request')
         gstate.tmp_message_author = ctx.message.author
         gstate.clash_date = arg
-        await ctx.send(consts.MESSAGE_CLASH_CREATE.format(
+        play_request_message = await ctx.send(consts.MESSAGE_CLASH_CREATE.format(
             ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT["LOL"]).mention, ctx.message.author.mention, arg))
+        _category = self.get_category("CLASH")
+        play_request = PlayRequest(play_request_message.id, ctx.message.author.id, category=_category)
+        await self.add_play_request_to_gstate(play_request)
+        await self.add_auto_reaction(ctx, play_request_message)
+        
+
+        
 
 def setup(bot: commands.Bot):
     bot.add_cog(PlayRequestsCog(bot))
