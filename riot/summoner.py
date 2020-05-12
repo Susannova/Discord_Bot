@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 import json
+import math
 
 from core import timers
 
@@ -24,20 +25,24 @@ class Summoner():
         json of all basic summononer data from Riot API
     data_mastery: list
         basic mastery data from Riot API
-    data_league: list
-        basic league data from Riot API
+    data_league: dict
+        formatted basic league data from Riot API
     """
-    def __init__(self, name, data_summoner={}, data_mastery=[], data_league=[]):
+    def __init__(self, name, data_summoner={}, data_mastery=[], data_league={}):
         self.name = name
+        self.discord_user_name = 'None'
+
         self.data_summoner = data_summoner
         self.data_mastery = data_mastery
         self.data_league = data_league
-        self.needs_update_timer = timers.start_timer(hrs=1)
-        self.rank_value = self.get_rank_value()
-        self.discord_user_name = 'None'
+
+        self.rank_values = {}
+        for queue_type in data_mastery:
+            self.rank_values[queue_type] = self.get_rank_value(queue_type)
+
 
     def __str__(self):
-        return f'Summoner: {self.name}, Level: {self.get_level()}, Rank: {self.get_soloq_rank_string()}, Winrate: {self.get_winrate()}'
+        return f'Summoner: {self.name}, Level: {self.get_level()}, Rank: {self.get_rank_string()}, Winrate: {self.get_winrate()}'
 
     def __repr__(self):
         return self.name
@@ -47,54 +52,61 @@ class Summoner():
 
     def is_smurf(self):
         winrate = self.get_winrate()
-        rank = self.get_tier()
-        if self.get_level() < 40 and winrate >= 58 and self.get_rank_weight(rank) < 7:
+        
+        if self.has_played_rankeds() and self.get_level() < 40 and winrate >= 58 and self.rank_values['RANKED_SOLO_5x5'] < 700:
             return True
         else:
             return False
 
-    def get_data(self, queue_type='RANKED_SOLO_5x5'):
-        for queue_data in self.data_league:
-            # print(queue_data)
-            if queue_data['queueType'] == queue_type:
-                # print(queue_type, ": Start of data")
-                # print(queue_data)
-                return queue_data
-        # print(queue_type, ": Nothing returned!")
+    def has_played_rankeds(self, queue_type='RANKED_SOLO_5x5'):
+        return queue_type in self.data_league
 
     def get_winrate(self, queue_type='RANKED_SOLO_5x5'):
-        soloq_stats = self.get_data(queue_type)
-        if soloq_stats is None:
-            return 50.0
-        games_played = int(soloq_stats['wins']) + int(
-            soloq_stats['losses'])
-        winrate = round((int(soloq_stats['wins']) / games_played) * 100, 1)
-        return winrate
-    
-
-    def get_tier(self, queue_type='RANKED_SOLO_5x5'):
-        soloq_stats = self.get_data(queue_type)
-        if soloq_stats is None:
-            return 'SILVER'
-        return soloq_stats['tier']
-        
-
-    def get_rank(self, queue_type='RANKED_SOLO_5x5'):
-        soloq_stats = self.get_data(queue_type)
-        if soloq_stats is None:
-            return 'II'
-        return soloq_stats['rank']
-
-
-    def get_lp(self, queue_type='RANKED_SOLO_5x5'):
-        soloq_stats = self.get_data(queue_type)
-        if soloq_stats is None:
-            return 0
-        return soloq_stats['leaguePoints']
-
+        if self.has_played_rankeds(queue_type):
+            data = self.data_league[queue_type]
+            games_played = int(data['wins']) + int(data['losses'])
+            return round((int(data['wins']) / games_played) * 100, 1)
+        else:
+            return math.nan
 
     def get_rank_weight(self, rank):
         return dict_rank[rank]
+
+    def get_rank_value(self, queue_type = 'RANKED_SOLO_5x5'):
+        if self.has_played_rankeds(queue_type):
+            data = self.data_league[queue_type]
+            tier_string = data['tier']
+            rank_string = data['rank']
+            return self.get_rank_weight(tier_string + '-' + rank_string) * 100 + data['leaguePoints']
+        else:
+            return math.nan
+
+    def get_rank_string(self, queue_type='RANKED_SOLO_5x5'):
+        if self.has_played_rankeds(queue_type):
+            data = self.data_league[queue_type]
+            tier_string = data['tier']
+            rank_string = data['rank']
+            lp = data['leaguePoints']
+            return f'{tier_string}-{rank_string} {lp}LP'
+        else:
+            return None
+
+    def get_promo_string(self, queue_type='RANKED_SOLO_5x5'):
+        if self.has_played_rankeds(queue_type):
+            data = self.data_league[queue_type]
+            promo_string = None if 'miniSeries' not in data else data['miniSeries']['progress']
+            new_promo_string = ''
+            if promo_string is not None:
+                for character in promo_string:
+                    if character == 'N':
+                        new_promo_string += 'N'
+                    elif character == 'W':
+                        new_promo_string += 'W'
+                    elif character == 'F':
+                        new_promo_string += 'L'
+                    new_promo_string += '-'
+            return None if promo_string is None else new_promo_string[:-1]
+
 
     def get_most_played_champs(self, count):
         i = 0
@@ -128,25 +140,3 @@ class Summoner():
         for value in data_champ['data'].values():
             if value["id"] == name:
                 return int(value['key'])
-
-    def get_rank_value(self, queue_type = 'RANKED_SOLO_5x5'):
-        return self.get_rank_weight(f'{self.get_tier(queue_type)}-{self.get_rank(queue_type)}') * 100 + self.get_lp(queue_type)
-
-
-    def get_soloq_rank_string(self):
-        return f'{self.get_tier()}-{self.get_rank()} {self.get_lp()}LP'
-
-    def get_soloq_promo_string(self):
-        soloq_data = self.get_data()
-        soloq_promo_string = None if 'miniSeries' not in soloq_data else soloq_data['miniSeries']['progress']
-        new_soloq_promo_string = ''
-        if soloq_promo_string is not None:
-            for character in soloq_promo_string:
-                if character == 'N':
-                    new_soloq_promo_string += 'N'
-                elif character == 'W':
-                    new_soloq_promo_string += 'W'
-                elif character == 'F':
-                    new_soloq_promo_string += 'L'
-                new_soloq_promo_string += '-'
-        return None if soloq_promo_string is None else new_soloq_promo_string[:-1]
