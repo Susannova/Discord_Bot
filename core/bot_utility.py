@@ -183,7 +183,7 @@ def pretty_print_list(*players) -> str:
             pretty_print += player + '\n'
     return pretty_print
 
-def insert_in_message_cache(message_cache, message_id, channel_id, time=18):
+def insert_in_message_cache(message_cache, message_id, channel_id, time=10):
     message_cache[message_id] = {
         "timer": timers.start_timer(hrs=time),
         "channel": channel_id

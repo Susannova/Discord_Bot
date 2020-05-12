@@ -20,6 +20,9 @@ logger = logging.getLogger('cog_play_request')
 
 
 class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
+    def __init__(self, bot: commands.bot):
+        self.bot = bot
+
     @commands.command(name='play', help = help_text.play_HelpText.text, brief = help_text.play_HelpText.brief, usage = help_text.play_HelpText.usage)
     @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS])
     async def play_(self, ctx, game_name, _time, *args):
@@ -79,8 +82,6 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
             _category = PlayRequestCategory.CLASH
         return _category
 
-    def __init__(self, bot: commands.bot):
-        self.bot = bot
 
     async def auto_reminder(self, message):
         logger.debug("Create an auto reminder for play request with id %s", message.id)
