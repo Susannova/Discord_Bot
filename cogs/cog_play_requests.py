@@ -19,6 +19,7 @@ from core.play_requests import PlayRequest, PlayRequestCategory
 logger = logging.getLogger('cog_play_request')
 
 
+
 class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     def __init__(self, bot: commands.bot):
         self.bot = bot
@@ -36,6 +37,8 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         if _time == 'now':
             arg = None if len(list(args)) == 0 else args[0]
             if arg != None:
+                if int(arg[1:]) > consts.PLAY_NOW_TIME_ADD_LIMIT:
+                    raise exceptions.LimitReachedException()
                 play_request_time = timers.add_to_current_time(int(arg[1:]))
                 message = consts.MESSAGE_PLAY_AT.format(ctx.guild.get_role(consts.GAME_NAME_TO_ROLE_ID_DICT[game_name]).mention, ctx.message.author.mention, consts.GAME_NAME_DICT[game_name], play_request_time)
             else:
