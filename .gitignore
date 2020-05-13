@@ -9,3 +9,4 @@ test-sequence
 .pylintrc
 /log/log
 /strings/
+/.VSCodeCounter/
