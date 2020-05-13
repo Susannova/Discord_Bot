@@ -46,7 +46,7 @@ class GlobalState(Singleton):
         self.play_requests = {}
         self.tmp_message_author = None
         self.message_cache = {}
-        self.clash_date = ''
+        self.clash_dates = []
         self.game_selector_id = None
         self.tmp_channel_ids = {}
 

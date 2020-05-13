@@ -11,7 +11,7 @@ from core import (
 )
 
 from riot import riot_commands
-
+from core.state import global_state as gstate
 logger = logging.getLogger('cog_riot')
 
 
@@ -61,6 +61,13 @@ class RiotCog(commands.Cog, name='Riot Commands'):
         ocr.clean_up_image(attached_image_file_name)
         await ctx.send(
             consts.MESSAGE_BANS.format(ocr.get_formatted_summoner_names()))
+
+    @commands.command(name='clash_dates')
+    @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
+    async def clash_dates(self, ctx):
+        riot_commands.update_gstate_clash_dates()
+        await ctx.send(gstate.clash_dates)
+
 
 def setup(bot: commands.Bot):
     bot.add_cog(RiotCog())

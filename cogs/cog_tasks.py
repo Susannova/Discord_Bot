@@ -278,6 +278,20 @@ class LoopCog(commands.Cog):
     async def before_auto_delete_purgeable_messages(self):
         await self.bot.wait_until_ready()
 
+    #how often? at what time should this trigger
+    @tasks.loop(hours=12)
+    async def create_clash_play_request(self):
+        current_date = ''
+        for date in gstate.clash_dates:
+            if date == current_date:
+                # create play request
+                gstate.clash_dates.remove(date) # how to not get it back in the before part => dont activate clash thing more than once
+                pass
+
+    @create_clash_play_request.before_loop
+    async def before_create_clash_play_request(self):
+        riot_commands.update_gstate_clash_dates()
+
 def setup(bot: commands.Bot):
     bot.add_cog(LoopCog(bot))
     logger.info('Loop cogs loaded')

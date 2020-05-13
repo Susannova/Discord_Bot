@@ -20,6 +20,7 @@ from . import (
     image_transformation,
     riot_utility as utility
 )
+from core.state import global_state as gstate
 
 
 logger = logging.getLogger('riot_commands')
@@ -223,4 +224,13 @@ def create_leaderboard_embed():
         url=op_url[:-3])
     return _embed
 
+
+
+def update_gstate_clash_dates():
+    clash_dates = utility.get_upcoming_clash_dates()
+    for clash_date in clash_dates:
+        if clash_date not in gstate.clash_dates:
+            gstate.clash_dates.append(clash_date)
+    return
+    
 # === INTERFACE END === #
