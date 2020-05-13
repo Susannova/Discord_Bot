@@ -96,14 +96,17 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @commands.command(name='leaderboard', help = help_text.leaderboard_HelpText.text, brief = help_text.leaderboard_HelpText.brief, usage = help_text.leaderboard_HelpText.usage)
     @commands.has_role(consts.ROLE_ADMIN_ID)
     async def leaderboard_(self, ctx):
-        logger.debug("!leaderboard-debug called")
-        loading_message = await ctx.send("This will take a few seconds. Processing...")
-        _embed = riot_commands.create_leaderboard_embed()
-        message = await ctx.send(file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/leaderboard.png'))
-        _embed = _embed.set_image(url=message.attachments[0].url)
-        await ctx.send(embed=_embed)
-        await loading_message.delete()
-        await message.delete()
+        logger.debug("!leaderboard called")
+        if False:
+            loading_message = await ctx.send("This will take a few seconds. Processing...")
+            _embed = riot_commands.create_leaderboard_embed()
+            message = await ctx.send(file=discord.File(f'./{consts.FOLDER_CHAMP_SPLICED}/leaderboard.png'))
+            _embed = _embed.set_image(url=message.attachments[0].url)
+            await ctx.send(embed=_embed)
+            await loading_message.delete()
+            await message.delete()
+        else:
+            await ctx.send("Not available right now. Use ``!plot`` instead.")
         
 
     # dont use this
