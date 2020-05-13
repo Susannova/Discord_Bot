@@ -7,9 +7,8 @@ import logging
 from discord.ext import tasks, commands
 import discord
 
-# import matplotlib
+from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
-from matplotlib.dates import MO
 import matplotlib.dates as mdates
 
 
@@ -117,8 +116,9 @@ def plot_all_summoners_data(summoners_data, filename):
         queue_type = args[i][0]
         data = args[i][1]
 
-        ax[row, col].set_xlabel('Zeit')
-        ax[row, col].set_ylabel(data)
+        ax[row, col].set_xlabel('Datum')
+        if col == 0:
+            ax[row, col].set_ylabel(data)
 
         ax[row, col].set_title(queue_type)
 
@@ -130,7 +130,9 @@ def plot_all_summoners_data(summoners_data, filename):
         
         ax[row, col].grid(axis='y', which='both')            
         ax[row, col].xaxis.set_major_locator(locator)
-        ax[row, col].xaxis.set_major_formatter(mdates.DateFormatter('%d.%m'))
+        ax[row, col].xaxis.set_major_formatter(mdates.DateFormatter('%d.%m.'))
+
+        ax[row, col].xaxis.set_minor_locator(MultipleLocator(1))
         # ax[row, col].xaxis.set_major_locator(locator)
         # ax[row, col].xaxis.set_major_formatter(formatter)
 
@@ -138,11 +140,13 @@ def plot_all_summoners_data(summoners_data, filename):
             # TODO Timezone is false
             x_data = [mdates.epoch2num(time) for time in summoners_data[summoner][queue_type]['date_time']]
 
-            ax[row, col].plot_date(x_data, list(summoners_data[summoner][queue_type][data]), label=summoner, ls='-')
+            ax[row, col].plot_date(x_data, list(summoners_data[summoner][queue_type][data]), ls='-')
 
-        ax[row, col].legend()
+        
+    fig.legend(labels=summoners_data.keys(), loc='center right')
 
     fig.set_size_inches(10, 10)
+    fig.subplots_adjust(right=0.8)
     fig.savefig(filename)
 
 
