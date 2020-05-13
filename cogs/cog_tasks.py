@@ -162,8 +162,8 @@ class LoopCog(commands.Cog):
         self.update_summoners.start()
         self.channel = None
 
-    async def print_leaderboard(self, channel_to_print=None):
-        summoners_data = get_summoners_data()
+    async def print_leaderboard(self, channel_to_print=None, update=True):
+        summoners_data = get_summoners_data(update)
 
         if channel_to_print is None:
             channel_to_print = self.channel
@@ -176,12 +176,12 @@ class LoopCog(commands.Cog):
     @commands.command(name='plot')
     async def print_leaderboard_command(self, ctx):
         logger.debug('!plot command called')
-        await self.print_leaderboard(ctx.channel)
+        await self.print_leaderboard(ctx.channel, False)
 
     @tasks.loop(hours=1)
     async def update_summoners(self):
         logger.info("Update the summoners")
-        get_summoners_data()
+        get_summoners_data(True)
     
     @update_summoners.before_loop
     async def before_update_summoners(self):
