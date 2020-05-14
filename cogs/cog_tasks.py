@@ -159,11 +159,18 @@ class LoopCog(commands.Cog):
         self.bot = bot
 
         self.message_cache = gstate.message_cache
-        self.print_leaderboard_loop.start()
-        self.check_LoL_patch.start()
-        self.auto_delete_purgeable_messages.start()
-        self.auto_delete_tmp_channels.start()
-        self.update_summoners.start()
+        
+        if gstate.CONFIG['TOGGLE_RIOT_API']:
+            if gstate.CONFIG['TOGGLE_SUMONNER_RANK_HISTORY']:
+                self.update_summoners.start()
+                self.print_leaderboard_loop.start()
+            if gstate.CONFIG['TOGGLE_CHECK_LOL_PATCH']:
+                self.check_LoL_patch.start()
+        
+        if gstate.CONFIG['TOGGLE_AUTO_DELETE']:
+            self.auto_delete_purgeable_messages.start()
+            self.auto_delete_tmp_channels.start()
+
         self.channel = None
 
     async def print_leaderboard(self, channel_to_print=None, update=True):
