@@ -1,9 +1,12 @@
 {
-    "TOGGLE_AUTO_DELETE": true,
+    "TOGGLE_AUTO_DELETE": false,
     "TOGGLE_COMMAND_ONLY": false,
-    "TOGGLE_AUTO_REACT": true,
-    "TOGGLE_AUTO_DM": true,
-    "TOGGLE_RIOT_API": true,
+    "TOGGLE_AUTO_REACT": false,
+    "TOGGLE_AUTO_DM": false,
+    "TOGGLE_RIOT_API": false,
     "TOGGLE_DEBUG": false,
+    "TOGGLE_GAME_SELECTOR": false,
+    "TOGGLE_SUMONNER_RANK_HISTORY": false,
+    "TOGGLE_CHECK_LOL_PATCH": false,
     "LOL_PATCH": "10.7"
 }

@@ -37,9 +37,10 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         logger.info('We have logged in as %s', self.bot.user)
-        game_selection_channel = discord.utils.find(lambda x: x.name == 'game-selection', self.bot.guilds[0].channels)
-        game_selector_message_list = await game_selection_channel.history(limit=1).flatten()
-        self.game_selection_message_id = game_selector_message_list[0].id
+        if gstate.CONFIG["TOGGLE_GAME_SELECTOR"]:
+            game_selection_channel = discord.utils.find(lambda x: x.name == 'game-selection', self.bot.guilds[0].channels)
+            game_selector_message_list = await game_selection_channel.history(limit=1).flatten()
+            self.game_selection_message_id = game_selector_message_list[0].id
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -51,12 +52,6 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message):
-        # # TODO Moved to tasks
-        # # checks if a new lol patch is out and posts it if it is
-        # if riot_utility.update_current_patch():
-        #     logger.info('Posted new Patch notes')
-        #     annoucement_channel = discord.utils.find(lambda m: m.name == 'announcements', message.channel.guild.channels)
-        #     await annoucement_channel.send(consts.MESSAGE_PATCH_NOTES_FORMATTED.format(message.guild.get_role(consts.ROLE_LOL_ID).mention, riot_utility.get_current_patch_url()))
 
         if isinstance(message.channel, discord.DMChannel):
             return
@@ -64,14 +59,6 @@ class EventCog(commands.Cog):
         # add all messages in channel to gstate.message_cache
         if gstate.CONFIG["TOGGLE_AUTO_DELETE"] and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
             utility.insert_in_message_cache(self.message_cache, message.id, message.channel.id)
-
-        # # TODO Moved to tasks
-        # # auto delete all purgeable messages
-        # purgeable_message_list = utility.get_purgeable_messages_list(message, self.message_cache)
-        # for purgeable_message in purgeable_message_list:
-        #     utility.clear_message_cache(purgeable_message, self.message_cache)
-        #     await purgeable_message.delete()
-
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
@@ -151,7 +138,7 @@ class EventCog(commands.Cog):
     # TODO no logging
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        if payload.message_id == self.game_selection_message_id:
+        if gstate.CONFIG["TOGGLE_GAME_SELECTOR"] and payload.message_id == self.game_selection_message_id:
             member = discord.utils.find(lambda x: x.id == payload.user_id, list(self.bot.get_all_members()))
             member_roles = member.roles.copy()
             for role in member_roles:
@@ -163,7 +150,7 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        if payload.message_id == self.game_selection_message_id:
+        if gstate.CONFIG["TOGGLE_GAME_SELECTOR"] and payload.message_id == self.game_selection_message_id:
             member = discord.utils.find(lambda x: x.id == payload.user_id, list(self.bot.get_all_members()))
             member_roles = member.roles.copy()
             for role in member_roles:
