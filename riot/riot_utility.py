@@ -5,6 +5,8 @@ import shelve
 from concurrent.futures import ThreadPoolExecutor
 from urllib.error import HTTPError
 import logging
+import requests
+import time
 
 from riotwatcher import LolWatcher as RiotWatcher
 
@@ -165,3 +167,15 @@ def is_in_need_of_update(summoner):
     if timers.is_timer_done(summoner.needs_update_timer):
         return True
     return False
+
+
+def get_upcoming_clash_dates():
+    riot_token = str(tokens['riot_token'])
+    clash_url = f'https://euw1.api.riotgames.com/lol/clash/v1/tournaments?api_key={riot_token}'
+    clash_json = json.loads(requests.get(clash_url).text)
+    clash_dates = []
+    for clash in clash_json:
+        tmp_clash_date = time.strftime('%d-%m-%Y', time.localtime(clash['schedule'][0]['registrationTime']/1000))
+        if tmp_clash_date not in gstate.clash_dates:
+            clash_dates.append(tmp_clash_date)
+    return clash_dates
