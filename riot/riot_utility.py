@@ -6,7 +6,7 @@ from concurrent.futures import ThreadPoolExecutor
 from urllib.error import HTTPError
 import logging
 
-from riotwatcher import RiotWatcher
+from riotwatcher import LolWatcher as RiotWatcher
 
 from core import consts, exceptions, timers
 from .summoner import Summoner
