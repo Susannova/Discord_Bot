@@ -59,6 +59,8 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
 
         if is_not_now:
             await self.auto_reminder(play_request_message)
+        
+        await ctx.message.delete()
 
     async def add_auto_reaction(self, ctx, play_request_message):
         await play_request_message.add_reaction(ctx.bot.get_emoji(consts.EMOJI_ID_LIST[5]))
