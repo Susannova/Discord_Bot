@@ -165,6 +165,20 @@ class EventCog(commands.Cog):
             logger.info("Temporary channel was deleted manually.")
             gstate.tmp_channel_ids[channel.id]["deleted"] = True
 
+    @commands.Cog.listener()
+    async def on_voice_state_update(self, member, before, after):
+        if after.channel != None:
+            if after.channel.category.id in consts.CATEGORY_IDS:
+                everyone_role = discord.utils.find(lambda m: m.id == consts.ROLE_EVERYONE_ID, after.channel.guild.roles)
+                category_channel = after.channel.category
+                await category_channel.set_permissions(everyone_role, read_messages=True)
+        if before.channel != None:
+            if before.channel.category.id in consts.CATEGORY_IDS:
+                everyone_role = discord.utils.find(lambda m: m.id == consts.ROLE_EVERYONE_ID, before.channel.guild.roles)
+                category_channel = before.channel.category
+                await category_channel.set_permissions(everyone_role, read_messages=False)
+
+
 def setup(bot: commands.Bot):
     bot.add_cog(EventCog(bot))
     logger.info('Event cogs loaded')
