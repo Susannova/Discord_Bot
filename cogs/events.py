@@ -167,15 +167,17 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member, before, after):
+        everyone_role = discord.utils.find(lambda m: m.id == consts.ROLE_EVERYONE_ID, member.guild.roles)   
         if after.channel != None:
             if after.channel.category.id in consts.CATEGORY_IDS:
-                everyone_role = discord.utils.find(lambda m: m.id == consts.ROLE_EVERYONE_ID, after.channel.guild.roles)
                 category_channel = after.channel.category
                 await category_channel.set_permissions(everyone_role, read_messages=True)
         if before.channel != None:
             if before.channel.category.id in consts.CATEGORY_IDS:
-                everyone_role = discord.utils.find(lambda m: m.id == consts.ROLE_EVERYONE_ID, before.channel.guild.roles)
                 category_channel = before.channel.category
+                for voice_channel in category_channel.voice_channels:
+                    if len(voice_channel.members) >= 1:
+                        return
                 await category_channel.set_permissions(everyone_role, read_messages=False)
 
 
