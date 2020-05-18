@@ -166,19 +166,30 @@ class EventCog(commands.Cog):
             gstate.tmp_channel_ids[channel.id]["deleted"] = True
 
     @commands.Cog.listener()
-    async def on_voice_state_update(self, member, before, after):
-        everyone_role = discord.utils.find(lambda m: m.id == consts.ROLE_EVERYONE_ID, member.guild.roles)
-        if after.channel is not None:
-            if after.channel.category.id in consts.CATEGORY_IDS:
-                category_channel = after.channel.category
-                await category_channel.set_permissions(everyone_role, read_messages=True)
-        if before.channel is not None:
-            if before.channel.category.id in consts.CATEGORY_IDS:
-                category_channel = before.channel.category
-                for voice_channel in category_channel.voice_channels:
-                    if len(voice_channel.members) >= 1:
-                        return
-                await category_channel.set_permissions(everyone_role, read_messages=False)
+    async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
+        # Checks if the user changed the channel and returns if the user didn't
+        if before.channel == after.channel:
+            return
+        else:
+            everyone_role = discord.utils.find(lambda m: m.id == consts.ROLE_EVERYONE_ID, member.guild.roles)
+            await update_channels_visibility(everyone_role, before.channel, False)
+            await update_channels_visibility(everyone_role, after.channel, True)
+
+async def update_channels_visibility(role, channel: discord.VoiceChannel, bool_after_channel=False):
+    if channel is not None and channel.category.id in consts.CATEGORY_IDS:
+        category_channel = channel.category
+        bool_make_visible = False
+
+        if not bool_after_channel:
+            for voice_channel in category_channel.voice_channels:
+                if len(voice_channel.members) >= 1:
+                    bool_make_visible = True
+                    break
+        else:
+            bool_make_visible = True
+
+        await category_channel.set_permissions(role, read_messages=bool_make_visible)
+        logger.info("Channel category %s is %s visible for everybody", category_channel.name, "" if bool_make_visible else "not")
 
 
 def setup(bot: commands.Bot):
