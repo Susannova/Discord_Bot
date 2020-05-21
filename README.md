@@ -24,6 +24,7 @@
 
 ### General Commands:
 - `!create-team [mv] [names]`
+  Creates two teams based on the voice channel the user is in. With ``mv``, the players are moved to the voice channels 'Team 1' and 'Team 2'
 - `!play game (time | "now")`
 - `!clash`
 
