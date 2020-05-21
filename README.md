@@ -33,7 +33,7 @@
 - `!smurf summoner`: Checks if the summoner is a smurf or not
 - `!link summoner`: Links a Riot account to the user.
 - `!unlink`: Unlinks the Riot account.
-- `plot`: Plots a time graph of the winrate and rank of the LoL SoloQ and Flex games for the linked users.
+- `!plot`: Plots a time graph of the winrate and rank of the LoL SoloQ and Flex games for the linked users.
 
 ### DEBUG/DEV Commands:
 - `!version`
