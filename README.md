@@ -18,6 +18,9 @@
 - check if player is a smurf
 - automatically generate op.gg link from scanning clash scouting screen
 
+## Using the bot on your server:
+_TODO_
+
 ## Commands:
 () = mandatory
 [] = optional
