@@ -23,7 +23,7 @@ logger = logging.getLogger('cog_utility')
 
 class UtilityCog(commands.Cog, name='Utility Commands'):
     @commands.command(name='create-team', help = help_text.create_team_HelpText.text, brief = help_text.create_team_HelpText.brief, usage = help_text.create_team_HelpText.usage)
-    @checks.is_in_channels([consts.CHANNEL_COMMANDS])
+    @checks.is_in_channels([consts.CHANNEL_COMMANDS_ID])
     async def create_team(self, ctx: commands.Context, *player_names):
         logger.debug('!create-team command called')
         member = await discord.ext.commands.MemberConverter().convert(ctx, ctx.message.author.name)
@@ -52,7 +52,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
     @commands.command(name='link', help = help_text.link_HelpText.text, brief = help_text.link_HelpText.brief, usage = help_text.link_HelpText.usage)
     @checks.is_riot_enabled()
-    @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
+    @checks.is_in_channels([consts.CHANNEL_COMMANDS_ID, consts.CHANNEL_COMMANDS_MEMBER_ID])
     async def link_(self, ctx, summoner_name):
         try:
             riot_commands.link_account(ctx.message.author.name, summoner_name)
@@ -66,7 +66,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             logger.info("%s was linked.", summoner_name)
 
     @commands.command(name='unlink', help = help_text.unlink_HelpText.text, brief = help_text.unlink_HelpText.brief, usage = help_text.unlink_HelpText.usage)
-    @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
+    @checks.is_in_channels([consts.CHANNEL_COMMANDS_ID, consts.CHANNEL_COMMANDS_MEMBER_ID])
     async def unlink_(self, ctx, *summoner_names):
         logger.debug("!unlink called")
         
@@ -120,7 +120,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         gstate.game_selector_id = message.id
 
     @commands.command(name='create-channel', help = help_text.create_channel_HelpText.text, brief = help_text.create_channel_HelpText.brief, usage = help_text.create_channel_HelpText.usage)
-    @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
+    @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER_ID])
     @discord.ext.commands.cooldown(rate=3, per=30)
     async def create_channel(self, ctx, kind, channel_name, *user_limit):
         logger.debug("!create-channel %s %s called by %s", kind, channel_name, ctx.message.author.name)
@@ -129,7 +129,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             if not gstate.tmp_channel_ids[tmp_channels]['deleted'] and gstate.tmp_channel_ids[tmp_channels]['author'] == ctx.message.author.id:
                 logger.info("%s wanted to create a new temporary channel but already has created channel %s with id %s.", ctx.message.author.name, gstate.tmp_channel_ids[tmp_channels]['name'], tmp_channels)
                 raise exceptions.LimitReachedException('Der Autor hat schon einen temprorären Channel erstellt.')
-        tmp_channel_category = discord.utils.find(lambda x: x.name == consts.CHANNEL_CATEGORY_TEMPORARY, ctx.message.guild.channels)
+        tmp_channel_category = discord.utils.find(lambda x: x.name == consts.CHANNEL_CATEGORY_TEMPORARY_ID, ctx.message.guild.channels)
         tmp_channel = None
         if channel_name is None:
             logger.error("!create-channel is called by user %s without a name.", ctx.message.author.name)

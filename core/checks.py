@@ -12,11 +12,12 @@ from . import (
 from core.state import global_state as gstate
 
 
-def is_in_channels(channel_names):
+def is_in_channels(channel_ids):
     async def predicate(ctx):
-        channel_names.append(consts.CHANNEL_BOT)
-        return utility.is_in_channels(ctx.message, channel_names)
+        channel_ids.append(consts.CHANNEL_BOT_ID)
+        return utility.is_in_channels(ctx.message, channel_ids)
     return commands.check(predicate)
+
 
 
 def has_n_attachments(n):

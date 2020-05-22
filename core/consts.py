@@ -14,12 +14,7 @@ MESSAGE_PLAY_REQUEST_REMINDER = 'REMINDER: Der abonnierte Play-Request geht in 5
 MESSAGE_TEAM_HEADER = '\n@here\n**__===Teams===__**\n'
 MESSAGE_TEAM_1 = 'Team 1:\n'
 MESSAGE_TEAM_2 = '\nTeam 2:\n'
-MESSAGE_SERVER_WELCOME = (
-    'Hallo {0} und herzlich willkommen auf dem Discord Server von Kraut9!\n \
-    Hier ist eine kleine Erklärung zu unserem Server:\n \
-    https://discordapp.com/channels/564481310417092629/647752522764648448/647752549411061791 \
-    Viel Spaß auf dem Server von Kraut9!'
-)
+MESSAGE_SERVER_WELCOME = None
 MESSAGE_BANS = (
     'If you want to receive the best bans \
     for the scouted team copy the following Command: \n \
@@ -36,13 +31,8 @@ MESSAGE_GAME_SELECTOR = "@everyone\nWähle hier durch das Klicken auf eine Reakt
 
 MESSAGE_PLAY_REQUEST_CREATED = '*{0}* hat ein Play-Request für das Spiel **{1}** erstellt. Wenn du interessiert daran bist, klicke hier: <{2}>'
 
-MESSAGE_PATCH_NOTES = "https://oce.leagueoflegends.com/en-us/news/game-updates/patch-{0}-{1}-notes/"
+MESSAGE_PATCH_NOTES = "https://euw.leagueoflegends.com/en-us/news/game-updates/patch-{0}-{1}-notes/"
 
-
-
-COMMAND_LIST_INTERN_PLANING = ["?create-team", "?play-internal"]
-COMMAND_LIST_PLAY_REQUEST = ["?play-lol", "?play-now"]
-COMMAND_LIST_ALL = ["?create-team", "?play-internal", "?play-lol", "?play-now", "?player", "?bans"]
 
 
 PATTERN_LIST_AUTO_REACT = [" spielen. Kommt gegen ",
@@ -64,28 +54,28 @@ COMMAND_SMURF = f'{COMMAND_PREFIX}smurf'
 
 COMMAND_LIST_RIOT = [COMMAND_PLAYER, COMMAND_SMURF]
 
-CHANNEL_CREATE_TEAM_VOICE_ID = 564481311432245265
-CHANNEL_PLAY_REQUESTS = 'play-requests'
-CHANNEL_BOT = 'bot'
-CHANNEL_MEMBER_ONLY = 'member-only'
-CHANNEL_COMMANDS_MEMBER = 'kraut-commands'
-CHANNEL_COMMANDS = 'commands'
-CHANNEL_CLASH = 'clash'
-CHANNEL_CATEGORY_TEMPORARY = 'TEMPORARY-CHANNELS'
-BOT_DYNO_NAME = 'Dyno'
+CHANNEL_CREATE_TEAM_VOICE_ID = None
+CHANNEL_PLAY_REQUESTS_ID = None
+CHANNEL_BOT_ID = None
+CHANNEL_MEMBER_ONLY_ID = None
+CHANNEL_COMMANDS_MEMBER_ID = None
+CHANNEL_COMMANDS_ID = None
+CHANNEL_CATEGORY_TEMPORARY_ID = None
+
+# BOT_DYNO_NAME = 'Dyno'
 
 TIMER_NOTIFY_ON_REACT_PURGE = 15.0
 TIMER_LAST_PLAY_REQUEST_DELETE = 86400.0
 
 
-ROLE_SETZLING_ID = 643169161236840449
-ROLE_EVERYONE_ID = 564481310417092629
-ROLE_ADMIN_ID = 564492616977088532
-ROLE_APEX_ID = 693817368937496596
-ROLE_CSGO_ID = 693817437623418911
-ROLE_LOL_ID = 693817391330623508
-ROLE_RL_ID = 693817406883233822
-ROLE_VAL_ID = 694873734040780810
+ROLE_SETZLING_ID = None
+ROLE_EVERYONE_ID = None
+ROLE_ADMIN_ID = None
+ROLE_APEX_ID = None
+ROLE_CSGO_ID = None
+ROLE_LOL_ID = None
+ROLE_RL_ID = None
+ROLE_VAL_ID = None
 FOLDER_CHAMP_ICON = './data/champ-icon/'
 FOLDER_CHAMP_SPLICED = './data/champ-spliced/'
 

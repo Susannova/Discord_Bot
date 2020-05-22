@@ -57,7 +57,7 @@ class EventCog(commands.Cog):
             return
 
         # add all messages in channel to gstate.message_cache
-        if gstate.CONFIG["TOGGLE_AUTO_DELETE"] and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS):
+        if gstate.CONFIG["TOGGLE_AUTO_DELETE"] and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS_ID):
             utility.insert_in_message_cache(self.message_cache, message.id, message.channel.id)
 
     @commands.Cog.listener()

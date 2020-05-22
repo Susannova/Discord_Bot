@@ -101,11 +101,12 @@ def contains_any_command(message, commands):
     return False
 
 
-def is_in_channels(message, channels):
+def is_in_channels(message: discord.message, channels: int):
     for channel in channels:
-        if message.channel.name == channel:
+        if message.channel.id == channel:
             return True
-    return False
+        else:
+            return False
 
 
 def is_in_channel(message, channel):
@@ -153,13 +154,6 @@ def get_purgeable_messages_list(message_cache):
     if gstate.CONFIG["TOGGLE_AUTO_DELETE"]:
         messages_list = [msg for msg in message_cache if timers.is_timer_done(message_cache[msg]["timer"])]
     return messages_list
-
-
-def is_no_play_request_command(message, bot):
-    if not contains_any_command(message, consts.COMMAND_LIST_PLAY_REQUEST) \
-    and message.author != bot.user:
-        return True
-    return False
 
 
 def clear_message_cache(message_id, message_cache):

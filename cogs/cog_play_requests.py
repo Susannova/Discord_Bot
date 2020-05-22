@@ -25,7 +25,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         self.bot = bot
 
     @commands.command(name='play', help = help_text.play_HelpText.text, brief = help_text.play_HelpText.brief, usage = help_text.play_HelpText.usage)
-    @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS])
+    @checks.is_in_channels([consts.CHANNEL_PLAY_REQUESTS_ID])
     async def play_(self, ctx, game_name, _time, *args):
         is_not_now = True
         logger.info('Create a play request')

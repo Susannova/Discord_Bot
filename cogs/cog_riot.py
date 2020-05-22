@@ -18,7 +18,7 @@ logger = logging.getLogger('cog_riot')
 class RiotCog(commands.Cog, name='Riot Commands'):
     @commands.command(name='player', help = help_text.player_HelpText.text, brief = help_text.player_HelpText.brief, usage = help_text.player_HelpText.usage)
     @checks.is_riot_enabled()
-    @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
+    @checks.is_in_channels([consts.CHANNEL_COMMANDS_ID, consts.CHANNEL_COMMANDS_MEMBER_ID])
     async def player_(self, ctx, *summoner_name):
         logger.debug('!player command called')
         if len(list(summoner_name)) == 0:
@@ -29,7 +29,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
 
     @commands.command(name='smurf', help = help_text.smurf_HelpText.text, brief = help_text.smurf_HelpText.brief, usage = help_text.smurf_HelpText.usage)
     @checks.is_riot_enabled()
-    @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
+    @checks.is_in_channels([consts.CHANNEL_COMMANDS_ID, consts.CHANNEL_COMMANDS_MEMBER_ID])
     async def smurf_(self, ctx, *summoner_name):
         logger.debug('!smurf command called')
         if len(list(summoner_name)) == 0:
@@ -41,7 +41,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
     @commands.command(name='bans', help = help_text.bans_HelpText.text, brief = help_text.bans_HelpText.brief, usage = help_text.bans_HelpText.usage)
     @checks.is_riot_enabled()
     @discord.ext.commands.cooldown(rate=1, per=5)
-    @checks.is_in_channels([consts.CHANNEL_COMMANDS, consts.CHANNEL_COMMANDS_MEMBER])
+    @checks.is_in_channels([consts.CHANNEL_COMMANDS_ID, consts.CHANNEL_COMMANDS_MEMBER_ID])
     async def bans_(self, ctx, *team_names):
         logger.debug('!bans command called')
         await ctx.send(
@@ -49,7 +49,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
                 f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))
 
     @commands.command(name='clash', help = help_text.clash_HelpText.text, brief = help_text.clash_HelpText.brief, usage = help_text.clash_HelpText.usage)
-    @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
+    @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER_ID])
     @checks.has_n_attachments(1)
     async def clash_(self, ctx):
         logger.debug('!clash command called')
@@ -63,7 +63,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             consts.MESSAGE_BANS.format(ocr.get_formatted_summoner_names()))
 
     @commands.command(name='clash_dates')
-    @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER])
+    @checks.is_in_channels([consts.CHANNEL_COMMANDS_MEMBER_ID])
     async def clash_dates(self, ctx):
         riot_commands.update_gstate_clash_dates()
         await ctx.send(gstate.clash_dates)
