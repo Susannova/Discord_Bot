@@ -101,18 +101,15 @@ def contains_any_command(message, commands):
     return False
 
 
-def is_in_channels(message: discord.message, channels: int):
-    for channel in channels:
-        if message.channel.id == channel:
-            return True
-        else:
-            return False
+def is_in_channels(message: discord.message, channels: list):
+    return message.channel.id in channels
 
 
-def is_in_channel(message, channel):
-    return message.channel.name == channel
+def is_in_channel(message: discord.message, channel_id: int):
+    return message.channel.id == channel_id
 
 
+#Todo dont use find here
 def get_voice_channel(message, id):
     voice_channel = discord.utils.find(lambda x: x.id == id, message.guild.voice_channels)
     return voice_channel if voice_channel is not None else None
