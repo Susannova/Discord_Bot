@@ -14,7 +14,6 @@ MESSAGE_PLAY_REQUEST_REMINDER = 'REMINDER: Der abonnierte Play-Request geht in 5
 MESSAGE_TEAM_HEADER = '\n@here\n**__===Teams===__**\n'
 MESSAGE_TEAM_1 = 'Team 1:\n'
 MESSAGE_TEAM_2 = '\nTeam 2:\n'
-MESSAGE_SERVER_WELCOME = None
 MESSAGE_BANS = (
     'If you want to receive the best bans \
     for the scouted team copy the following Command: \n \
@@ -29,10 +28,8 @@ MESSAGE_CLASH_FULL = 'Das Clash Team von {0} für den {1} ist jetzt voll. Das Te
 MESSAGE_PATCH_NOTES_FORMATTED = '{0}\nEin neuer Patch ist da: {1}'
 MESSAGE_GAME_SELECTOR = "@everyone\nWähle hier durch das Klicken auf eine Reaktion aus zu welchen Spielen du Benachrichtungen erhalten willst!"
 
-MESSAGE_PLAY_REQUEST_CREATED = '*{0}* hat ein Play-Request für das Spiel **{1}** erstellt. Wenn du interessiert daran bist, klicke hier: <{2}>'
 
 MESSAGE_PATCH_NOTES = "https://euw.leagueoflegends.com/en-us/news/game-updates/patch-{0}-{1}-notes/"
-
 
 
 PATTERN_LIST_AUTO_REACT = [" spielen. Kommt gegen ",
@@ -40,19 +37,9 @@ PATTERN_LIST_AUTO_REACT = [" spielen. Kommt gegen ",
   " und sucht noch nach weiteren Spielern!",
   " sucht nach Mitspielern für den Clash am "]
 
-PATTERN_PLAY_REQUEST = " spielen. Kommt gegen "
-PATTERN_CLASH = " sucht nach Mitspielern für den Clash am "
 
 
-COMMAND_CREATE_TEAM = f'{COMMAND_PREFIX}create-team'
-COMMAND_PLAY_LOL = f'{COMMAND_PREFIX}play-lol'
-COMMAND_PLAY_NOW = f'{COMMAND_PREFIX}play-now'
-COMMAND_CLASH = f'{COMMAND_PREFIX}clash'
-COMMAND_BANS = f'{COMMAND_PREFIX}bans'
-COMMAND_PLAYER = f'{COMMAND_PREFIX}player'
-COMMAND_SMURF = f'{COMMAND_PREFIX}smurf'
 
-COMMAND_LIST_RIOT = [COMMAND_PLAYER, COMMAND_SMURF]
 
 CHANNEL_CREATE_TEAM_VOICE_ID = None
 CHANNEL_PLAY_REQUESTS_ID = None
@@ -61,12 +48,6 @@ CHANNEL_MEMBER_ONLY_ID = None
 CHANNEL_COMMANDS_MEMBER_ID = None
 CHANNEL_COMMANDS_ID = None
 CHANNEL_CATEGORY_TEMPORARY_ID = None
-
-# BOT_DYNO_NAME = 'Dyno'
-
-TIMER_NOTIFY_ON_REACT_PURGE = 15.0
-TIMER_LAST_PLAY_REQUEST_DELETE = 86400.0
-
 
 ROLE_SETZLING_ID = None
 ROLE_EVERYONE_ID = None
@@ -98,7 +79,6 @@ DATABASE_DIRECTORY_GLOBAL_STATE = './db/global_state'
 DATABASE_NAME_GLOBAL_STATE = 'global_state_db'
 
 LOG_FILE = './log/log'
-LOG_NAME = 'kraut.log'
 
 GAME_NAME_DICT = {
     "LOL" : "League of Legends",
@@ -108,7 +88,6 @@ GAME_NAME_DICT = {
     "VAL" : "Valorant"
 }
 
-GAME_SELECTOR_MESSAGE_ID = 693832367521005617
 PLAY_NOW_TIME_ADD_LIMIT = 120
 
 #                   LOL,                CSGO,               VAL,                RL,                 APEX                
