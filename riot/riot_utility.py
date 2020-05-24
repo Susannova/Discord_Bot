@@ -47,13 +47,6 @@ def format_last_time_played(_time):
     return _time.strftime('%d-%m-%Y')
 
 
-def generate_summoner_names(players):
-    for player in players:
-        if player.find('%') > 0:
-            player = player.replace('%', '%20')
-        yield player
-
-
 def format_summoner_name(name):
     if name.find('%20') > 0:
         return name.replace('%20', ' ')
@@ -87,16 +80,6 @@ def update_champion_json():
             json.dump(data, f, ensure_ascii=False, indent=4)
 
 
-def is_command_on_cooldown(timer_list):
-    timers.remove_finished_timers(timer_list)
-    if len(timer_list) != 0:
-        return True
-    timer_list.append(timers.start_timer(secs=5))
-    return False
-
-
-def get_median_rank(ranks):
-    return statistics.median(ranks)
 
 def get_average_rank(ranks):
     tmp = 0

@@ -49,9 +49,6 @@ def convert_human_to_epoch_time(date: str) -> int:
     pattern = '%d.%m.%Y'
     return int(time.mktime(time.strptime(date_time, pattern)))
 
-def get_current_weekday() -> str:
-    return datetime.today().strftime('%A')
-
 
 def add_to_current_time(mins):
     return (datetime.now() + timedelta(minutes=mins)).strftime('%H:%M')

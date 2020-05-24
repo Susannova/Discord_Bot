@@ -31,20 +31,6 @@ def create_team(players):
 
     return teams_message, team1, team2
 
-# FIXME: this is bs
-def is_purgeable_message(message, cmds, channel, excepted_users):
-    """
-    Checks if message should be purged based on if it starts with
-    a specified command cmd and is send in a specfied channel name
-    channel and is from a user excepted user that should not be purged.
-    """
-    if contains_command(message, tuple(cmds)) and is_in_channel(message, channel):
-        if message.author.name in excepted_users:
-            return False
-        return True
-    return False
-
-
 def create_internal_play_request_message(message, play_request):
     """
     Creates an internal play_request message.
@@ -74,18 +60,6 @@ def generate_auto_role_list(member):
 def get_auto_role_list(member):
     return list(generate_auto_role_list(member))
 
-
-def contains_command(message, command):
-    if message.content.startswith(command):
-        return True
-    return False
-
-
-def contains_any_command(message, commands):
-    for command in commands:
-        if message.content.startswith(command):
-            return True
-    return False
 
 
 def is_in_channels(message: discord.message, channels: list):
