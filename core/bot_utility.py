@@ -62,19 +62,6 @@ def switch_to_internal_play_request(message, play_request):
     return create_internal_play_request_message(message, play_request)
 
 
-def has_any_pattern(message):
-    for pattern in consts.PATTERN_LIST_AUTO_REACT:
-        if message.content.find(pattern) > -1:
-            return True
-    return False
-
-
-def has_pattern(message, pattern):
-    if message.content.find(pattern) > -1:
-        return True
-    return False
-
-
 def generate_auto_role_list(member):
     if len(member.roles) >= 2:
         return
@@ -158,9 +145,9 @@ def clear_message_cache(message_id, message_cache):
         del message_cache[message_id]
 
 
-def clear_play_requests(message):
-    if has_any_pattern(message):
-        del gstate.play_requests[message.id]
+def clear_play_requests(message_id: int):
+    if message_id in gstate.play_requests:
+        del gstate.play_requests[message_id]
 
 
 def pretty_print_list(*players) -> str:

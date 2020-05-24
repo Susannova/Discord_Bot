@@ -62,7 +62,7 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
-        utility.clear_play_requests(message)
+        utility.clear_play_requests(message.id)
         if message.id in self.message_cache:
             utility.clear_message_cache(message.id, self.message_cache)
         else:

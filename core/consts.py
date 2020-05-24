@@ -32,10 +32,6 @@ MESSAGE_GAME_SELECTOR = "@everyone\nWähle hier durch das Klicken auf eine Reakt
 MESSAGE_PATCH_NOTES = "https://euw.leagueoflegends.com/en-us/news/game-updates/patch-{0}-{1}-notes/"
 
 
-PATTERN_LIST_AUTO_REACT = [" spielen. Kommt gegen ",
- "hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!",
-  " und sucht noch nach weiteren Spielern!",
-  " sucht nach Mitspielern für den Clash am "]
 
 
 
