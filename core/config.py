@@ -1,90 +1,161 @@
-""" Used for global variables that cant be used in json(lists, format strings, emoji)
-and constant strings. Dont change any variables from outside.
-"""
+import dataclasses
+import json
 
-COMMAND_PREFIX = '!'
-EMOJI_JOIN = '✅'
-EMOJI_PASS = '❎'
-MESSAGE_CREATE_INTERN_PLAY_REQUEST = '@everyone Das Play-Request von {0} hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!\nEs sind noch **__{1}__** Plätze frei. \nUhrzeit: {2} Uhr \nSpieler:\n'
-MESSAGE_AUTO_DM_CREATOR = '{0} hat auf dein Play-Request reagiert: {1} '
-MESSAGE_AUTO_DM_SUBSCRIBER = '{0} hat auch auf das Play-Request von {1} reagiert: {2} '
-MESSAGE_PLAY_NOW = '{0}\n{1} spielt **__jetzt gerade__** **{2}** und sucht noch nach weiteren Spielern!'
-MESSAGE_PLAY_AT = '{0}\n{1} will **{2}** spielen. Kommt gegen **__{3}__** Uhr online!'
-MESSAGE_PLAY_REQUEST_REMINDER = 'REMINDER: Der abonnierte Play-Request geht in 5 Minuten los!'
-MESSAGE_TEAM_HEADER = '\n@here\n**__===Teams===__**\n'
-MESSAGE_TEAM_1 = 'Team 1:\n'
-MESSAGE_TEAM_2 = '\nTeam 2:\n'
-MESSAGE_BANS = (
-    'If you want to receive the best bans \
-    for the scouted team copy the following Command: \n \
-    ' + COMMAND_PREFIX + 'bans {0}'
-)
+@dataclasses.dataclass
+class Game:
+    """ Represents a game. A game has a long and a short name and belongs to a discord role """
+    name_short: str
+    name_long: str
+    role_id: int
 
-MESSAGE_CLASH_CREATE = (
-    '{0}\n{1} sucht nach Mitspielern für den LoL Clash am {2}.'
-)
-MESSAGE_CLASH_FULL = 'Das Clash Team von {0} für den {1} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{1}'
+@dataclasses.dataclass
+class Messages_Config:
+    """ Configuration data of the messages from the bot """
+    create_internal_play_request: str = '@everyone Das Play-Request von {creator} hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!\nEs sind noch **__{free_places}__** Plätze frei. \nUhrzeit: {time} Uhr \nSpieler:\n'
+    auto_dm_creator: str = '{player} hat auf dein Play-Request reagiert: {reaction} '
+    auto_dm_subscriber: str = '{player} hat auch auf das Play-Request von {creator} reagiert: {reaction} '
+    play_now: str = '{role_mention}\n{creator} spielt **__jetzt gerade__** **{game}** und sucht noch nach weiteren Spielern!'
+    play_at: str = '{role_mention}\n{1} will **{game}** spielen. Kommt gegen **__{time}__** Uhr online!'
+    play_request_reminder: str = 'REMINDER: Der abonnierte Play-Request geht in 5 Minuten los!'
+    clash_full: str = 'Das Clash Team von {creator} für den {time} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{team}'
+            
+    bans: str = (
+                'If you want to receive the best bans \
+                for the scouted team copy the following Command: \n \
+                {command_prefix}bans {team}'
+            )
 
-MESSAGE_PATCH_NOTES_FORMATTED = '{0}\nEin neuer Patch ist da: {1}'
-MESSAGE_GAME_SELECTOR = "@everyone\nWähle hier durch das Klicken auf eine Reaktion aus zu welchen Spielen du Benachrichtungen erhalten willst!"
+    team_header: str = '\n@here\n**__===Teams===__**\n'
+    team_1: str = 'Team 1:\n'
+    team_2: str = '\nTeam 2:\n'
+
+    patch_notes_formatted: str = '{role_mention}\nEin neuer Patch ist da: {patch_note}'
+    patch_notes: str = "https://euw.leagueoflegends.com/en-us/news/game-updates/patch-{0}-{1}-notes/"
+            
+    game_selector: str = "@everyone\nWähle hier durch das Klicken auf eine Reaktion aus zu welchen Spielen du Benachrichtungen erhalten willst!"
+        
+@dataclasses.dataclass
+class Basic_Config:
+    """ Some basic config """
+    command_prefix: str = '?'
+
+    emoji_join: str = '✅'
+    emoji_pass: str = '❎'
+
+    riot_region: str = 'euw1'
+
+    play_lol_now_time_limit: str = 120
+
+@dataclasses.dataclass
+class Channel_Ids:
+    """ Channel id lists """
+    create_team_voice: list
+    play_request: list
+    bot: list
+    member_only: list
+    commands_member: list
+    commands: list
+    category_temporary: list
 
 
-MESSAGE_PATCH_NOTES = "https://euw.leagueoflegends.com/en-us/news/game-updates/patch-{0}-{1}-notes/"
+@dataclasses.dataclass
+class Folder_and_Files:
+    """ Global folder and files used by the bot """
+    config_file: str = './config/configuration.json'
+    folder_champ_icon: str = './data/champ-icon/'
+    folder_champ_spliced: str = './data/champ-spliced/'
+
+    database_directory_summoners: str = './db/summoners'
+    database_name_summoners: str = 'summoner_db'
+    database_directory_global_state: str = './db/global_state'
+    database_name_global_state: str = 'global_state_db'
+
+    log_file: str = './log/log'
+
+class Config():
+    """Configuration of the bot"""
+    basic_config: Basic_Config
+    messages: Messages_Config
+    channel_ids: Channel_Ids
+    folder_and_files: Folder_and_Files
+    __games: dict
+    """Use the set and get functions to modify this. Access also possible with 'all_settings'"""
+
+    def __init__(self, filename: str):
+        self.set_all_settings()
+
+        if filename:
+            self.update_config_from_file(filename)
+    
+    def set_all_settings(self, basic_config=Basic_Config(), messages=Messages_Config(), channel_ids=Channel_Ids(), folders_and_files=Folder_and_Files(), games={}):
+        self.basic_config = basic_config
+        self.messages = messages
+        self.channel_ids = channel_ids
+        self.folders_and_files = folders_and_files
+        self.__games = games
 
 
 
+    def all_settings_as_dict(self) -> dict:
+        return {
+            "basic_config": dataclasses.asdict(self.basic_config),
+            "messages": dataclasses.asdict(self.messages),
+            "channel_ids": dataclasses.asdict(self.channel_ids),
+            "folder_and_files": dataclasses.asdict(self.folders_and_files),
+            "games": self.__games
+        }
+
+    def update_config_category(self, config_old: dict, config_new: dict):
+        """Replaces settings of the old config with the new. Settings not set in new are left as is"""
+        
+        for key in config_new:
+            config_old[key] = config_new[key]
 
 
+    def update_config_from_file(self, filename: str):
+        """ Sets all settings to default and updates the settings given in the file """
+        
+        reset_class = Config("")
 
+        all_settings_reset_class = reset_class.all_settings_as_dict()
+        all_settings_as_dict = self.all_settings_as_dict()
 
-CHANNEL_CREATE_TEAM_VOICE_ID = None
-CHANNEL_PLAY_REQUESTS_ID = None
-CHANNEL_BOT_ID = None
-CHANNEL_MEMBER_ONLY_ID = None
-CHANNEL_COMMANDS_MEMBER_ID = None
-CHANNEL_COMMANDS_ID = None
-CHANNEL_CATEGORY_TEMPORARY_ID = None
+        # Reset all settings
+        for category in all_settings_reset_class:
+            all_settings_as_dict[category] = all_settings_reset_class[category]
 
-ROLE_SETZLING_ID = None
-ROLE_EVERYONE_ID = None
-ROLE_ADMIN_ID = None
-ROLE_APEX_ID = None
-ROLE_CSGO_ID = None
-ROLE_LOL_ID = None
-ROLE_RL_ID = None
-ROLE_VAL_ID = None
-FOLDER_CHAMP_ICON = './data/champ-icon/'
-FOLDER_CHAMP_SPLICED = './data/champ-spliced/'
+        # Updaets settings
+        with json.load(open(filename, 'r')) as config_new:
+            for category in config_new:
+                if category not in all_settings_as_dict:
+                    raise "Category unknown"
+                else:
+                    self.update_config_category(all_settings_as_dict[category], config_new[category])
+        
+        # Set the settings
+        self.set_all_settings(
+            Basic_Config(**all_settings_as_dict["basic_config"]),
+            Messages_Config(**all_settings_as_dict["messages"]),
+            Channel_Ids(**all_settings_as_dict["channel_ids"]),
+            Folder_and_Files(**all_settings_as_dict["folder_and_files"]),
+            all_settings_as_dict["games"]
+        )
+        
 
-GAME_NAME_TO_ROLE_ID_DICT = {
-    "LOL" : ROLE_LOL_ID,
-    "APEX" : ROLE_APEX_ID,
-    "CSGO" : ROLE_CSGO_ID,
-    "RL" : ROLE_RL_ID,
-    "VAL" : ROLE_VAL_ID
-}
-
-# source: https://na.leagueoflegends.com/en-us/news/game-updates/patch-10-1-notes/
-RIOT_SEASON_2020_START = '10.01.2020'
-RIOT_REGION = 'euw1'
-
-DATABASE_DIRECTORY = './db/summoners'
-DATABASE_NAME = 'summoner_db'
-
-DATABASE_DIRECTORY_GLOBAL_STATE = './db/global_state'
-DATABASE_NAME_GLOBAL_STATE = 'global_state_db'
-
-LOG_FILE = './log/log'
-
-GAME_NAME_DICT = {
-    "LOL" : "League of Legends",
-    "APEX" : "Apex",
-    "CSGO" : "CS:GO",
-    "RL" : "Rocket League",
-    "VAL" : "Valorant"
-}
-
-PLAY_NOW_TIME_ADD_LIMIT = 120
-
-#                   LOL,                CSGO,               VAL,                RL,                 APEX                
-CATEGORY_IDS = [696776011848613958, 696776901779521536, 696776627786481674, 696776150613098577, 696777095719682073]
+    
+    def save_config(self):
+        with open(self.folders_and_files["config_file"]) as json_file:
+            json.dump(self.all_settings_as_dict, json_file)
+    
+    def get_game(self, game: str):
+        if game in self.__games:
+            game_dict = self.__games[game]
+            return Game(game, game_dict["long_name"], game_dict["role_id"])
+        else:
+            raise "Game not found"
+    
+    def set_game(self, game: str, long_name: str, role_id: id):
+        self.__games[game] = {
+            "long_name": long_name,
+            "role_id": role_id
+        }
