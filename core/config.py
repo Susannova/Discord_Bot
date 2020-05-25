@@ -99,7 +99,7 @@ class Config():
     folders_and_files: Folders_and_Files
     toggles: Toggles
     __games: dict
-    """Use the set and get functions to modify this. Access also possible with 'all_settings'"""
+    __games.__doc__("Dict of classes Game. Use the set and get functions to modify this.")
 
     def __init__(self, filename: str):
         self.set_all_settings()
@@ -117,6 +117,7 @@ class Config():
 
 
     def all_settings_as_dict(self) -> dict:
+        """ Returns all settings as a dict """
         return {
             "basic_config": dataclasses.asdict(self.basic_config),
             "messages": dataclasses.asdict(self.messages),
@@ -165,6 +166,7 @@ class Config():
         )
 
     def save_config(self):
+        """ Save the config to the config file """
         with open(self.folders_and_files.config_file) as json_file:
             json.dump(self.all_settings_as_dict, json_file)
 
