@@ -1,12 +1,27 @@
 import dataclasses
 import json
 
+
 @dataclasses.dataclass
 class Game:
     """ Represents a game. A game has a long and a short name and belongs to a discord role """
     name_short: str
     name_long: str
     role_id: int
+
+
+@dataclasses.dataclass
+class Toggles:
+    auto_delete: bool = False
+    command_only: bool = False
+    auto_react: bool = False
+    auto_dm: bool = False
+    riot_api: bool = False
+    debug: bool = False
+    game_selector: bool = False
+    summoner_rank_history: bool = False
+    check_LoL_patch: bool = False
+
 
 @dataclasses.dataclass
 class Messages_Config:
@@ -18,12 +33,12 @@ class Messages_Config:
     play_at: str = '{role_mention}\n{1} will **{game}** spielen. Kommt gegen **__{time}__** Uhr online!'
     play_request_reminder: str = 'REMINDER: Der abonnierte Play-Request geht in 5 Minuten los!'
     clash_full: str = 'Das Clash Team von {creator} für den {time} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{team}'
-            
+
     bans: str = (
-                'If you want to receive the best bans \
+        'If you want to receive the best bans \
                 for the scouted team copy the following Command: \n \
                 {command_prefix}bans {team}'
-            )
+    )
 
     team_header: str = '\n@here\n**__===Teams===__**\n'
     team_1: str = 'Team 1:\n'
@@ -31,9 +46,10 @@ class Messages_Config:
 
     patch_notes_formatted: str = '{role_mention}\nEin neuer Patch ist da: {patch_note}'
     patch_notes: str = "https://euw.leagueoflegends.com/en-us/news/game-updates/patch-{0}-{1}-notes/"
-            
+
     game_selector: str = "@everyone\nWähle hier durch das Klicken auf eine Reaktion aus zu welchen Spielen du Benachrichtungen erhalten willst!"
-        
+
+
 @dataclasses.dataclass
 class Basic_Config:
     """ Some basic config """
@@ -43,8 +59,10 @@ class Basic_Config:
     emoji_pass: str = '❎'
 
     riot_region: str = 'euw1'
+    LOL_PATCH: str  # Move to global state
 
     play_lol_now_time_limit: str = 120
+
 
 @dataclasses.dataclass
 class Channel_Ids:
@@ -59,7 +77,7 @@ class Channel_Ids:
 
 
 @dataclasses.dataclass
-class Folder_and_Files:
+class Folders_and_Files:
     """ Global folder and files used by the bot """
     config_file: str = './config/configuration.json'
     folder_champ_icon: str = './data/champ-icon/'
@@ -72,12 +90,14 @@ class Folder_and_Files:
 
     log_file: str = './log/log'
 
+
 class Config():
     """Configuration of the bot"""
     basic_config: Basic_Config
     messages: Messages_Config
     channel_ids: Channel_Ids
-    folder_and_files: Folder_and_Files
+    folders_and_files: Folders_and_Files
+    toggles: Toggles
     __games: dict
     """Use the set and get functions to modify this. Access also possible with 'all_settings'"""
 
@@ -86,14 +106,14 @@ class Config():
 
         if filename:
             self.update_config_from_file(filename)
-    
-    def set_all_settings(self, basic_config=Basic_Config(), messages=Messages_Config(), channel_ids=Channel_Ids(), folders_and_files=Folder_and_Files(), games={}):
+
+    def set_all_settings(self, basic_config=Basic_Config(), messages=Messages_Config(), channel_ids=Channel_Ids(), folders_and_files=Folders_and_Files(), games={}, toggles=Toggles()):
         self.basic_config = basic_config
         self.messages = messages
         self.channel_ids = channel_ids
         self.folders_and_files = folders_and_files
         self.__games = games
-
+        self.toggles = toggles
 
 
     def all_settings_as_dict(self) -> dict:
@@ -101,20 +121,20 @@ class Config():
             "basic_config": dataclasses.asdict(self.basic_config),
             "messages": dataclasses.asdict(self.messages),
             "channel_ids": dataclasses.asdict(self.channel_ids),
-            "folder_and_files": dataclasses.asdict(self.folders_and_files),
-            "games": self.__games
+            "folders_and_files": dataclasses.asdict(self.folders_and_files),
+            "games": self.__games,
+            "toggles": dataclasses.asdict(self.toggles)
         }
 
     def update_config_category(self, config_old: dict, config_new: dict):
         """Replaces settings of the old config with the new. Settings not set in new are left as is"""
-        
+
         for key in config_new:
             config_old[key] = config_new[key]
 
-
     def update_config_from_file(self, filename: str):
         """ Sets all settings to default and updates the settings given in the file """
-        
+
         reset_class = Config("")
 
         all_settings_reset_class = reset_class.all_settings_as_dict()
@@ -124,37 +144,40 @@ class Config():
         for category in all_settings_reset_class:
             all_settings_as_dict[category] = all_settings_reset_class[category]
 
-        # Updaets settings
+        # Updates settings
         with json.load(open(filename, 'r')) as config_new:
             for category in config_new:
                 if category not in all_settings_as_dict:
                     raise "Category unknown"
                 else:
-                    self.update_config_category(all_settings_as_dict[category], config_new[category])
-        
+                    self.update_config_category(
+                        all_settings_as_dict[category], config_new[category])
+
         # Set the settings
         self.set_all_settings(
-            Basic_Config(**all_settings_as_dict["basic_config"]),
-            Messages_Config(**all_settings_as_dict["messages"]),
-            Channel_Ids(**all_settings_as_dict["channel_ids"]),
-            Folder_and_Files(**all_settings_as_dict["folder_and_files"]),
-            all_settings_as_dict["games"]
+            basic_config=Basic_Config(**all_settings_as_dict["basic_config"]),
+            messages=Messages_Config(**all_settings_as_dict["messages"]),
+            channel_ids=Channel_Ids(**all_settings_as_dict["channel_ids"]),
+            folders_and_files=Folders_and_Files(
+                **all_settings_as_dict["folders_and_files"]),
+            games=all_settings_as_dict["games"],
+            toggles=Toggles(**all_settings_as_dict["toggles"])
         )
-        
 
-    
     def save_config(self):
         with open(self.folders_and_files["config_file"]) as json_file:
             json.dump(self.all_settings_as_dict, json_file)
-    
-    def get_game(self, game: str):
-        if game in self.__games:
-            game_dict = self.__games[game]
-            return Game(game, game_dict["long_name"], game_dict["role_id"])
+
+    def get_game(self, game_short_name: str) -> Game:
+        """ Returns a Game class that belongs to the short name of a game """
+        if game_short_name in self.__games:
+            game_dict = self.__games[game_short_name]
+            return Game(game_short_name, game_dict["long_name"], game_dict["role_id"])
         else:
             raise "Game not found"
-    
+
     def set_game(self, game: str, long_name: str, role_id: id):
+        """ Adds a new game to the bot """
         self.__games[game] = {
             "long_name": long_name,
             "role_id": role_id
