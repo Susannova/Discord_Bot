@@ -165,7 +165,7 @@ class Config():
         )
 
     def save_config(self):
-        with open(self.folders_and_files["config_file"]) as json_file:
+        with open(self.folders_and_files.config_file) as json_file:
             json.dump(self.all_settings_as_dict, json_file)
 
     def get_game(self, game_short_name: str) -> Game:
