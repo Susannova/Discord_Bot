@@ -25,7 +25,7 @@ from core import (
     timers
 )
 
-logger = logging.getLogger('cog_tasks')
+logger = logging.getLogger(__name__)
 
 
 def get_summoners_data(update=True, file_path='./data/summoners_data.json'):

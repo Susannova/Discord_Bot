@@ -13,7 +13,7 @@ from core import (
 from core.play_requests import PlayRequestCategory
 from riot import riot_utility
 
-logger = logging.getLogger('events')
+logger = logging.getLogger(__name__)
 
 
 class EventCog(commands.Cog):

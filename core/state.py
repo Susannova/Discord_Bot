@@ -5,7 +5,7 @@ import logging
 
 from core import consts
 
-logger = logging.getLogger('state')
+logger = logging.getLogger(__name__)
 
 
 class SingletonBase(type):

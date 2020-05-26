@@ -12,7 +12,7 @@ from core import (
 from core.config import CONFIG
 from riot import riot_commands
 from core.state import global_state as gstate
-logger = logging.getLogger('cog_riot')
+logger = logging.getLogger(__name__)
 
 
 class RiotCog(commands.Cog, name='Riot Commands'):

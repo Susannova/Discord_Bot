@@ -9,7 +9,7 @@ from core import checks
 from core.state import global_state as gstate
 from core.config import CONFIG
 
-logger = logging.getLogger('cog_debug')
+logger = logging.getLogger(__name__)
 
 
 class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):

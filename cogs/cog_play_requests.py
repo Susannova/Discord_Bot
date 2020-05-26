@@ -16,7 +16,7 @@ from core.config import CONFIG
 from core.state import global_state as gstate
 from core.play_requests import PlayRequest, PlayRequestCategory
 
-logger = logging.getLogger('cog_play_request')
+logger = logging.getLogger(__name__)
 
 
 

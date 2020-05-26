@@ -18,7 +18,7 @@ from riot import riot_commands
 from core.config import CONFIG
 from core.state import global_state as gstate
 
-logger = logging.getLogger('cog_utility')
+logger = logging.getLogger(__name__)
 
 
 class UtilityCog(commands.Cog, name='Utility Commands'):
