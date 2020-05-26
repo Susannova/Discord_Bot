@@ -111,6 +111,9 @@ class Config():
         if filename:
             self.update_config_from_file(filename)
 
+    def __del__(self):
+        self.save_config()
+
     def set_all_settings(self, basic_config=Basic_Config(), messages=Messages_Config(), channel_ids=Channel_Ids(), folders_and_files=Folders_and_Files(), games={}, toggles=Toggles()):
         self.basic_config = basic_config
         self.messages = messages
