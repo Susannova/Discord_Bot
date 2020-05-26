@@ -3,10 +3,10 @@ import logging
 import discord
 from discord.ext import commands
 
+from core.config import CONFIG
 from core.state import global_state as gstate
 from core import (
     bot_utility as utility,
-    consts,
     timers,
     play_requests
 )
@@ -57,7 +57,7 @@ class EventCog(commands.Cog):
             return
 
         # add all messages in channel to gstate.message_cache
-        if gstate.CONFIG["TOGGLE_AUTO_DELETE"] and utility.is_in_channel(message, consts.CHANNEL_PLAY_REQUESTS_ID):
+        if gstate.CONFIG["TOGGLE_AUTO_DELETE"] and utility.is_in_channels(message, CONFIG.channel_ids.play_request):
             utility.insert_in_message_cache(self.message_cache, message.id, message.channel.id)
 
     @commands.Cog.listener()
@@ -90,7 +90,7 @@ class EventCog(commands.Cog):
             await reaction.remove(user)
             return
 
-        if str(reaction.emoji) == consts.EMOJI_PASS:
+        if str(reaction.emoji) == CONFIG.basic_config.emoji_pass:
             for player_id in play_request.generate_all_players():
                 if user.id == player_id:
                     logger.info("Remove %s from play_request %s", user.name, reaction.message.id)
@@ -109,18 +109,25 @@ class EventCog(commands.Cog):
         for player_id in play_request.generate_all_players():
             if player_id == play_request.author_id and player_id != user.id:
                 await author.send(
-                    consts.MESSAGE_AUTO_DM_CREATOR.format(user.name, str(reaction.emoji))
+                    CONFIG.messages.auto_dm_creator.format(
+                        player=user.name,
+                        reaction=str(reaction.emoji)
+                        )
                     )
             elif player_id != user.id:
                 player = self.bot.get_user(player_id)
                 await player.send(
-                    consts.MESSAGE_AUTO_DM_SUBSCRIBER.format(
-                        user.name, author.name, str(reaction.emoji)))
+                    CONFIG.messages.auto_dm_subscriber.format(
+                        player=user.name,
+                        creator=author.name,
+                        reaction=str(reaction.emoji)))
 
         if len(play_request.subscriber_ids) + 1 == 5 and play_request.category == PlayRequestCategory.CLASH:
             logger.info("Clash has 5 Members")
-            await reaction.channel.send(consts.MESSAGE_CLASH_FULL.format(
-                author, play_request.clash_date, utility.pretty_print_list([self.bot.get_user(player_id) for player_id in play_request.subscriber_ids], author)
+            await reaction.channel.send(CONFIG.messages.clash_full.format(
+                creator=author,
+                time=play_request.clash_date,
+                team=utility.pretty_print_list([self.bot.get_user(player_id) for player_id in play_request.subscriber_ids], author)
             ))
 
         if len(play_request.subscriber_ids) + 1 > 5 and play_request.category == PlayRequestCategory.CLASH:
@@ -142,7 +149,7 @@ class EventCog(commands.Cog):
             member = discord.utils.find(lambda x: x.id == payload.user_id, list(self.bot.get_all_members()))
             member_roles = member.roles.copy()
             for role in member_roles:
-                if role.id == consts.GAME_NAME_TO_ROLE_ID_DICT[payload.emoji.name.upper()]:
+                if role.id == CONFIG.emoji_to_game(payload.emoji.name).role_id:
                     return
             member_roles.append(discord.utils.find(lambda x: x.name == payload.emoji.name.upper(), member.guild.roles))
             await member.edit(roles=member_roles)
@@ -154,7 +161,7 @@ class EventCog(commands.Cog):
             member = discord.utils.find(lambda x: x.id == payload.user_id, list(self.bot.get_all_members()))
             member_roles = member.roles.copy()
             for role in member_roles:
-                if role.id == consts.GAME_NAME_TO_ROLE_ID_DICT[payload.emoji.name.upper()]:
+                if role.id == CONFIG.emoji_to_game(payload.emoji.name).role_id:
                     member_roles.remove(role)
             await member.edit(roles=member_roles)
         return
@@ -171,12 +178,12 @@ class EventCog(commands.Cog):
         if before.channel == after.channel:
             return
         else:
-            everyone_role = discord.utils.find(lambda m: m.id == consts.ROLE_EVERYONE_ID, member.guild.roles)
+            everyone_role = discord.utils.find(lambda m: m.id == CONFIG.basic_config.everyone_id, member.guild.roles)
             await update_channels_visibility(everyone_role, before.channel, False)
             await update_channels_visibility(everyone_role, after.channel, True)
 
 async def update_channels_visibility(role, channel: discord.VoiceChannel, bool_after_channel=False):
-    if channel is not None and channel.category.id in consts.CATEGORY_IDS:
+    if channel is not None and channel.category.id in CONFIG.get_all_category_ids():
         category_channel = channel.category
         bool_make_visible = False
 

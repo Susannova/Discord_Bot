@@ -4,7 +4,12 @@ import json
 
 import discord
 
-from core import consts, timers, play_requests
+from core import (
+    timers,
+    play_requests
+)
+
+from core.config import CONFIG
 from core.state import global_state as gstate
 
 
@@ -20,12 +25,12 @@ def create_team(players):
     for player in team1:
         team2.remove(player)
 
-    teams_message = consts.MESSAGE_TEAM_HEADER
-    teams_message += consts.MESSAGE_TEAM_1
+    teams_message = CONFIG.messages.team_header
+    teams_message += CONFIG.messages.team_1
     for player in team1:
         teams_message += player + "\n"
 
-    teams_message += consts.MESSAGE_TEAM_2
+    teams_message += CONFIG.messages.team_2
     for player in team2:
         teams_message += player + "\n"
 
@@ -36,8 +41,11 @@ def create_internal_play_request_message(message, play_request):
     Creates an internal play_request message.
     """
     play_request_time = re.findall('\d\d:\d\d', message.content)
-    intern_message = consts.MESSAGE_CREATE_INTERN_PLAY_REQUEST.format(
-        play_request.message_author.name, 10 - len(gstate.play_requests[message.id]), play_request_time)
+    intern_message = CONFIG.messages.create_internal_play_request.format(
+        creator=play_request.message_author.name,
+        free_places=10 - len(gstate.play_requests[message.id]),
+        time=play_request_time
+        )
     for player_tuple in gstate.play_requests[message.id]:
         intern_message += player_tuple[0].name + '\n'
     return intern_message
@@ -53,7 +61,7 @@ def generate_auto_role_list(member):
         return
 
     for role in member.guild.roles:
-        if role.id == consts.ROLE_EVERYONE_ID or role.id == consts.ROLE_SETZLING_ID:
+        if role.id == CONFIG.basic_config.everyone_id or role.id == CONFIG.basic_config.guest_id:
             yield role
 
 
@@ -62,12 +70,12 @@ def get_auto_role_list(member):
 
 
 
-def is_in_channels(message: discord.message, channels: list):
-    return message.channel.id in channels
+def is_in_channels(message: discord.message, channel_ids: list):
+    return message.channel.id in channel_ids
 
 
-def is_in_channel(message: discord.message, channel_id: int):
-    return message.channel.id == channel_id
+# def is_in_channel(message: discord.message, channel_id: int):
+#     return message.channel.id == channel_id
 
 
 #Todo dont use find here

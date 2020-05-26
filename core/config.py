@@ -7,10 +7,12 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class Game:
-    """ Represents a game. A game has a long and a short name and belongs to a discord role """
+    """ Represents a game. A game has a long and a short name, belongs to a discord role and category and an emoji """
     name_short: str
     name_long: str
     role_id: int
+    emoji: str
+    category_id: int
 
 
 @dataclasses.dataclass
@@ -33,8 +35,9 @@ class Messages_Config:
     auto_dm_creator: str = '{player} hat auf dein Play-Request reagiert: {reaction} '
     auto_dm_subscriber: str = '{player} hat auch auf das Play-Request von {creator} reagiert: {reaction} '
     play_now: str = '{role_mention}\n{creator} spielt **__jetzt gerade__** **{game}** und sucht noch nach weiteren Spielern!'
-    play_at: str = '{role_mention}\n{1} will **{game}** spielen. Kommt gegen **__{time}__** Uhr online!'
+    play_at: str = '{role_mention}\n{player} will **{game}** spielen. Kommt gegen **__{time}__** Uhr online!'
     play_request_reminder: str = 'REMINDER: Der abonnierte Play-Request geht in 5 Minuten los!'
+    clash_create = '{role_mention}\n{player} sucht nach Mitspielern für den LoL Clash am {date}.'
     clash_full: str = 'Das Clash Team von {creator} für den {time} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{team}'
 
     bans: str = (
@@ -58,6 +61,9 @@ class Basic_Config:
     """ Some basic config """
     lol_patch: str = ''  # Move to global state
 
+    discord_token: str = ''
+    riot_token: str = ''
+
     command_prefix: str = '?'
 
     emoji_join: str = '✅'
@@ -65,7 +71,12 @@ class Basic_Config:
 
     riot_region: str = 'euw1'
 
-    play_lol_now_time_limit: str = 120
+    play_now_time_add_limit: str = 120
+
+    admin_id: int
+    member_id: int
+    guest_id: int
+    everyone_id: int
 
 
 @dataclasses.dataclass
@@ -77,13 +88,14 @@ class Channel_Ids:
     member_only: list = dataclasses.field(default_factory=list)
     commands_member: list = dataclasses.field(default_factory=list)
     commands: list = dataclasses.field(default_factory=list)
-    category_temporary: list = dataclasses.field(default_factory=list)
+    
+    category_temporary: int
 
 
 @dataclasses.dataclass
 class Folders_and_Files:
     """ Global folder and files used by the bot """
-    config_file: str = './config/configuration.json'
+    config_file: str = 'config_test.json'
     folder_champ_icon: str = './data/champ-icon/'
     folder_champ_spliced: str = './data/champ-spliced/'
 
@@ -139,7 +151,7 @@ class Config():
         for key in config_new:
             config_old[key] = config_new[key]
 
-    def update_config_from_file(self, filename: str):
+    def update_config_from_file(self, filename: str = ""):
         """ Sets all settings to default and updates the settings given in the file """
 
         if not filename:
@@ -186,13 +198,31 @@ class Config():
         """ Returns a Game class that belongs to the short name of a game """
         if game_short_name in self.__games:
             game_dict = self.__games[game_short_name]
-            return Game(game_short_name, game_dict["long_name"], game_dict["role_id"])
+            return Game(name_short=game_short_name, **game_dict)
         else:
             raise "Game not found"
 
-    def add_game(self, game: str, long_name: str, role_id: int):
+    def add_game(self, game: str, long_name: str, role_id: int, emoji: str, category_id: int):
         """ Adds a new game to the bot """
-        self.__games[game] = {
-            "long_name": long_name,
-            "role_id": role_id
-        }
+
+        # The asdict prevents one from create a dict that is invalid to Game
+        self.__games[game] = dataclasses.asdict(Game(game, long_name, role_id, emoji, category_id))
+    
+    def emoji_to_game(self, emoji: str) -> Game:
+        for game in self.__games:
+            if game.emoji == emoji:
+                return game
+        
+        raise "Game not found"
+
+    def get_all_category_ids(self) -> list:
+        return [game["category_id"] for game in self.__games]
+
+# Todo Has to be a singleton!
+CONFIG = Config("")
+
+# CONFIG.add_game("LoL", "League of Legends", 42)
+# CONFIG.save_config()
+
+# CONFIG2 = Config(CONFIG.folders_and_files.config_file)
+# CONFIG2.folders_and_files.config_file = "config2.json"

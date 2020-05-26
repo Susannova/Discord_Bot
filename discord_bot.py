@@ -1,10 +1,10 @@
 """Main module. Stars and defines the Discord Bot (KrautBot).
 """
 import logging
-from core import consts
+from core import config
 
 logging.basicConfig(
-    filename=consts.LOG_FILE,
+    filename="log/log",
     filemode='a',
     format='%(asctime)s,%(msecs)d %(levelname)s %(name)s %(message)s',
     level=logging.INFO
@@ -32,14 +32,15 @@ from cogs import (
 )
 
 discord.voice_client.VoiceClient.warn_nacl = False
-BOT_TOKENS = utility.read_config_file('bot')
+
 help_command_ = discord.ext.commands.DefaultHelpCommand()
 help_command_.verify_checks = False
 
 class KrautBot(commands.Bot):
     """The actual bot.
     """
-    BOT_TOKEN = str(BOT_TOKENS['token'])
+
+    BOT_TOKEN = config.CONFIG.basic_config.discord_token
 
     exit_status = 1
 
@@ -48,7 +49,7 @@ class KrautBot(commands.Bot):
         call the __init__ method of the commands.Bot
         class.
         """
-        super().__init__(command_prefix=consts.COMMAND_PREFIX)
+        super().__init__(command_prefix=config.CONFIG.basic_config.command_prefix)
         self.help_command = help_command_
 
     def run(self):
@@ -79,7 +80,7 @@ if __name__ == '__main__':
         bot.load_extension('cogs.cog_utility')
         bot.load_extension('cogs.events')
         bot.load_extension('cogs.cog_tasks')
-        
+
         bot.run()
         logger.info("End")
     except discord.LoginFailure:
