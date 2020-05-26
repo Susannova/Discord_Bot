@@ -1,5 +1,8 @@
+import logging
 import dataclasses
 import json
+
+logger = logging.getLogger(__name__)
 
 
 @dataclasses.dataclass
@@ -173,6 +176,8 @@ class Config():
         """ Save the config to the config file """
         with open(self.folders_and_files.config_file, 'w') as json_file:
             json.dump(self.all_settings_as_dict(), json_file)
+        logger.info("Saved the config to %s",
+                    self.folders_and_files.config_file)
 
     def get_game(self, game_short_name: str) -> Game:
         """ Returns a Game class that belongs to the short name of a game """
