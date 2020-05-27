@@ -95,7 +95,7 @@ class Channel_Ids:
 @dataclasses.dataclass
 class Folders_and_Files:
     """ Global folder and files used by the bot """
-    config_file: str = 'config_test.json'
+    config_file: str = './config/configuration.json'
     folder_champ_icon: str = './data/champ-icon/'
     folder_champ_spliced: str = './data/champ-spliced/'
 
