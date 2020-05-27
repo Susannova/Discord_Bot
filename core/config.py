@@ -1,6 +1,7 @@
 import logging
 import dataclasses
 import json
+import atexit
 
 logger = logging.getLogger(__name__)
 
@@ -123,8 +124,8 @@ class Config():
         if filename:
             self.update_config_from_file(filename)
 
-    def __del__(self):
-        self.save_config()
+    # def __del__(self):
+    #     self.save_config()
 
     def set_all_settings(self, basic_config=Basic_Config(), messages=Messages_Config(), channel_ids=Channel_Ids(), folders_and_files=Folders_and_Files(), games={}, toggles=Toggles()):
         self.basic_config = basic_config
@@ -226,3 +227,6 @@ CONFIG = Config("")
 
 # CONFIG2 = Config(CONFIG.folders_and_files.config_file)
 # CONFIG2.folders_and_files.config_file = "config2.json"
+
+#Todo Maybe doesn't work because we use sys.exit()
+atexit.register(CONFIG.save_config)
