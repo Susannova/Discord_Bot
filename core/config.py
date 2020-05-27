@@ -60,6 +60,12 @@ class Messages_Config:
 @dataclasses.dataclass
 class Basic_Config:
     """ Some basic config """
+
+    admin_id: int = None
+    member_id: int = None
+    guest_id: int = None
+    everyone_id: int = None
+
     lol_patch: str = ''  # Move to global state
 
     discord_token: str = ''
@@ -74,23 +80,19 @@ class Basic_Config:
 
     play_now_time_add_limit: str = 120
 
-    admin_id: int
-    member_id: int
-    guest_id: int
-    everyone_id: int
-
 
 @dataclasses.dataclass
 class Channel_Ids:
     """ Channel id lists """
+
+    category_temporary: int = None
+
     create_team_voice: list = dataclasses.field(default_factory=list)
     play_request: list = dataclasses.field(default_factory=list)
     bot: list = dataclasses.field(default_factory=list)
     member_only: list = dataclasses.field(default_factory=list)
     commands_member: list = dataclasses.field(default_factory=list)
     commands: list = dataclasses.field(default_factory=list)
-    
-    category_temporary: int
 
 
 @dataclasses.dataclass
