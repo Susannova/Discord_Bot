@@ -1,6 +1,6 @@
 """ Used for help texts """
 
-from core import consts
+from core.config import CONFIG
 
 class HelpText(object):
     """
@@ -49,7 +49,7 @@ create_channel_HelpText = HelpText(
     '( text | voice ) name [voice_chat_user_limit]'
     )
 
-play_HelpText_long = 'und benachrichtigt alle User, die dieses Spiel auf dem Server aboniert haben. Auf die Anfrage kann mit ' + ':fill:' + ' und ' + consts.EMOJI_PASS + ' reagiert werden, wodurch der Ersteller und bereits beigetretene Spieler eine Benachrichtigung erhalten.'
+play_HelpText_long = 'und benachrichtigt alle User, die dieses Spiel auf dem Server aboniert haben. Auf die Anfrage kann mit ' + CONFIG.basic_config.emoji_join + ' und ' + CONFIG.basic_config.emoji_pass + ' reagiert werden, wodurch der Ersteller und bereits beigetretene Spieler eine Benachrichtigung erhalten.'
 
 play_HelpText = HelpText(
     'Erstellt eine Spielanfrage ' + play_HelpText_long + ' Der Ersteller und die Spieler bekommen kurz vor Beginn des Spieles eine Nachricht.',

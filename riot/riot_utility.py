@@ -10,8 +10,12 @@ import time
 
 from riotwatcher import LolWatcher as RiotWatcher
 
-from core import consts, exceptions, timers
+from core import (
+    exceptions,
+    timers
+)
 from .summoner import Summoner
+from core.config import CONFIG
 from core.state import global_state as gstate
 
 def load_json(file_name, folder='config'):
@@ -24,9 +28,9 @@ tokens = load_json("bot")
 data_champ = load_json("champion")
 
 
-def get_champion_name_by_id(id):
+def get_champion_name_by_id(champ_id):
     for value in data_champ['data'].values():
-        if int(value["key"]) == id:
+        if int(value["key"]) == champ_id:
             return value['id']
 
 
@@ -54,13 +58,13 @@ def format_summoner_name(name):
 
 def get_current_patch_url():
     current_patch_list = get_current_patch().split('.')
-    return consts.MESSAGE_PATCH_NOTES.format(current_patch_list[0], current_patch_list[1])
+    return CONFIG.messages.patch_notes.format(current_patch_list[0], current_patch_list[1])
 
 
 def get_current_patch():
-  with urllib.request.urlopen("https://ddragon.leagueoflegends.com/api/versions.json") as url:
-    data = json.loads(url.read().decode())
-    return data[0]
+    with urllib.request.urlopen("https://ddragon.leagueoflegends.com/api/versions.json") as url:
+        data = json.loads(url.read().decode())
+        return data[0]
 
 def update_current_patch():
     current_patch_list = get_current_patch().split('.')
@@ -88,7 +92,7 @@ def get_average_rank(ranks):
     return tmp / len(ranks)
 
 def read_account(discord_user_name):
-    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'r') as database:
+    with shelve.open(f'{CONFIG.folders_and_files.database_directory_summoners}/{CONFIG.folders_and_files.database_name_summoners}', 'r') as database:
         for key in database.keys():
             if key == str(discord_user_name):
                 return database[key]
@@ -96,7 +100,7 @@ def read_account(discord_user_name):
 
 
 def read_all_accounts():
-    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'r') as database:
+    with shelve.open(f'{CONFIG.folders_and_files.database_directory_summoners}/{CONFIG.folders_and_files.database_name_summoners}', 'r') as database:
         for key in database.keys():
             yield database[key]
 
@@ -131,7 +135,7 @@ def create_summoner(summoner_name: str):
 
 
 def fetch_summoner(player, watcher):
-    region = consts.RIOT_REGION
+    region = CONFIG.basic_config.riot_region
     try:
         data_summoner = watcher.summoner.by_name(region, player)
         data_mastery = watcher.champion_mastery.by_summoner(region, data_summoner['id'])

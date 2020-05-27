@@ -12,7 +12,6 @@ import discord
 import pandas as pd
 from core import (
     timers,
-    consts,
     exceptions
 )
 
@@ -20,11 +19,12 @@ from . import (
     image_transformation,
     riot_utility as utility
 )
+
+from core.config import CONFIG
 from core.state import global_state as gstate
 
 
 logger = logging.getLogger('riot_commands')
-SEASON_2020_START_EPOCH = timers.convert_human_to_epoch_time(consts.RIOT_SEASON_2020_START)
 
 _timers = []
 
@@ -96,7 +96,7 @@ def calculate_bans_for_team(*names) -> str:
 def link_account(discord_user_name, summoner_name):
     summoner = utility.create_summoner(summoner_name)
     summoner.discord_user_name = discord_user_name
-    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
+    with shelve.open(f'{CONFIG.folders_and_files.database_directory_summoners}/{CONFIG.folders_and_files.database_name_summoners}', 'rc') as database:
         for key in database.keys():
             if key == str(discord_user_name):
                 logger.exception('DataBaseException')
@@ -111,7 +111,7 @@ def link_account(discord_user_name, summoner_name):
 def update_linked_account_data_by_discord_user_name(discord_user_name):
     summoner = utility.create_summoner(utility.read_account(discord_user_name).name)
     summoner.discord_user_name = discord_user_name
-    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
+    with shelve.open(f'{CONFIG.folders_and_files.database_directory_summoners}/{CONFIG.folders_and_files.database_name_summoners}', 'rc') as database:
         database[str(discord_user_name)] = summoner
     return summoner
 
@@ -128,9 +128,8 @@ def get_or_create_summoner(discord_user_name, summoner_name):
     else:
         return utility.create_summoner(summoner_name)
 
-
 def unlink_account(discord_user_name):
-    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
+    with shelve.open(f'{CONFIG.folders_and_files.database_directory_summoners}/{CONFIG.folders_and_files.database_name_summoners}', 'rc') as database:
         for key in database.keys():
             if key == str(discord_user_name):
                 del database[key]
@@ -212,8 +211,7 @@ def create_leaderboard_embed():
 
     fig.tight_layout()
 
-
-    plt.savefig(f'./{consts.FOLDER_CHAMP_SPLICED}/leaderboard.png')
+    plt.savefig(f'./{CONFIG.folders_and_files.folder_champ_spliced}/leaderboard.png')
 
     op_url = 'https://euw.op.gg/multi/query='
     for summoner in summoners:

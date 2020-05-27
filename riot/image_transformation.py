@@ -2,16 +2,16 @@ import os
 from PIL import Image
 import json
 
-from core import consts
+from core.config import CONFIG
 
 
 def get_files(champs):
     files = []
     for champ in champs:
-        if os.path.isfile(f'./{consts.FOLDER_CHAMP_ICON}/{champ}.png'):
-            files.append(f'./{consts.FOLDER_CHAMP_ICON}/{champ}.png')
+        if os.path.isfile(f'./{CONFIG.folders_and_files.folder_champ_icon}/{champ}.png'):
+            files.append(f'./{CONFIG.folders_and_files.folder_champ_icon}/{champ}.png')
         else:
-            files.append(f'./{consts.FOLDER_CHAMP_ICON}/-1.png')
+            files.append(f'./{CONFIG.folders_and_files.folder_champ_icon}/-1.png')
     return files
 
 
@@ -26,9 +26,8 @@ def create_new_image(champs):
         y = index % 120
         w, h = img.size
         result.paste(img, (x, y, x + w, y + h))
-    result.save(os.path.expanduser(f'./{consts.FOLDER_CHAMP_SPLICED}/image.jpg'))
+    result.save(os.path.expanduser(f'./{CONFIG.folders_and_files.folder_champ_spliced}/image.jpg'))
     return 0
-
 
 # === TEST === #
 def testModule():

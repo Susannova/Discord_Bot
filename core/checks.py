@@ -6,19 +6,18 @@ from discord.ext import commands
 from . import (
     bot_utility as utility,
     exceptions as _exceptions,
-    consts
 )
 
+
+from core.config import CONFIG
 from core.state import global_state as gstate
 
 
 def is_in_channels(channel_ids):
     async def predicate(ctx):
-        channel_ids.append(consts.CHANNEL_BOT_ID)
+        channel_ids.append(CONFIG.channel_ids.bot)
         return utility.is_in_channels(ctx.message, channel_ids)
     return commands.check(predicate)
-
-
 
 def has_n_attachments(n):
     async def predicate(ctx):

@@ -3,7 +3,7 @@ import urllib
 import concurrent.futures
 import json
 
-from core import consts
+from core.config import CONFIG
 from . import riot_utility as utility
 from .riot_utility import data_champ
 
@@ -23,11 +23,10 @@ def fill_urls():
     for value in data_champ['data'].values():
         urls.append(url + value['key'] + '.png')
 
-
 def download_image(url):
     img_bytes = requests.get(url).content
     name = utility.get_champion_name_by_id(int(url[101:-4]))
-    with open(f'./{consts.FOLDER_CHAMP_ICON}/{name}.png', 'wb') as img_file:
+    with open(f'./{CONFIG.folders_and_files.folder_champ_icon}/{name}.png', 'wb') as img_file:
         img_file.write(img_bytes)
         print(f'{name} Icon was downloaded...')
 

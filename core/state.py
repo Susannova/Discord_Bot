@@ -3,7 +3,8 @@ import pickle
 import sys
 import logging
 
-from core import consts
+
+from core.config import CONFIG
 
 logger = logging.getLogger(__name__)
 
@@ -64,9 +65,9 @@ class GlobalState(Singleton):
         with open(f'./config/{self.CONFIG_FILENAME}.json', 'w', encoding='utf-8') as file_:
             json.dump(data, file_, ensure_ascii=False, indent=4)
         self.reload_config()
-    
+
     def write_state_to_file(self):
-        filename = f'{consts.DATABASE_DIRECTORY_GLOBAL_STATE}/{consts.DATABASE_NAME_GLOBAL_STATE}'
+        filename = f'{CONFIG.folders_and_files.database_directory_global_state}/{CONFIG.folders_and_files.name_global_state}'
         try:
             with open(filename, 'wb') as file:
                 pickle.dump(self, file)
@@ -84,7 +85,7 @@ class GlobalState(Singleton):
 
    
 try:
-    file = open(f'{consts.DATABASE_DIRECTORY_GLOBAL_STATE}/{consts.DATABASE_NAME_GLOBAL_STATE}', 'rb')
+    file = open(f'{CONFIG.folders_and_files.database_directory_global_state}/{CONFIG.folders_and_files.name_global_state}', 'rb')
     global_state = pickle.load(file)
     logger.info('Global State reinitialized.')
 except FileNotFoundError:
@@ -99,7 +100,7 @@ except:
     backuped = False
     for i in range(10):
         try:
-            filename = f'{consts.DATABASE_DIRECTORY_GLOBAL_STATE}/{consts.DATABASE_NAME_GLOBAL_STATE}'
+            filename = f'{CONFIG.folders_and_files.database_directory_global_state}/{CONFIG.folders_and_files.name_global_state}'
             with open(filename, 'x') as file_backup:
                 file_backup.write(file)
             logger.info("Old State was backuped to %s", filename)
