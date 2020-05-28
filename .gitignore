@@ -10,3 +10,4 @@ test-sequence
 /log/log
 /strings/
 /.VSCodeCounter/
+/.env/
