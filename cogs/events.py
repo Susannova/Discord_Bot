@@ -51,9 +51,16 @@ class EventCog(commands.Cog):
         await member.edit(roles=utility.get_auto_role_list(member))
 
     @commands.Cog.listener()
-    async def on_message(self, message):
+    async def on_message(self, message: discord.Message):
 
         if isinstance(message.channel, discord.DMChannel):
+            bot_channel = self.bot.get_channel(639889605256019980)
+            message_info = 'Got a message from: {user}. Content: {content}'.format(user=message.author, content=message.content.replace("\n", "\\n"))
+            logger.info(message_info)
+            if bot_channel is None:
+                logger.error("Can't send message to bot channel! Channel is None")
+            
+            await bot_channel.send(message_info)
             return
 
         # add all messages in channel to gstate.message_cache
