@@ -1,7 +1,6 @@
 """Main module. Stars and defines the Discord Bot (KrautBot).
 """
 import logging
-from core import config
 
 logging.basicConfig(
     filename="log/log",
@@ -19,7 +18,8 @@ from discord.ext import commands
 
 from core import (
     bot_utility as utility,
-    state
+    state,
+    DiscordBot
 )
 
 from cogs import (
@@ -33,44 +33,9 @@ from cogs import (
 
 discord.voice_client.VoiceClient.warn_nacl = False
 
-help_command_ = discord.ext.commands.DefaultHelpCommand()
-help_command_.verify_checks = False
-
-class KrautBot(commands.Bot):
-    """The actual bot.
-    """
-
-    BOT_TOKEN = config.CONFIG.basic_config.discord_token
-
-    exit_status = 1
-
-    def __init__(self):
-        """ Sets the Command Prefix and then
-        call the __init__ method of the commands.Bot
-        class.
-        """
-        super().__init__(command_prefix=config.CONFIG.basic_config.command_prefix)
-        self.help_command = help_command_
-
-    def run(self):
-        """ Runs the Bot using the Token defined
-        in BOT_TOKEN.
-        """
-        try:
-            super().run(self.BOT_TOKEN)
-        except KeyboardInterrupt:
-            logger.exception('Stopped Bot due to Keyboard Interrupt.')
-            self.exit_status = 2
-
-    async def logout(self, exit_status_input):
-        """Aborts the bot and sets exit_status to exit_status_input"""
-        await super().logout()
-        logger.info('Logout')
-        self.exit_status = exit_status_input
-
 
 if __name__ == '__main__':
-    bot = KrautBot()
+    bot = DiscordBot.KrautBot()
     try:
         logger.info("Start Bot")
 

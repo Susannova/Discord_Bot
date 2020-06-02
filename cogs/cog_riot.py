@@ -10,12 +10,16 @@ from core import (
 )
 
 from core.config import CONFIG
+from core import DiscordBot
 from riot import riot_commands
 from core.state import global_state as gstate
 logger = logging.getLogger(__name__)
 
 
 class RiotCog(commands.Cog, name='Riot Commands'):
+    def __init__(self, bot: DiscordBot.KrautBot):
+        self.bot = bot
+
     @commands.command(name='player', help = help_text.player_HelpText.text, brief = help_text.player_HelpText.brief, usage = help_text.player_HelpText.usage)
     @checks.is_riot_enabled()
     @checks.is_in_channels(CONFIG.channel_ids.commands_member + CONFIG.channel_ids.commands)
@@ -69,6 +73,6 @@ class RiotCog(commands.Cog, name='Riot Commands'):
         await ctx.send(gstate.clash_dates)
 
 
-def setup(bot: commands.Bot):
-    bot.add_cog(RiotCog())
+def setup(bot: DiscordBot.KrautBot):
+    bot.add_cog(RiotCog(bot))
     logger.info('Riot cogs loaded')

@@ -22,7 +22,8 @@ from core.state import global_state as gstate
 
 from core import (
     bot_utility as utility,
-    timers
+    timers,
+    DiscordBot
 )
 
 logger = logging.getLogger(__name__)
@@ -168,7 +169,7 @@ def plot_all_summoners_data(summoners_data, filename):
 class LoopCog(commands.Cog):
     """A class for background tasks"""
 
-    def __init__(self, bot: commands.bot):
+    def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
 
         self.message_cache = gstate.message_cache
@@ -328,6 +329,6 @@ class LoopCog(commands.Cog):
         riot_commands.update_gstate_clash_dates()
 
 
-def setup(bot: commands.Bot):
+def setup(bot: DiscordBot.KrautBot):
     bot.add_cog(LoopCog(bot))
     logger.info('Loop cogs loaded')

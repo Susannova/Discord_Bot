@@ -9,7 +9,8 @@ from core import (
     checks,
     exceptions,
     timers,
-    help_text
+    help_text,
+    DiscordBot
 )
 
 from core.config import CONFIG
@@ -21,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
-    def __init__(self, bot: commands.bot):
+    def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
 
     @commands.command(name='play', help = help_text.play_HelpText.text, brief = help_text.play_HelpText.brief, usage = help_text.play_HelpText.usage)
@@ -130,6 +131,6 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
 
         
 
-def setup(bot: commands.Bot):
+def setup(bot: DiscordBot.KrautBot):
     bot.add_cog(PlayRequestsCog(bot))
     logger.info('Play request cogs loaded')

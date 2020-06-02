@@ -4,7 +4,10 @@ import logging
 
 from discord.ext import commands
 
-from core import checks
+from core import (
+    checks,
+    DiscordBot
+)
 
 from core.state import global_state as gstate
 from core.config import CONFIG
@@ -13,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
-    def __init__(self, bot):
+    def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
 
     @commands.command(name='version')
@@ -118,6 +121,6 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
         await self.bot.logout(exit_status)
 
 
-def setup(bot: commands.Bot):
+def setup(bot: DiscordBot.KrautBot):
     bot.add_cog(DebugCog(bot))
     logger.info('Debug cogs loaded')
