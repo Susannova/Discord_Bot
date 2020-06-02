@@ -17,7 +17,6 @@ from riot import (
     riot_utility
 )
 
-from core.config import CONFIG
 from core.state import global_state as gstate
 
 from core import (
@@ -174,6 +173,7 @@ class LoopCog(commands.Cog):
 
         self.message_cache = gstate.message_cache
 
+        # TODO
         if gstate.CONFIG['TOGGLE_RIOT_API']:
             if gstate.CONFIG['TOGGLE_SUMONNER_RANK_HISTORY']:
                 self.update_summoners.start()
@@ -249,21 +249,24 @@ class LoopCog(commands.Cog):
     @tasks.loop(hours=24)
     async def check_LoL_patch(self):
         logger.info("Look for new LoL patch")
-        # The for loop is not needed right now but if the bot will ever run on multiple servers this is needed.
-        for guild in self.bot.guilds:
-            if riot_utility.update_current_patch():
-                logger.info('New LoL patch notes')
-                annoucement_channel = discord.utils.find(
-                    lambda m: m.name == 'announcements', guild.channels)
-                await annoucement_channel.send(CONFIG.messages.patch_notes_formatted.format(
-                    role_mention=guild.get_role(
-                        CONFIG.get_game("LoL").role_id).mention,
-                    patch_note=riot_utility.get_current_patch_url())
-                )
+        if riot_utility.update_current_patch():
+            logger.info('New LoL patch notes')        
+            for guild in self.bot.guilds:
+                guild_config = self.bot.config.get_guild_config(guild.id)
+                if guild_config.toggles.check_LoL_patch:
+                    # TODO Rewrite this
+                    annoucement_channel = discord.utils.find(
+                        lambda m: m.name == 'announcements', guild.channels)
+                    await annoucement_channel.send(guild_config.messages.patch_notes_formatted.format(
+                        role_mention=guild.get_role(
+                            guild_config.get_game("LoL").role_id).mention,
+                        patch_note=riot_utility.get_current_patch_url())
+                    )
 
-    # auto delete all purgeable messages
+    # TODO Has to be rewritten like check_LoL_patch
     @tasks.loop(hours=1)
     async def auto_delete_purgeable_messages(self):
+        """ auto deletes all purgeable messages """ 
         logger.info('Look for purgeable messages')
         purgeable_message_list = utility.get_purgeable_messages_list(
             self.message_cache)
@@ -281,9 +284,10 @@ class LoopCog(commands.Cog):
             logger.info(
                 "Message with id %s was deleted automatically", purgeable_message_id)
 
-    # auto delete all tmp_channels
+    # TODO Has to be rewritten like check_LoL_patch
     @tasks.loop(hours=1)
     async def auto_delete_tmp_channels(self):
+        """ auto deletes all tmp_channels """
         logger.info('Look for expired temp channels')
         deleted_channels = []
         for temp_channel_id in gstate.tmp_channel_ids:
@@ -313,6 +317,7 @@ class LoopCog(commands.Cog):
     async def before_auto_delete_purgeable_messages(self):
         await self.bot.wait_until_ready()
 
+    # TODO Has to be rewritten like check_LoL_patch
     # how often? at what time should this trigger
     @tasks.loop(hours=12)
     async def create_clash_play_request(self):

@@ -3,12 +3,13 @@ import logging
 import discord
 from discord.ext import commands
 
-from core.config import CONFIG
 from core.state import global_state as gstate
 from core import (
     bot_utility as utility,
     timers,
-    play_requests
+    play_requests,
+    DiscordBot,
+    config
 )
 from core.play_requests import PlayRequestCategory
 from riot import riot_utility
@@ -20,7 +21,7 @@ class EventCog(commands.Cog):
     """Cog that handles all events. Used for
     features like Auto-React, Auto-DM etc.
     """
-    def __init__(self, bot):
+    def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
         """ Dicts are mutable objects, which means
         that 'self.play_requests = gstate.play_requests'
@@ -37,10 +38,12 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         logger.info('We have logged in as %s', self.bot.user)
-        if gstate.CONFIG["TOGGLE_GAME_SELECTOR"]:
-            game_selection_channel = discord.utils.find(lambda x: x.name == 'game-selection', self.bot.guilds[0].channels)
-            game_selector_message_list = await game_selection_channel.history(limit=1).flatten()
-            self.game_selection_message_id = game_selector_message_list[0].id
+        for guild in self.bot.guilds:
+            guild_config = self.bot.config.get_guild_config(guild.id)
+            if guild_config.toggles.game_selector:
+                game_selection_channel = discord.utils.find(lambda x: x.name == 'game-selection', self.bot.guilds[0].channels)
+                game_selector_message_list = await game_selection_channel.history(limit=1).flatten()
+                self.game_selection_message_id = game_selector_message_list[0].id
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -53,11 +56,13 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message):
 
+        guild_config = self.bot.config.get_guild_config(message.guild.id)
+
         if isinstance(message.channel, discord.DMChannel):
             return
 
         # add all messages in channel to gstate.message_cache
-        if gstate.CONFIG["TOGGLE_AUTO_DELETE"] and utility.is_in_channels(message, CONFIG.channel_ids.play_request):
+        if guild_config.toggles.auto_delete and utility.is_in_channels(message, guild_config.channel_ids.play_request):
             utility.insert_in_message_cache(self.message_cache, message.id, message.channel.id)
 
     @commands.Cog.listener()
@@ -70,13 +75,15 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
+        guild_config = self.bot.config.get_guild_config(reaction.guild.id)
+
         # auto dm
         logger.debug("Reaction added to %s by %s", reaction.message.id, user.name)
 
         if utility.is_user_bot(user, self.bot):
             return
         
-        if not gstate.CONFIG["TOGGLE_AUTO_DM"]:
+        if not guild_config.toggles.auto_dm:
             return
 
         if reaction.message.id not in self.play_requests:
@@ -90,7 +97,7 @@ class EventCog(commands.Cog):
             await reaction.remove(user)
             return
 
-        if str(reaction.emoji) == CONFIG.basic_config.emoji_pass:
+        if str(reaction.emoji) == guild_config.basic_config.emoji_pass:
             for player_id in play_request.generate_all_players():
                 if user.id == player_id:
                     logger.info("Remove %s from play_request %s", user.name, reaction.message.id)
@@ -109,7 +116,7 @@ class EventCog(commands.Cog):
         for player_id in play_request.generate_all_players():
             if player_id == play_request.author_id and player_id != user.id:
                 await author.send(
-                    CONFIG.messages.auto_dm_creator.format(
+                    guild_config.messages.auto_dm_creator.format(
                         player=user.name,
                         reaction=str(reaction.emoji)
                         )
@@ -117,14 +124,14 @@ class EventCog(commands.Cog):
             elif player_id != user.id:
                 player = self.bot.get_user(player_id)
                 await player.send(
-                    CONFIG.messages.auto_dm_subscriber.format(
+                    guild_config.messages.auto_dm_subscriber.format(
                         player=user.name,
                         creator=author.name,
                         reaction=str(reaction.emoji)))
 
         if len(play_request.subscriber_ids) + 1 == 5 and play_request.category == PlayRequestCategory.CLASH:
             logger.info("Clash has 5 Members")
-            await reaction.channel.send(CONFIG.messages.clash_full.format(
+            await reaction.channel.send(guild_config.messages.clash_full.format(
                 creator=author,
                 time=play_request.clash_date,
                 team=utility.pretty_print_list([self.bot.get_user(player_id) for player_id in play_request.subscriber_ids], author)
@@ -145,11 +152,12 @@ class EventCog(commands.Cog):
     # TODO no logging
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        if gstate.CONFIG["TOGGLE_GAME_SELECTOR"] and payload.message_id == self.game_selection_message_id:
+        guild_config = self.bot.config.get_guild_config(payload.guild.id)
+        if guild_config.toggles.game_selector and payload.message_id == self.game_selection_message_id:
             member = discord.utils.find(lambda x: x.id == payload.user_id, list(self.bot.get_all_members()))
             member_roles = member.roles.copy()
             for role in member_roles:
-                if role.id == CONFIG.emoji_to_game(payload.emoji.name).role_id:
+                if role.id == guild_config.emoji_to_game(payload.emoji.name).role_id:
                     return
             member_roles.append(discord.utils.find(lambda x: x.name == payload.emoji.name.upper(), member.guild.roles))
             await member.edit(roles=member_roles)
@@ -157,11 +165,12 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        if gstate.CONFIG["TOGGLE_GAME_SELECTOR"] and payload.message_id == self.game_selection_message_id:
+        guild_config = self.bot.config.get_guild_config(payload.guild.id)
+        if guild_config.toggles.game_selector and payload.message_id == self.game_selection_message_id:
             member = discord.utils.find(lambda x: x.id == payload.user_id, list(self.bot.get_all_members()))
             member_roles = member.roles.copy()
             for role in member_roles:
-                if role.id == CONFIG.emoji_to_game(payload.emoji.name).role_id:
+                if role.id == guild_config.emoji_to_game(payload.emoji.name).role_id:
                     member_roles.remove(role)
             await member.edit(roles=member_roles)
         return
@@ -174,16 +183,17 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
+        guild_config = self.bot.config.get_guild_config(member.guild.id)
         # Checks if the user changed the channel and returns if the user didn't
         if before.channel == after.channel:
             return
         else:
-            everyone_role = discord.utils.find(lambda m: m.id == CONFIG.basic_config.everyone_id, member.guild.roles)
-            await update_channels_visibility(everyone_role, before.channel, False)
-            await update_channels_visibility(everyone_role, after.channel, True)
+            everyone_role = discord.utils.find(lambda m: m.id == guild_config.unsorted_config.everyone_id, member.guild.roles)
+            await update_channels_visibility(everyone_role, before.channel, guild_config, False)
+            await update_channels_visibility(everyone_role, after.channel, guild_config, True)
 
-async def update_channels_visibility(role, channel: discord.VoiceChannel, bool_after_channel=False):
-    if channel is not None and channel.category.id in CONFIG.get_all_category_ids():
+async def update_channels_visibility(role, channel: discord.VoiceChannel, guild_config: config.GuildConfig, bool_after_channel=False):
+    if channel is not None and channel.category.id in guild_config.get_all_category_ids():
         category_channel = channel.category
         bool_make_visible = False
 
@@ -199,6 +209,6 @@ async def update_channels_visibility(role, channel: discord.VoiceChannel, bool_a
         logger.info("Channel category %s is %s visible for everybody", category_channel.name, "" if bool_make_visible else "not")
 
 
-def setup(bot: commands.Bot):
+def setup(bot: DiscordBot.KrautBot):
     bot.add_cog(EventCog(bot))
     logger.info('Event cogs loaded')

@@ -3,17 +3,18 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import discord
 from discord.ext import commands
 
-from core.config import Config as ConfigurationClass
+from core.config import BotConfig
 
 
 class KrautBot(commands.Bot):
     """The actual bot.
     """
 
-    config = ConfigurationClass(None, "./config/configuration.json")
-    BOT_TOKEN = config.basic_config.discord_token
+    config = BotConfig()
+    BOT_TOKEN = config.general_config.discord_token
 
     exit_status = 1
 
@@ -22,7 +23,7 @@ class KrautBot(commands.Bot):
         call the __init__ method of the commands.Bot
         class.
         """
-        super().__init__(command_prefix=self.config.basic_config.command_prefix)
+        super().__init__(command_prefix=get_command_prefix)
         
         help_command_ = commands.DefaultHelpCommand()
         help_command_.verify_checks = False
@@ -43,3 +44,7 @@ class KrautBot(commands.Bot):
         await super().logout()
         logger.info('Logout')
         self.exit_status = exit_status_input
+
+def get_command_prefix(bot: KrautBot, msg: discord.Message):
+    """ Returns the command prefix for the guild in that the message is in """
+    return bot.config.get_guild_config(msg.id).unsorted_config.command_prefix

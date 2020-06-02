@@ -10,25 +10,29 @@ from core import (
     checks,
     exceptions,
     timers,
-    help_text
+    help_text,
+    DiscordBot
 )
 
 from riot import riot_commands
 
-from core.config import CONFIG
 from core.state import global_state as gstate
 
 logger = logging.getLogger(__name__)
 
 
 class UtilityCog(commands.Cog, name='Utility Commands'):
+    def __init__(self, bot: DiscordBot.KrautBot):
+        self.bot = bot
+
     @commands.command(name='create-team', help = help_text.create_team_HelpText.text, brief = help_text.create_team_HelpText.brief, usage = help_text.create_team_HelpText.usage)
-    @checks.is_in_channels(CONFIG.channel_ids.commands)
+    @checks.is_in_channels("commands")
     async def create_team(self, ctx: commands.Context, *player_names):
         logger.debug('!create-team command called')
         member = await discord.ext.commands.MemberConverter().convert(ctx, ctx.message.author.name)
         voice_channel = discord.utils.find(lambda x: member in x.members, ctx.message.guild.voice_channels)
-        voice_channel = voice_channel if voice_channel is not None else utility.get_voice_channel(ctx.message, CONFIG.channel_ids.create_team_voice[0])
+        # TODO Only the last element of list is taken!
+        voice_channel = voice_channel if voice_channel is not None else utility.get_voice_channel(ctx.message, self.bot.config.get_guild_config(ctx.guild.id).channel_ids.create_team_voice[0])
         players_list = utility.get_players_in_channel(voice_channel)
         if len(list(player_names)) != 0:
             for player_name in player_names:
@@ -52,7 +56,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
     @commands.command(name='link', help = help_text.link_HelpText.text, brief = help_text.link_HelpText.brief, usage = help_text.link_HelpText.usage)
     @checks.is_riot_enabled()
-    @checks.is_in_channels(CONFIG.channel_ids.commands + CONFIG.channel_ids.commands_member)
+    @checks.is_in_channels("commands", "commands_member")
     async def link_(self, ctx, summoner_name):
         try:
             riot_commands.link_account(ctx.message.author.name, summoner_name)
@@ -66,7 +70,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             logger.info("%s was linked.", summoner_name)
 
     @commands.command(name='unlink', help = help_text.unlink_HelpText.text, brief = help_text.unlink_HelpText.brief, usage = help_text.unlink_HelpText.usage)
-    @checks.is_in_channels(CONFIG.channel_ids.commands + CONFIG.channel_ids.commands_member)
+    @checks.is_in_channels("commands", "commands_member")
     async def unlink_(self, ctx, *summoner_names):
         logger.debug("!unlink called")
         
@@ -80,7 +84,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         logger.info("%s was unlinked", ctx.message.author.name)
 
     @commands.command(name='purge', hidden=True)
-    @commands.has_role(CONFIG.basic_config.admin_id)
+    @checks.has_any_role("admin_id")
     async def purge_(self, ctx, count: int):
         logger.info("!purge %s called in channel %s", count, ctx.message.channel.name)
         last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
@@ -88,19 +92,21 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         [await message_.delete() for message_ in last_count_messages if not message_.pinned]
 
     @commands.command(name='leaderboard-old', hidden=True)
-    @commands.has_role(CONFIG.basic_config.admin_id)
+    @checks.has_any_role("admin_id")
     async def test_embed(self, ctx):
         logger.debug("!leaderboard-old called")
         await ctx.send(embed=riot_commands.create_embed(ctx))
 
     @commands.command(name='leaderboard', help = help_text.leaderboard_HelpText.text, brief = help_text.leaderboard_HelpText.brief, usage = help_text.leaderboard_HelpText.usage)
-    @commands.has_role(CONFIG.basic_config.admin_id)
+    @commands.hay_any_role("admin_id")
     async def leaderboard_(self, ctx):
         logger.debug("!leaderboard called")
         if False:
             loading_message = await ctx.send("This will take a few seconds. Processing...")
             _embed = riot_commands.create_leaderboard_embed()
-            message = await ctx.send(file=discord.File(f'{CONFIG.folders_and_files.folder_champ_spliced}/leaderboard.png'))
+            guild_config = self.bot.config.get_guild_config(ctx.guild.id)
+            folder_name = guild_config.folders_and_files.folders_and_files.folder_champ_spliced.format(guild_id=ctx.guild.id)
+            message = await ctx.send(file=discord.File(f'{folder_name}/leaderboard.png'))
             _embed = _embed.set_image(url=message.attachments[0].url)
             await ctx.send(embed=_embed)
             await loading_message.delete()
@@ -111,16 +117,16 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
     # dont use this
     @commands.command(name='game-selector', hidden=True)
-    @commands.has_role(CONFIG.basic_config.admin_id)
+    @commands.has_any_role("admin_id")
     async def game_selector(self, ctx):
-        message = await ctx.send(CONFIG.messages.game_selector)
+        message = await ctx.send(self.bot.config.get_guild_config(ctx.guild.id).messages.game_selector)
         for emoji in ctx.bot.emojis:
             if emoji.name == 'rl' or emoji.name == 'lol' or emoji.name == 'csgo' or emoji.name == 'apex' or emoji.name == 'val':
                 await message.add_reaction(emoji)
         gstate.game_selector_id = message.id
 
     @commands.command(name='create-channel', help = help_text.create_channel_HelpText.text, brief = help_text.create_channel_HelpText.brief, usage = help_text.create_channel_HelpText.usage)
-    @checks.is_in_channels(CONFIG.channel_ids.commands_member)
+    @checks.is_in_channels("commands_member")
     @discord.ext.commands.cooldown(rate=3, per=30)
     async def create_channel(self, ctx, kind, channel_name, *user_limit):
         logger.debug("!create-channel %s %s called by %s", kind, channel_name, ctx.message.author.name)
@@ -129,7 +135,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             if not gstate.tmp_channel_ids[tmp_channels]['deleted'] and gstate.tmp_channel_ids[tmp_channels]['author'] == ctx.message.author.id:
                 logger.info("%s wanted to create a new temporary channel but already has created channel %s with id %s.", ctx.message.author.name, gstate.tmp_channel_ids[tmp_channels]['name'], tmp_channels)
                 raise exceptions.LimitReachedException('Der Autor hat schon einen temprorären Channel erstellt.')
-        tmp_channel_category = discord.utils.find(lambda x: x.name == CONFIG.channel_ids.category_temporary, ctx.message.guild.channels)
+        tmp_channel_category = discord.utils.find(lambda x: x.name == self.bot.config.get_guild_config(ctx.guild.id).channel_ids.category_temporary, ctx.message.guild.channels)
         tmp_channel = None
         if channel_name is None:
             logger.error("!create-channel is called by user %s without a name.", ctx.message.author.name)
@@ -175,6 +181,6 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     #     else:
     #         await ctx.send(error)
 
-def setup(bot: commands.Bot):
-    bot.add_cog(UtilityCog())
+def setup(bot: DiscordBot.KrautBot):
+    bot.add_cog(UtilityCog(bot))
     logger.info('Utility cogs loaded')
