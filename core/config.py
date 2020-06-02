@@ -1,7 +1,7 @@
 import logging
 import dataclasses
 import json
-import atexit
+from typing import List
 
 logger = logging.getLogger(__name__)
 
@@ -85,14 +85,14 @@ class Basic_Config:
 class Channel_Ids:
     """ Channel id lists """
 
-    category_temporary: int = None
+    category_temporary: str = None
 
-    create_team_voice: list = dataclasses.field(default_factory=list)
-    play_request: list = dataclasses.field(default_factory=list)
-    bot: list = dataclasses.field(default_factory=list)
-    member_only: list = dataclasses.field(default_factory=list)
-    commands_member: list = dataclasses.field(default_factory=list)
-    commands: list = dataclasses.field(default_factory=list)
+    create_team_voice: List[str] = dataclasses.field(default_factory=list)
+    play_request: List[str] = dataclasses.field(default_factory=list)
+    bot: List[str] = dataclasses.field(default_factory=list)
+    member_only: List[str] = dataclasses.field(default_factory=list)
+    commands_member: List[str] = dataclasses.field(default_factory=list)
+    commands: List[str] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass
