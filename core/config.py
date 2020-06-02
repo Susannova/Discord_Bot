@@ -58,7 +58,7 @@ class Messages_Config:
 
 
 @dataclasses.dataclass
-class Basic_Config:
+class UnsortedConfig:
     """ Some basic config """
 
     admin_id: int = None
@@ -66,10 +66,9 @@ class Basic_Config:
     guest_id: int = None
     everyone_id: int = None
 
-    lol_patch: str = ''  # Move to global state
+    lol_patch: str = ''  # TODO Move to global state
 
-    discord_token: str = ''
-    riot_token: str = ''
+    guild_id: int = None
 
     command_prefix: str = '?'
 
@@ -97,105 +96,57 @@ class Channel_Ids:
 
 @dataclasses.dataclass
 class Folders_and_Files:
-    """ Global folder and files used by the bot """
-    config_file: str = './config/configuration.json'
-    folder_champ_icon: str = './data/champ-icon/'
-    folder_champ_spliced: str = './data/champ-spliced/'
+    """ Global folder and files for the guild. Some needs to be formated with the guild_id! """
 
-    database_directory_summoners: str = './db/summoners'
+    folder_champ_icon: str = './data/{guild_id}/champ-icon/'
+    folder_champ_spliced: str = './data/{guild_id}/champ-spliced/'
+
+    database_directory_summoners: str = './db/{guild_id}/summoners'
     database_name_summoners: str = 'summoner_db'
-    database_directory_global_state: str = './db/global_state'
+    database_directory_global_state: str = './db/{guild_id}/global_state'
     database_name_global_state: str = 'global_state_db'
 
-    log_file: str = './log/log'
+class GuildConfig():
+    """Configuration for the guild """
 
+    def __init__(self, guild_id: int):
+        self.unsorted_config = UnsortedConfig()
+        self.messages = Messages_Config()
+        self.channel_ids = Channel_Ids()
+        self.folders_and_files = Folders_and_Files()
+        self.toggles = Toggles()
 
-class Config():
-    """Configuration of the bot"""
-    basic_config: Basic_Config
-    messages: Messages_Config
-    channel_ids: Channel_Ids
-    folders_and_files: Folders_and_Files
-    toggles: Toggles
     # Dict of classes Game. Use the add and get functions to modify this.
-    __games: dict
+        self.__games = {}
 
-    def __init__(self, filename: str):
-        self.set_all_settings()
+        self.unsorted_config.guild_id = guild_id
 
-        if filename:
-            self.update_config_from_file(filename)
-
-    # def __del__(self):
-    #     self.save_config()
-
-    def set_all_settings(self, basic_config=Basic_Config(), messages=Messages_Config(), channel_ids=Channel_Ids(), folders_and_files=Folders_and_Files(), games={}, toggles=Toggles()):
-        self.basic_config = basic_config
-        self.messages = messages
-        self.channel_ids = channel_ids
-        self.folders_and_files = folders_and_files
-        self.__games = games
-        self.toggles = toggles
-
-    def all_settings_as_dict(self) -> dict:
+    def asdict(self) -> dict:
         """ Returns all settings as a dict """
         return {
-            "basic_config": dataclasses.asdict(self.basic_config),
+            "unsorted_config": dataclasses.asdict(self.unsorted_config),
             "messages": dataclasses.asdict(self.messages),
             "channel_ids": dataclasses.asdict(self.channel_ids),
             "folders_and_files": dataclasses.asdict(self.folders_and_files),
-            "games": self.__games,
-            "toggles": dataclasses.asdict(self.toggles)
+            "toggles": dataclasses.asdict(self.toggles),
+            "games": self.__games
         }
 
-    def update_config_category(self, config_old: dict, config_new: dict):
-        """Replaces settings of the old config with the new. Settings not set in new are left as is"""
-
-        for key in config_new:
-            config_old[key] = config_new[key]
-
-    def update_config_from_file(self, filename: str = ""):
-        """ Sets all settings to default and updates the settings given in the file """
-
-        if not filename:
-            filename = self.folders_and_files.config_file
-
-        reset_class = Config("")
-
-        all_settings_reset_class = reset_class.all_settings_as_dict()
-        all_settings_as_dict = self.all_settings_as_dict()
-
-        # Reset all settings
-        for category in all_settings_reset_class:
-            all_settings_as_dict[category] = all_settings_reset_class[category]
-
-        # Updates settings
-        with open(filename, 'r') as config_new_file:
-            config_new = json.load(config_new_file)
-            for category in config_new:
-                if category not in all_settings_as_dict:
-                    raise "Category unknown"
-                else:
-                    self.update_config_category(
-                        all_settings_as_dict[category], config_new[category])
-
-        # Set the settings
-        self.set_all_settings(
-            basic_config=Basic_Config(**all_settings_as_dict["basic_config"]),
-            messages=Messages_Config(**all_settings_as_dict["messages"]),
-            channel_ids=Channel_Ids(**all_settings_as_dict["channel_ids"]),
-            folders_and_files=Folders_and_Files(
-                **all_settings_as_dict["folders_and_files"]),
-            games=all_settings_as_dict["games"],
-            toggles=Toggles(**all_settings_as_dict["toggles"])
-        )
-
-    def save_config(self):
-        """ Save the config to the config file """
-        with open(self.folders_and_files.config_file, 'w') as json_file:
-            json.dump(self.all_settings_as_dict(), json_file)
-        logger.info("Saved the config to %s",
-                    self.folders_and_files.config_file)
+    def fromdict(self, config_dict):
+        """ Sets the settings given by a dict. The format of the dictionary must be like in self.asdict().
+        Settings not given in the dict are set to default """
+        if "unsorted_config" in config_dict:
+            self.unsorted_config = UnsortedConfig(**config_dict["unsorted_config"])
+        if "messages" in config_dict:
+            self.messages = Messages_Config(**config_dict["messages"])
+        if "channel_ids" in config_dict:
+            self.channel_ids = Channel_Ids(**config_dict["channel_ids"])
+        if "folder_and_files" in config_dict:
+            self.folders_and_files = Folders_and_Files(**config_dict["folder_and_files"])
+        if "toggles" in config_dict:
+            self.toggles = Toggles(**config_dict["toggles"])
+        if "games" in config_dict:
+            self.__games = config_dict["games"]
 
     def get_game(self, game_short_name: str) -> Game:
         """ Returns a Game class that belongs to the short name of a game """
@@ -203,7 +154,7 @@ class Config():
             game_dict = self.__games[game_short_name]
             return Game(name_short=game_short_name, **game_dict)
         else:
-            raise "Game not found"
+            raise LookupError("Game not found")
 
     def add_game(self, game: str, long_name: str, role_id: int, emoji: str, category_id: int):
         """ Adds a new game to the bot """
@@ -216,16 +167,93 @@ class Config():
             if game.emoji == emoji:
                 return game
         
-        raise "Game not found"
+        raise LookupError("Game not found")
 
-    def get_all_category_ids(self) -> list:
-        return [game["category_id"] for game in self.__games]
+    def get_all_category_ids(self, *role_names) -> list:
+        return [game["category_id"] for game in self.__games if game in role_names]
+    
+    def get_role_ids(self, *role_names) -> dict:
+        role_ids = {
+            "guest": self.unsorted_config.guest_id,
+            "member": self.unsorted_config.member_id,
+            "admin": self.unsorted_config.admin_id
+        }
 
-# Todo Has to be a singleton!
-CONFIG = Config("")
+        for game in self.__games:
+            role_ids[game] = self.get_game(game).role_id
+        
+        for role_name in role_names:
+            del role_ids[role_name]
+        return role_ids
 
-# CONFIG.add_game("LoL", "League of Legends", 42)
-# CONFIG.save_config()
+
+@dataclasses.dataclass
+class GeneralConfig:
+    discord_token: str = ''
+    riot_token: str = ''
+
+    log_file: str = './log/log'
+    config_file: str = './config/configuration.json'
+
+
+class BotConfig:
+    """ Configuration of the bot """
+
+    def __init__(self, general_config=GeneralConfig()):
+        self.general_config = general_config
+        self.__guilds_config = {}
+        self.update_config_from_file()
+    
+    def asdict(self) -> dict:
+        """ Returns the general configs as a dict """
+        config_dict = {
+            "general_config": dataclasses.asdict(self.general_config),
+            "guilds_config": {}
+            }
+
+        for guild in self.__guilds_config:
+            config = self.get_guild_config(guild)
+            config_dict["guilds_config"][guild] = config.asdict()
+        return config_dict
+    
+    def fromdict(self, config_dict: dict):
+        """ Sets the settings given by a dict. The format of the dictionary must be like in self.asdict().
+        Settings not given in the dict are set to default """
+        self.general_config = GeneralConfig(**config_dict["general_config"])
+        for guild in config_dict["guilds_config"]:
+            if guild not in self.__guilds_config:
+                self.add_new_guild_config(guild)
+            self.get_guild_config(guild).fromdict(config_dict)
+
+    def write_config_to_file(self, filename: str = None):
+        """ Write the config to the config file """
+        if filename is None:
+            filename = self.general_config.config_file
+
+        with open(filename, 'w') as json_file:
+            json.dump(self.asdict(), json_file)
+        logger.info("Saved the config to %s",
+                    filename)  
+
+    def update_config_from_file(self):
+        try:
+            config_dict = json.load(open(self.general_config.config_file, 'r'))
+            self.fromdict(config_dict)
+        except FileNotFoundError:
+            logger.warning("File '%s' does not exist. All settings are set to default.", self.general_config.config_file)
+
+    def add_new_guild_config(self, guild_id: str):
+        """ Adds a new guild config """ 
+        if guild_id in self.__guilds_config:
+            raise LookupError("Guild already has a config!")
+        else:
+            self.__guilds_config[guild_id] = GuildConfig(guild_id)
+
+    def get_guild_config(self, guild_id: str) -> GuildConfig:
+        return self.__guilds_config[guild_id]
+
+    def check_if_guild_exists(self, guild_id: str) -> bool:
+        return True if guild_id in self.__guilds_config else False
 
 # CONFIG2 = Config(CONFIG.folders_and_files.config_file)
 # CONFIG2.folders_and_files.config_file = "config2.json"
