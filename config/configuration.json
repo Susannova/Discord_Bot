@@ -1,63 +1,10 @@
 {
-	"basic_config": {
-		"admin_id": null,
-		"member_id": null,
-		"guest_id": null,
-		"everyone_id": null,
-		"lol_patch": "",
-		"discord_token": "",
-		"riot_token": "",
-		"command_prefix": "?",
-		"emoji_join": "\u2705",
-		"emoji_pass": "\u274e",
-		"riot_region": "euw1",
-		"play_now_time_add_limit": 120
-	},
-	"messages": {
-		"create_internal_play_request": "@everyone Das Play-Request von {creator} hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!\nEs sind noch **__{free_places}__** Pl\u00e4tze frei. \nUhrzeit: {time} Uhr \nSpieler:\n",
-		"auto_dm_creator": "{player} hat auf dein Play-Request reagiert: {reaction} ",
-		"auto_dm_subscriber": "{player} hat auch auf das Play-Request von {creator} reagiert: {reaction} ",
-		"play_now": "{role_mention}\n{creator} spielt **__jetzt gerade__** **{game}** und sucht noch nach weiteren Spielern!",
-		"play_at": "{role_mention}\n{player} will **{game}** spielen. Kommt gegen **__{time}__** Uhr online!",
-		"play_request_reminder": "REMINDER: Der abonnierte Play-Request geht in 5 Minuten los!",
-		"clash_full": "Das Clash Team von {creator} f\u00fcr den {time} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{team}",
-		"bans": "If you want to receive the best bans                 for the scouted team copy the following Command: \n                 {command_prefix}bans {team}",
-		"team_header": "\n@here\n**__===Teams===__**\n",
-		"team_1": "Team 1:\n",
-		"team_2": "\nTeam 2:\n",
-		"patch_notes_formatted": "{role_mention}\nEin neuer Patch ist da: {patch_note}",
-		"patch_notes": "https://euw.leagueoflegends.com/en-us/news/game-updates/patch-{0}-{1}-notes/",
-		"game_selector": "@everyone\nW\u00e4hle hier durch das Klicken auf eine Reaktion aus zu welchen Spielen du Benachrichtungen erhalten willst!"
-	},
-	"channel_ids": {
-		"category_temporary": null,
-		"create_team_voice": [],
-		"play_request": [],
-		"bot": [],
-		"member_only": [],
-		"commands_member": [],
-		"commands": []
-	},
-	"folders_and_files": {
-		"config_file": "./config/configuration.json",
-		"folder_champ_icon": "./data/champ-icon/",
-		"folder_champ_spliced": "./data/champ-spliced/",
-		"database_directory_summoners": "./db/summoners",
-		"database_name_summoners": "summoner_db",
-		"database_directory_global_state": "./db/global_state",
-		"database_name_global_state": "global_state_db",
-		"log_file": "./log/log"
-	},
-	"games": {},
-	"toggles": {
-		"auto_delete": false,
-		"command_only": false,
-		"auto_react": false,
-		"auto_dm": false,
-		"riot_api": false,
-		"debug": false,
-		"game_selector": false,
-		"summoner_rank_history": false,
-		"check_LoL_patch": false
-	}
+    "general_config": {
+        "discord_token": "",
+        "riot_token": "",
+        "log_file": "./log/log",
+        "config_file": "./config/configuration.json"
+    },
+    "guilds_config": {
+    }
 }
