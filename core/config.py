@@ -255,8 +255,17 @@ class BotConfig:
     def check_if_guild_exists(self, guild_id: str) -> bool:
         return True if guild_id in self.__guilds_config else False
 
-# CONFIG2 = Config(CONFIG.folders_and_files.config_file)
-# CONFIG2.folders_and_files.config_file = "config2.json"
+if __name__ == "__main__":
+    general_config = GeneralConfig(config_file="./test_config.json")
+    bot_config = BotConfig(general_config)
+    test_guild_id = "1234"
+    if not bot_config.check_if_guild_exists(test_guild_id):
+        bot_config.add_new_guild_config(test_guild_id)
+    else:
+        print("Guild does exist!")
+    print(bot_config.get_guild_config(test_guild_id))
+    bot_config.write_config_to_file()
 
-#Todo Maybe doesn't work because we use sys.exit()
-atexit.register(CONFIG.save_config)
+    bot_config2 = BotConfig(general_config)
+    bot_config2.get_guild_config(test_guild_id).unsorted_config.command_prefix = "!"
+    bot_config2.write_config_to_file("./test_config2.json")
