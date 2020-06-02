@@ -8,7 +8,8 @@ logger = logging.getLogger(__name__)
 
 @dataclasses.dataclass
 class Game:
-    """ Represents a game. A game has a long and a short name, belongs to a discord role and category and an emoji """
+    """ Represents a game.
+    A game has a long and a short name, belongs to a discord role and category and an emoji """
     name_short: str
     name_long: str
     role_id: int
@@ -97,7 +98,7 @@ class Channel_Ids:
 @dataclasses.dataclass
 class Folders_and_Files:
     """ Global folder and files for the guild. Some needs to be formated with the guild_id! """
-
+    
     folder_champ_icon: str = './data/{guild_id}/champ-icon/'
     folder_champ_spliced: str = './data/{guild_id}/champ-spliced/'
 
@@ -115,10 +116,10 @@ class GuildConfig():
         self.channel_ids = Channel_Ids()
         self.folders_and_files = Folders_and_Files()
         self.toggles = Toggles()
-
-    # Dict of classes Game. Use the add and get functions to modify this.
+        
+        # Dict of classes Game. Use the add and get functions to modify this.
         self.__games = {}
-
+        
         self.unsorted_config.guild_id = guild_id
 
     def asdict(self) -> dict:
@@ -131,7 +132,7 @@ class GuildConfig():
             "toggles": dataclasses.asdict(self.toggles),
             "games": self.__games
         }
-
+    
     def fromdict(self, config_dict):
         """ Sets the settings given by a dict. The format of the dictionary must be like in self.asdict().
         Settings not given in the dict are set to default """
@@ -163,6 +164,7 @@ class GuildConfig():
         self.__games[game] = dataclasses.asdict(Game(game, long_name, role_id, emoji, category_id))
     
     def emoji_to_game(self, emoji: str) -> Game:
+        """ Returns the game that belongs to the emoji """
         for game in self.__games:
             if game.emoji == emoji:
                 return game
@@ -235,12 +237,16 @@ class BotConfig:
         logger.info("Saved the config to %s",
                     filename)  
 
-    def update_config_from_file(self):
+    def update_config_from_file(self, filename = None):
+        """ Updates the config from a file using fromdict """
+        if filename is None:
+            filename = self.general_config.config_file
         try:
-            config_dict = json.load(open(self.general_config.config_file, 'r'))
+            config_dict = json.load(open(filename, 'r'))
             self.fromdict(config_dict)
+            logger.info("Settings were updated from file %s", filename)
         except FileNotFoundError:
-            logger.warning("File '%s' does not exist. All settings are set to default.", self.general_config.config_file)
+            logger.warning("File '%s' does not exist. All settings are set to default.", filename)
 
     def add_new_guild_config(self, guild_id: str):
         """ Adds a new guild config """ 
@@ -248,16 +254,23 @@ class BotConfig:
             raise LookupError("Guild already has a config!")
         else:
             self.__guilds_config[guild_id] = GuildConfig(guild_id)
-
+            logger.info("We have added the guild %s to the config!", guild_id)
+    
     def get_guild_config(self, guild_id: str) -> GuildConfig:
-        return self.__guilds_config[guild_id]
-
+        """ Gets the guild that belongs to the id. Raises an key error if guild does not exists """
+        try:
+            return self.__guilds_config[guild_id]
+        except KeyError:
+            logger.warning("Guild %s is unknown", guild_id)
+            raise
+    
     def check_if_guild_exists(self, guild_id: str) -> bool:
+        """ Checks if a guild exists in the config """
         return True if guild_id in self.__guilds_config else False
 
 if __name__ == "__main__":
-    general_config = GeneralConfig(config_file="./test_config.json")
-    bot_config = BotConfig(general_config)
+    general_test_config = GeneralConfig(config_file="./test_config.json")
+    bot_config = BotConfig(general_test_config)
     test_guild_id = "1234"
     if not bot_config.check_if_guild_exists(test_guild_id):
         bot_config.add_new_guild_config(test_guild_id)
@@ -266,6 +279,6 @@ if __name__ == "__main__":
     print(bot_config.get_guild_config(test_guild_id))
     bot_config.write_config_to_file()
 
-    bot_config2 = BotConfig(general_config)
+    bot_config2 = BotConfig(general_test_config)
     bot_config2.get_guild_config(test_guild_id).unsorted_config.command_prefix = "!"
     bot_config2.write_config_to_file("./test_config2.json")
