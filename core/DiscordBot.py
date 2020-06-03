@@ -3,10 +3,14 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import pickle
+import sys
+
 import discord
 from discord.ext import commands
 
 from core.config import BotConfig
+from core.state import GeneralState
 
 
 class KrautBot(commands.Bot):
@@ -28,6 +32,18 @@ class KrautBot(commands.Bot):
         help_command_ = commands.DefaultHelpCommand()
         help_command_.verify_checks = False
         self.help_command = help_command_
+        try:
+            with open(f'{self.config.general_config.database_directory_global_state}/{self.config.general_config.name_global_state}', 'rb') as file:
+                self.state = pickle.load(file)
+                logger.info('Global State reinitialized.')
+        except FileNotFoundError:
+            no_global_state_found_text = "No global state found! Create new global state."
+            logger.warning(no_global_state_found_text)
+            print(no_global_state_found_text, file=sys.stderr)
+            
+            self.state = GeneralState(self.config)
+            for guild in self.guilds:
+                self.state.add_guild_state(guild.id)
 
     def run(self):
         """ Runs the Bot using the Token defined

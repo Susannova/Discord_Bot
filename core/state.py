@@ -2,72 +2,40 @@ import json
 import pickle
 import sys
 import logging
+from core.config import BotConfig
 
-
-from core.config import CONFIG
 
 logger = logging.getLogger(__name__)
 
-
-class SingletonBase(type):
-    """Metaclass that changes class to be a Singleton.
-    """
-    def __init__(self, *args, **kwargs):
-        self._instance = None
-        super().__init__(*args, **kwargs)
-
-    def __call__(self, *args, **kwargs):
-        if self._instance is None:
-            self._instance = super().__call__(*args, **kwargs)
-            return self._instance
-        else:
-            return self._instance
-
-
-class Singleton(metaclass=SingletonBase):
-    """Inhertiable class that provides the Singleton
-    property to all heirs.
-    """
-    pass
-
-
-class GlobalState(Singleton):
-    """Global state class that saves all variables that need to have a
+class GuildState:
+    """State class for one guild that saves all variables that need to have a
     global state at runtime that potentially has to change during
-    runtime. Has the Singleton property, which means that all instances
-    created of this class all point to the same region in memory.
-    This makes sure that the state stays conistent.
+    runtime. 
     """
-    CONFIG_FILENAME = 'configuration'
-
     def __init__(self):
-        self.CONFIG = self.read_config()
-        self.VERSION = self.get_version()
         self.debug = False
         self.play_requests = {}
-        self.tmp_message_author = None
+        self.tmp_channel_ids = {}
+
+
+class GeneralState:
+    """State class that saves all variables that need to have a
+    global state at runtime that potentially has to change during
+    runtime. 
+    """
+    def __init__(self, config: BotConfig):
+        self.config = config
+        self.version = self.get_version()
         self.message_cache = {}
         self.clash_dates = []
-        self.game_selector_id = None
-        self.tmp_channel_ids = {}
+        self.guilds_state = {}
 
     def get_version(self):
         version_file = open("./.git/refs/heads/master", "r")
         return version_file.read()[:7]
 
-    def read_config(self):
-        return json.load(open(f'./config/{self.CONFIG_FILENAME}.json', 'r'))
-
-    def reload_config(self):
-        self.CONFIG = self.read_config()
-
-    def write_and_reload_config(self, data):
-        with open(f'./config/{self.CONFIG_FILENAME}.json', 'w', encoding='utf-8') as file_:
-            json.dump(data, file_, ensure_ascii=False, indent=4)
-        self.reload_config()
-
     def write_state_to_file(self):
-        filename = f'{CONFIG.folders_and_files.database_directory_global_state}/{CONFIG.folders_and_files.name_global_state}'
+        filename = f'{self.config.general_config.database_directory_global_state}/{self.config.general_config.database_name_global_state}'
         try:
             with open(filename, 'wb') as file:
                 pickle.dump(self, file)
@@ -77,39 +45,15 @@ class GlobalState(Singleton):
             with open(filename_failed, 'w') as file_failed:
                 file_failed.write(self)
             logger.error('Global state was not pickable. Content was written to %s', filename_failed)
-            
-
-    # TODO Doesn't work?
-    # def __del__(self):
-    #    self.write_state_to_file()
-
-   
-try:
-    file = open(f'{CONFIG.folders_and_files.database_directory_global_state}/{CONFIG.folders_and_files.name_global_state}', 'rb')
-    global_state = pickle.load(file)
-    logger.info('Global State reinitialized.')
-except FileNotFoundError:
-    no_global_state_found_text = "No global state found! Create new global state."
-    logger.warning(no_global_state_found_text)
-    print(no_global_state_found_text, file=sys.stderr)
-    global_state = GlobalState()
-except:
-    unknown_error_global_state_text = "Unknown error reading the global state!"
-    logger.error(unknown_error_global_state_text)
-    print(unknown_error_global_state_text, file=sys.stderr)
-    backuped = False
-    for i in range(10):
-        try:
-            filename = f'{CONFIG.folders_and_files.database_directory_global_state}/{CONFIG.folders_and_files.name_global_state}'
-            with open(filename, 'x') as file_backup:
-                file_backup.write(file)
-            logger.info("Old State was backuped to %s", filename)
-            backuped = True
-            break
-        except FileExistsError:
-            filename += str(i)
     
-    if not backuped:
-        logger.error("Failed to backup old global state 10 times. Are there 10 or more backupfiles already?")
-    
-    global_state = GlobalState()
+    def add_guild_state(self, guild_id: int):
+        if guild_id in self.guilds_state:
+            raise KeyError(f"Can't add {guild_id} because guild already exists.")
+        else:
+            self.guilds_state[guild_id] = GuildState()
+
+    def get_guild_state(self, guild_id: int) -> GuildState:
+        if guild_id not in self.guilds_state:
+            raise KeyError(f"{guild_id} does not exists!.")
+        else:
+            return self.guilds_state[guild_id]
