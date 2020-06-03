@@ -30,8 +30,8 @@ logger = logging.getLogger(__name__)
 
 def get_summoners_data(update=True, file_path='./data/summoners_data.json'):
     summoners = list(riot_utility.read_all_accounts())
+    time_updated = time.time()
     if update:
-        time_updated = time.time()
         summoners = list(riot_commands.update_linked_summoners_data(summoners))
 
     with open(file_path) as json_file:
