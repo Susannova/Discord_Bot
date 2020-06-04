@@ -9,15 +9,16 @@ from core import (
     play_requests
 )
 
-from core.config import CONFIG
-from core.state import global_state as gstate
+from core import config
+from core.DiscordBot import KrautBot
+from core.state import GuildState
 
 
 def read_config_file(filename):
     return json.load(open(f'./config/{filename}.json', 'r'))
 
 
-def create_team(players):
+def create_team(players, guild_config: config.GuildConfig):
     num_players = len(players)
     team1 = random.sample(players, int(num_players / 2))
     team2 = players
@@ -25,48 +26,49 @@ def create_team(players):
     for player in team1:
         team2.remove(player)
 
-    teams_message = CONFIG.messages.team_header
-    teams_message += CONFIG.messages.team_1
+    teams_message = guild_config.messages.team_header
+    teams_message += guild_config.messages.team_1
     for player in team1:
         teams_message += player + "\n"
 
-    teams_message += CONFIG.messages.team_2
+    teams_message += guild_config.messages.team_2
     for player in team2:
         teams_message += player + "\n"
 
     return teams_message, team1, team2
 
-def create_internal_play_request_message(message, play_request):
+def create_internal_play_request_message(message, play_request, guild_config: config.GuildConfig, state: GuildState):
     """
     Creates an internal play_request message.
     """
     play_request_time = re.findall('\d\d:\d\d', message.content)
-    intern_message = CONFIG.messages.create_internal_play_request.format(
+    intern_message = guild_config.messages.create_internal_play_request.format(
         creator=play_request.message_author.name,
-        free_places=10 - len(gstate.play_requests[message.id]),
+        free_places=10 - len(state.play_requests[message.id]),
         time=play_request_time
         )
-    for player_tuple in gstate.play_requests[message.id]:
+    for player_tuple in state.play_requests[message.id]:
         intern_message += player_tuple[0].name + '\n'
     return intern_message
 
 
 # TODO: implement this
-def switch_to_internal_play_request(message, play_request):
-    return create_internal_play_request_message(message, play_request)
+def switch_to_internal_play_request(message, play_request, guild_config: config.GuildConfig, state: GuildState):
+    return create_internal_play_request_message(message, play_request, guild_config, state)
 
 
-def generate_auto_role_list(member):
+def generate_auto_role_list(member, guild_config: config.GuildConfig):
+    # TODO Needs to be more general!
     if len(member.roles) >= 2:
         return
 
     for role in member.guild.roles:
-        if role.id == CONFIG.basic_config.everyone_id or role.id == CONFIG.basic_config.guest_id:
+        if role.id == guild_config.basic_config.everyone_id or role.id == guild_config.basic_config.guest_id:
             yield role
 
 
-def get_auto_role_list(member):
-    return list(generate_auto_role_list(member))
+def get_auto_role_list(member, guild_config: config.GuildConfig):
+    return list(generate_auto_role_list(member, guild_config))
 
 
 
@@ -115,9 +117,9 @@ def is_play_request_author(user_id, play_request: play_requests.PlayRequest):
     return False
 
 
-def get_purgeable_messages_list(message_cache):
+def get_purgeable_messages_list(message_cache, guild_config: config.GuildConfig):
     messages_list = []
-    if gstate.CONFIG["TOGGLE_AUTO_DELETE"]:
+    if guild_config.toggles.auto_delete:
         messages_list = [msg for msg in message_cache if timers.is_timer_done(message_cache[msg]["timer"])]
     return messages_list
 
@@ -127,9 +129,9 @@ def clear_message_cache(message_id, message_cache):
         del message_cache[message_id]
 
 
-def clear_play_requests(message_id: int):
-    if message_id in gstate.play_requests:
-        del gstate.play_requests[message_id]
+def clear_play_requests(message_id: int, state: GuildState):
+    if message_id in state.play_requests:
+        del state.play_requests[message_id]
 
 
 def pretty_print_list(*players) -> str:
@@ -148,3 +150,6 @@ def insert_in_message_cache(message_cache, message_id, channel_id, time=10):
         "timer": timers.start_timer(hrs=time),
         "channel": channel_id
     }
+
+def get_guild_config(bot: KrautBot, guild_id: int) -> config.GuildConfig:
+    return bot.config.get_guild_config(guild_id)

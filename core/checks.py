@@ -7,12 +7,10 @@ import dataclasses
 from discord.ext import commands
 
 from . import (
-    bot_utility as utility,
     exceptions as _exceptions,
+    DiscordBot
 )
 
-
-from core.state import global_state as gstate
 
 def has_any_role(*role_names):
     """ Checks if the author of the context has any of the roles """
@@ -72,26 +70,27 @@ def has_n_attachments(n):
     return commands.check(predicate)
 
 
-def is_riot_enabled():
-    async def predicate(ctx):
-        if not gstate.CONFIG["TOGGLE_RIOT_API"]:
-            await ctx.send('Sorry, der Befehl ist aktuell nicht verfügbar.')
-            return False
-        return True
-    return commands.check(predicate)
+def is_riot_enabled(func):
+    """ Checks if the riot API is enabled """
+    def inner(obj: DiscordBot.KrautBot, *args):
+        if obj.config.general_config.riot_api:
+            return func(obj, *args)
+        else:
+            raise commands.CheckFailure("Riot-API is disabled")
+    return inner
 
+# def is_debug_config_enabled():
+#     async def predicate(ctx):
+#         if not gstate.CONFIG['TOGGLE_DEBUG']:
+#             return False
+#         return True
+#     return commands.check(predicate)
 
-def is_debug_config_enabled():
-    async def predicate(ctx):
-        if not gstate.CONFIG['TOGGLE_DEBUG']:
-            return False
-        return True
-    return commands.check(predicate)
-
-
-def is_debug_enabled():
-    async def predicate(ctx):
-        if not gstate.debug:
-            return False
-        return True
-    return commands.check(predicate)
+def is_debug_enabled(func):
+    """ Checks if the debug toggle is enabled """
+    def inner(obj: DiscordBot.KrautBot, ctx: commands.Context, *args):
+        if obj.config.get_guild_config(ctx.guild.id).toggles.debug:
+            return func(obj, ctx, *args)
+        else:
+            raise commands.CheckFailure("Debug toggle is false")
+    return inner

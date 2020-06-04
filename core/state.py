@@ -1,6 +1,4 @@
-import json
 import pickle
-import sys
 import logging
 from core.config import BotConfig
 
@@ -17,6 +15,7 @@ class GuildState:
         self.message_cache = {}
         self.play_requests = {}
         self.tmp_channel_ids = {}
+        self.clash_date: str = None
 
 
 class GeneralState:
@@ -28,7 +27,8 @@ class GeneralState:
         self.config = config
         self.version = self.get_version()
         self.clash_dates = []
-        self.guilds_state = {}
+        self.__guilds_state = {}
+        self.lol_patch: str = None
 
     def get_version(self):
         """ Returns the git master head """
@@ -50,18 +50,18 @@ class GeneralState:
     
     def add_guild_state(self, guild_id: int):
         """ Adds the guild state. Raises a KeyError if guild already exists """
-        if guild_id in self.guilds_state:
+        if guild_id in self.__guilds_state:
             raise KeyError(f"Can't add {guild_id} because guild already exists.")
         else:
-            self.guilds_state[guild_id] = GuildState()
+            self.__guilds_state[guild_id] = GuildState()
 
     def get_guild_state(self, guild_id: int) -> GuildState:
         """ Returns the guild state. Raises a KeyError if guild does not exist """
-        if guild_id not in self.guilds_state:
+        if guild_id not in self.__guilds_state:
             raise KeyError(f"{guild_id} does not exists!.")
         else:
-            return self.guilds_state[guild_id]
+            return self.__guilds_state[guild_id]
     
     def remove_guild_state(self, guild_id: int):
         """ Removes the guild state """
-        del self.guilds_state[guild_id]
+        del self.__guilds_state[guild_id]

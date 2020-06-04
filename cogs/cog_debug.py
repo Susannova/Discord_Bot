@@ -9,8 +9,6 @@ from core import (
     DiscordBot
 )
 
-from core.state import global_state as gstate
-
 logger = logging.getLogger(__name__)
 
 
@@ -23,7 +21,7 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
     @checks.has_any_role("admin_id")
     async def version_(self, ctx):
         logger.debug('!version called')
-        await ctx.send(gstate.VERSION)
+        await ctx.send(self.bot.state.version)
 
     @commands.command(name='reload-ext')
     @checks.is_in_channels()
@@ -61,31 +59,30 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
     async def reload_config(self, ctx):
         logger.info('Try to reload the configuration.')
         await ctx.send("Reload configuration.json:")
-        gstate.read_config()
         self.bot.config.update_config_from_file()
-        gstate.get_version()
+        self.bot.state.get_version()
         await ctx.send("Done.")
         logger.info('configuration reloaded.')
 
-    @commands.command(name='enable-debug')
-    @checks.is_in_channels()
-    @checks.is_debug_config_enabled()
-    @checks.has_any_role("admin_id")
-    async def enable_debug(self, ctx):
-        gstate.debug = True
-        str_debug_activated="Debugging is activated for one hour."
-        await ctx.send(str_debug_activated)
-        logger.info(str_debug_activated)
-        await asyncio.sleep(3600)
-        gstate.debug = False
-        self.bot.config.get_guild_config(ctx.guild.id).toggles.debug = False
-        str_debug_deactivated="Debugging is deactivated."
-        await ctx.send(str_debug_deactivated)
-        logger.info(str_debug_deactivated)
+    # @commands.command(name='enable-debug')
+    # @checks.is_in_channels()
+    # @checks.is_debug_config_enabled()
+    # @checks.has_any_role("admin_id")
+    # async def enable_debug(self, ctx):
+    #     gstate.debug = True
+    #     str_debug_activated="Debugging is activated for one hour."
+    #     await ctx.send(str_debug_activated)
+    #     logger.info(str_debug_activated)
+    #     await asyncio.sleep(3600)
+    #     gstate.debug = False
+    #     self.bot.config.get_guild_config(ctx.guild.id).toggles.debug = False
+    #     str_debug_deactivated="Debugging is deactivated."
+    #     await ctx.send(str_debug_deactivated)
+    #     logger.info(str_debug_deactivated)
 
     @commands.command(name='print')
     @checks.is_in_channels()
-    @checks.is_debug_enabled()
+    @checks.is_debug_enabled
     @checks.has_any_role("admin_id")
     async def print_(self, ctx, arg):
         logger.debug('!print %s called', arg)

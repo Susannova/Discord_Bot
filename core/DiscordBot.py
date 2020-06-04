@@ -35,7 +35,8 @@ class KrautBot(commands.Bot):
         try:
             with open(f'{self.config.general_config.database_directory_global_state}/{self.config.general_config.name_global_state}', 'rb') as file:
                 self.state = pickle.load(file)
-                logger.info('Global State reinitialized.')
+            self.state.config = self.config
+            logger.info('Global State reinitialized.')
         except FileNotFoundError:
             no_global_state_found_text = "No global state found! Create new global state."
             logger.warning(no_global_state_found_text)

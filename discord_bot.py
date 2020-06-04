@@ -22,17 +22,7 @@ from core import (
     DiscordBot
 )
 
-from cogs import (
-    cog_debug,
-    cog_play_requests,
-    cog_riot,
-    cog_utility,
-    cog_tasks,
-    events
-)
-
 discord.voice_client.VoiceClient.warn_nacl = False
-
 
 if __name__ == '__main__':
     bot = DiscordBot.KrautBot()
@@ -52,5 +42,5 @@ if __name__ == '__main__':
         logger.exception('Failed to login due to improper Token.')
         bot.exit_status = 2
 
-    state.global_state.write_state_to_file()
+    bot.state.write_state_to_file()
     sys.exit(bot.exit_status)

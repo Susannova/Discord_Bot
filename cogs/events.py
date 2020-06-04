@@ -3,7 +3,6 @@ import logging
 import discord
 from discord.ext import commands
 
-from core.state import global_state as gstate
 from core import (
     bot_utility as utility,
     timers,
@@ -23,27 +22,10 @@ class EventCog(commands.Cog):
     """
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
-        """ Dicts are mutable objects, which means
-        that 'self.play_requests = gstate.play_requests'
-        makes self.play_requests a pointer to gstate.play_requests
-        so every change to play_requests also changes 
-        gstate.play_requests. Technically we can make play_requests
-        local, but I feel like we might need play_requests in a global
-        scope sometime. Same for message_cache.
-        """
-        self.play_requests = gstate.play_requests
-        self.message_cache = gstate.message_cache
-        self.game_selection_message_id = None
 
     @commands.Cog.listener()
     async def on_ready(self):
         logger.info('We have logged in as %s', self.bot.user)
-        for guild in self.bot.guilds:
-            guild_config = self.bot.config.get_guild_config(guild.id)
-            if guild_config.toggles.game_selector:
-                game_selection_channel = discord.utils.find(lambda x: x.name == 'game-selection', self.bot.guilds[0].channels)
-                game_selector_message_list = await game_selection_channel.history(limit=1).flatten()
-                self.game_selection_message_id = game_selector_message_list[0].id
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -51,7 +33,7 @@ class EventCog(commands.Cog):
         anyone that joins the server.
         """
         logger.info('New member joined: %s', member.name)
-        await member.edit(roles=utility.get_auto_role_list(member))
+        await member.edit(roles=utility.get_auto_role_list(member, self.bot.config.get_guild_config(member.guild.id)))
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
@@ -59,7 +41,8 @@ class EventCog(commands.Cog):
         guild_config = self.bot.config.get_guild_config(message.guild.id)
 
         if isinstance(message.channel, discord.DMChannel):
-            bot_channel = self.bot.get_channel(639889605256019980)
+            # TODO Is only the first bot channel
+            bot_channel = self.bot.get_channel(self.bot.config.get_guild_config(message.guild.id).channel_ids.bot[0])
             message_info = 'Got a message from: {user}. Content: {content}'.format(user=message.author, content=message.content.replace("\n", "\\n"))
             logger.info(message_info)
             if bot_channel is None:
@@ -70,19 +53,21 @@ class EventCog(commands.Cog):
 
         # add all messages in channel to gstate.message_cache
         if guild_config.toggles.auto_delete and utility.is_in_channels(message, guild_config.channel_ids.play_request):
-            utility.insert_in_message_cache(self.message_cache, message.id, message.channel.id)
+            utility.insert_in_message_cache(self.bot.state.get_guild_state(message.guild.id).message_cache, message.id, message.channel.id)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message):
-        utility.clear_play_requests(message.id)
-        if message.id in self.message_cache:
-            utility.clear_message_cache(message.id, self.message_cache)
+        guild_state = self.bot.state.get_guild_state(message.guild.id)
+        utility.clear_play_requests(message.id, guild_state)
+        if message.id in guild_state.message_cache:
+            utility.clear_message_cache(message.id, guild_state.message_cache)
         else:
             logger.info('Manually deleted message %s', message.id)
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
-        guild_config = self.bot.config.get_guild_config(reaction.guild.id)
+        guild_config = utility.get_guild_config(self.bot, reaction.guild.id)
+        guild_state = self.bot.state.get_guild_state(reaction.guild.id)
 
         # auto dm
         logger.debug("Reaction added to %s by %s", reaction.message.id, user.name)
@@ -93,11 +78,11 @@ class EventCog(commands.Cog):
         if not guild_config.toggles.auto_dm:
             return
 
-        if reaction.message.id not in self.play_requests:
+        if reaction.message.id not in guild_state.play_requests:
             logger.debug("Message is not a play request. Ignore reaction")
             return
         
-        play_request = self.play_requests[reaction.message.id]
+        play_request = guild_state.play_requests[reaction.message.id]
 
         if utility.is_play_request_author(user.id, play_request):
             logger.info("Remove reaction from a play_request_author")
@@ -152,7 +137,7 @@ class EventCog(commands.Cog):
         if len(play_request.subscriber_ids) + 1 == 6 and play_request.category == PlayRequestCategory.INTERN:
             logger.info("Create internal play request")
             await reaction.channel.send(
-                utility.switch_to_internal_play_request(reaction.message, play_request))
+                utility.switch_to_internal_play_request(reaction.message, play_request, guild_config, guild_state))
 
 
 
@@ -160,7 +145,7 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         guild_config = self.bot.config.get_guild_config(payload.guild.id)
-        if guild_config.toggles.game_selector and payload.message_id == self.game_selection_message_id:
+        if guild_config.toggles.game_selector and payload.message_id == self.bot.config.get_guild_config(payload.guild.id).unsorted_config.game_selector_id:
             member = discord.utils.find(lambda x: x.id == payload.user_id, list(self.bot.get_all_members()))
             member_roles = member.roles.copy()
             for role in member_roles:
@@ -173,7 +158,7 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
         guild_config = self.bot.config.get_guild_config(payload.guild.id)
-        if guild_config.toggles.game_selector and payload.message_id == self.game_selection_message_id:
+        if guild_config.toggles.game_selector and payload.message_id == self.bot.config.get_guild_config(payload.guild.id).unsorted_config.game_selector_id:
             member = discord.utils.find(lambda x: x.id == payload.user_id, list(self.bot.get_all_members()))
             member_roles = member.roles.copy()
             for role in member_roles:
@@ -184,9 +169,10 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
-        if channel.id in gstate.tmp_channel_ids:
+        tmp_channel_ids = self.bot.state.get_guild_state(channel.guild.id).tmp_channel_ids
+        if channel.id in tmp_channel_ids:
             logger.info("Temporary channel was deleted manually.")
-            gstate.tmp_channel_ids[channel.id]["deleted"] = True
+            tmp_channel_ids[channel.id]["deleted"] = True
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):

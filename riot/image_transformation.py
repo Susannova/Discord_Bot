@@ -1,22 +1,21 @@
 import os
 from PIL import Image
-import json
 
-from core.config import CONFIG
+from core.config import BotConfig
 
 
-def get_files(champs):
+def get_files(champs: tuple, config: BotConfig):
     files = []
     for champ in champs:
-        if os.path.isfile(f'./{CONFIG.folders_and_files.folder_champ_icon}/{champ}.png'):
-            files.append(f'./{CONFIG.folders_and_files.folder_champ_icon}/{champ}.png')
+        if os.path.isfile(f'./{config.general_config.folder_champ_icon}/{champ}.png'):
+            files.append(f'./{config.general_config.folders_and_files.folder_champ_icon}/{champ}.png')
         else:
-            files.append(f'./{CONFIG.folders_and_files.folder_champ_icon}/-1.png')
+            files.append(f'./{config.general_config.folders_and_files.folder_champ_icon}/-1.png')
     return files
 
 
-def create_new_image(champs):
-    files = get_files(champs)
+def create_new_image(champs, config: BotConfig):
+    files = get_files(champs, config)
     result = Image.new("RGB", (600, 120))
     for index, file in enumerate(files):
         path = os.path.expanduser(file)
@@ -26,14 +25,15 @@ def create_new_image(champs):
         y = index % 120
         w, h = img.size
         result.paste(img, (x, y, x + w, y + h))
-    result.save(os.path.expanduser(f'./{CONFIG.folders_and_files.folder_champ_spliced}/image.jpg'))
+    result.save(os.path.expanduser(f'./{config.general_config.folder_champ_spliced}/image.jpg'))
     return 0
 
 # === TEST === #
 def testModule():
-    assert(len(get_files(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Nautilus'])) == 5)
-    assert(create_new_image(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Nunu']) == 0)
-    assert(create_new_image(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Pingu']) == 0)
+    config = BotConfig()
+    assert(len(get_files(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Nautilus'], config)) == 5)
+    assert(create_new_image(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Nunu'], config) == 0)
+    assert(create_new_image(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Pingu'], config) == 0)
     return "Tests succeded."
 
 

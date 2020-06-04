@@ -16,8 +16,6 @@ from core import (
 
 from riot import riot_commands
 
-from core.state import global_state as gstate
-
 logger = logging.getLogger(__name__)
 
 
@@ -38,7 +36,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             for player_name in player_names:
                 if player_name != 'mv':
                     players_list.append(player_name)
-        message, team1, team2 = utility.create_team(players_list)
+        message, team1, team2 = utility.create_team(players_list, utility.get_guild_config(self.bot, ctx.guild.id))
         await ctx.send(message)
 
         role = discord.utils.find(lambda x: x.name == 'Wurzel', ctx.message.guild.roles)
@@ -55,11 +53,11 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
                     await member.move_to(channel_team2)
 
     @commands.command(name='link', help = help_text.link_HelpText.text, brief = help_text.link_HelpText.brief, usage = help_text.link_HelpText.usage)
-    @checks.is_riot_enabled()
+    @checks.is_riot_enabled
     @checks.is_in_channels("commands", "commands_member")
     async def link_(self, ctx, summoner_name):
         try:
-            riot_commands.link_account(ctx.message.author.name, summoner_name)
+            riot_commands.link_account(ctx.message.author.name, summoner_name, self.bot.config.get_guild_config(ctx.guild.id))
         except Exception as error:
             logger.error("Error linking %s: %s", summoner_name, error)
             #TODO Add a link to our accounts
@@ -78,7 +76,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         if len(list(summoner_names)) != 0:
             raise commands.CommandInvokeError
         
-        riot_commands.unlink_account(ctx.message.author.name)
+        riot_commands.unlink_account(ctx.message.author.name, self.bot.config.get_guild_config(ctx.guild.id))
         await ctx.message.author.send(
             'Dein Lol-Account wurde erfolgreich von deinem Discord Account getrennt!')
         logger.info("%s was unlinked", ctx.message.author.name)
@@ -95,15 +93,15 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @checks.has_any_role("admin_id")
     async def test_embed(self, ctx):
         logger.debug("!leaderboard-old called")
-        await ctx.send(embed=riot_commands.create_embed(ctx))
+        await ctx.send(embed=riot_commands.create_embed(ctx, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config))
 
     @commands.command(name='leaderboard', help = help_text.leaderboard_HelpText.text, brief = help_text.leaderboard_HelpText.brief, usage = help_text.leaderboard_HelpText.usage)
-    @commands.hay_any_role("admin_id")
+    @checks.has_any_role("admin_id")
     async def leaderboard_(self, ctx):
         logger.debug("!leaderboard called")
         if False:
             loading_message = await ctx.send("This will take a few seconds. Processing...")
-            _embed = riot_commands.create_leaderboard_embed()
+            _embed = riot_commands.create_leaderboard_embed(self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config)
             guild_config = self.bot.config.get_guild_config(ctx.guild.id)
             folder_name = guild_config.folders_and_files.folders_and_files.folder_champ_spliced.format(guild_id=ctx.guild.id)
             message = await ctx.send(file=discord.File(f'{folder_name}/leaderboard.png'))
@@ -123,17 +121,18 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         for emoji in ctx.bot.emojis:
             if emoji.name == 'rl' or emoji.name == 'lol' or emoji.name == 'csgo' or emoji.name == 'apex' or emoji.name == 'val':
                 await message.add_reaction(emoji)
-        gstate.game_selector_id = message.id
+        self.bot.config.get_guild_config(ctx.guild.id).unsorted_config.game_selector_id = message.id
 
     @commands.command(name='create-channel', help = help_text.create_channel_HelpText.text, brief = help_text.create_channel_HelpText.brief, usage = help_text.create_channel_HelpText.usage)
     @checks.is_in_channels("commands_member")
     @discord.ext.commands.cooldown(rate=3, per=30)
     async def create_channel(self, ctx, kind, channel_name, *user_limit):
         logger.debug("!create-channel %s %s called by %s", kind, channel_name, ctx.message.author.name)
-        for tmp_channels in gstate.tmp_channel_ids:
-            logger.debug("Check if channel %s with id %s is already created by user %s.", gstate.tmp_channel_ids[tmp_channels]["name"], tmp_channels, ctx.message.author.name)
-            if not gstate.tmp_channel_ids[tmp_channels]['deleted'] and gstate.tmp_channel_ids[tmp_channels]['author'] == ctx.message.author.id:
-                logger.info("%s wanted to create a new temporary channel but already has created channel %s with id %s.", ctx.message.author.name, gstate.tmp_channel_ids[tmp_channels]['name'], tmp_channels)
+        guild_state = self.bot.state.get_guild_state(ctx.guild.id)
+        for tmp_channels in guild_state.tmp_channel_ids:
+            logger.debug("Check if channel %s with id %s is already created by user %s.", guild_state.tmp_channel_ids[tmp_channels]["name"], tmp_channels, ctx.message.author.name)
+            if not guild_state.tmp_channel_ids[tmp_channels]['deleted'] and guild_state.tmp_channel_ids[tmp_channels]['author'] == ctx.message.author.id:
+                logger.info("%s wanted to create a new temporary channel but already has created channel %s with id %s.", ctx.message.author.name, guild_state.tmp_channel_ids[tmp_channels]['name'], tmp_channels)
                 raise exceptions.LimitReachedException('Der Autor hat schon einen temprorären Channel erstellt.')
         tmp_channel_category = discord.utils.find(lambda x: x.name == self.bot.config.get_guild_config(ctx.guild.id).channel_ids.category_temporary, ctx.message.guild.channels)
         tmp_channel = None
@@ -150,7 +149,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         else:
             logger.error("!create-channel is called by user %s with invalid type %s.", ctx.message.author.name, kind)
             return
-        gstate.tmp_channel_ids[tmp_channel.id] = {
+        guild_state.tmp_channel_ids[tmp_channel.id] = {
             "timer": timers.start_timer(hrs=12),
             "author": ctx.message.author.id,
             "deleted": False,

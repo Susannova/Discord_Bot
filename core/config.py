@@ -23,10 +23,10 @@ class Toggles:
     command_only: bool = False
     auto_react: bool = False
     auto_dm: bool = False
-    riot_api: bool = False
     debug: bool = False
     game_selector: bool = False
     summoner_rank_history: bool = False
+    leaderboard_loop: bool = False
     check_LoL_patch: bool = False
 
 
@@ -67,8 +67,6 @@ class UnsortedConfig:
     guest_id: int = None
     everyone_id: int = None
 
-    lol_patch: str = ''  # TODO Move to global state
-
     guild_id: int = None
 
     command_prefix: str = '?'
@@ -80,12 +78,18 @@ class UnsortedConfig:
 
     play_now_time_add_limit: str = 120
 
+    # TODO Move this stuff in an own class
+    game_selector_id: int = None
+
 
 @dataclasses.dataclass
 class Channel_Ids:
     """ Channel id lists """
 
     category_temporary: str = None
+
+    plots: int = None
+    announcement: int = None
 
     create_team_voice: List[str] = dataclasses.field(default_factory=list)
     play_request: List[str] = dataclasses.field(default_factory=list)
@@ -97,15 +101,9 @@ class Channel_Ids:
 
 @dataclasses.dataclass
 class Folders_and_Files:
+    # TODO Can be replaced with a class 'message_ids' because this is not needed anymore
     """ Global folder and files for the guild. Some needs to be formated with the guild_id! """
-    
-    folder_champ_icon: str = './data/{guild_id}/champ-icon/'
-    folder_champ_spliced: str = './data/{guild_id}/champ-spliced/'
-
-    database_directory_summoners: str = './db/{guild_id}/summoners'
-    database_name_summoners: str = 'summoner_db'
-    database_directory_global_state: str = './db/{guild_id}/global_state'
-    database_name_global_state: str = 'global_state_db'
+    pass
 
 class GuildConfig():
     """Configuration for the guild """
@@ -194,8 +192,19 @@ class GeneralConfig:
     discord_token: str = ''
     riot_token: str = ''
 
+    riot_api: bool = True
+
     log_file: str = './log/log'
     config_file: str = './config/configuration.json'
+
+    folder_champ_icon: str = './data/champ-icon/'
+    folder_champ_spliced: str = './data/champ-spliced/'
+
+    database_directory_global_state: str = './db/global_state'
+    database_name_global_state: str = 'global_state_db'
+
+    database_directory_summoners: str = './db/{guild_id}/summoners'
+    database_name_summoners: str = 'summoner_db'
 
 
 class BotConfig:
@@ -271,6 +280,7 @@ class BotConfig:
 if __name__ == "__main__":
     general_test_config = GeneralConfig(config_file="./test_config.json")
     bot_config = BotConfig(general_test_config)
+    bot_config.write_config_to_file("./configuration.json")
     test_guild_id = "1234"
     if not bot_config.check_if_guild_exists(test_guild_id):
         bot_config.add_new_guild_config(test_guild_id)

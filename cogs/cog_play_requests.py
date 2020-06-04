@@ -14,7 +14,6 @@ from core import (
     DiscordBot
 )
 
-from core.state import global_state as gstate
 from core.play_requests import PlayRequest, PlayRequestCategory
 
 logger = logging.getLogger(__name__)
@@ -72,7 +71,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         play_request_message = await ctx.send(message)
         _category = self.get_category(game_name)
         play_request = PlayRequest(play_request_message.id, ctx.message.author.id, category=_category)
-        await self.add_play_request_to_gstate(play_request)
+        await self.add_play_request_to_state(ctx.guild.id, play_request)
         await self.add_auto_reaction(ctx, play_request_message)
 
         await ctx.message.delete()
@@ -87,9 +86,9 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         await play_request_message.add_reaction(guild_config.unsorted_config.emoji_pass)
 
 
-    async def add_play_request_to_gstate(self, play_request):
+    async def add_play_request_to_state(self, guild_id: int, play_request):
         logger.debug("Add the message id %s to the global state", play_request.message_id)
-        gstate.play_requests[play_request.message_id] = play_request
+        self.bot.state.get_guild_state(guild_id).play_requests[play_request.message_id] = play_request
     
     def get_category(self, game_name):
         _category = None
@@ -114,15 +113,15 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         time_difference = timers.get_time_difference(message.content)
         if time_difference > 0:
             await asyncio.sleep(time_difference)
-            for player_id in gstate.play_requests[message.id].generate_all_players():
+            for player_id in self.bot.state.get_guild_state(message.guild.id).play_requests[message.id].generate_all_players():
                 player = self.bot.get_user(player_id)
                 await player.send(guild_config.messages.play_request_reminder)
 
     async def create_clash(self, ctx, date):
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
         logger.debug('Create a clash request')
-        gstate.tmp_message_author = ctx.message.author
-        gstate.clash_date = date
+        # TODO I don't like this. With this you can only have one clash request
+        self.bot.state.get_guild_state(ctx.guild.id).clash_date = date
         play_request_message = await ctx.send(guild_config.messages.clash_create.format(
             role_mention=ctx.guild.get_role(guild_config.get_game("clash").role_id).mention,
             player=ctx.message.author.mention,
@@ -131,7 +130,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         )
         _category = self.get_category("CLASH")
         play_request = PlayRequest(play_request_message.id, ctx.message.author.id, category=_category)
-        await self.add_play_request_to_gstate(play_request)
+        await self.add_play_request_to_state(ctx.guild.id, play_request)
         await self.add_auto_reaction(ctx, play_request_message)
         
 
