@@ -14,6 +14,7 @@ class GuildState:
     """
     def __init__(self):
         self.debug = False
+        self.message_cache = {}
         self.play_requests = {}
         self.tmp_channel_ids = {}
 
@@ -26,7 +27,6 @@ class GeneralState:
     def __init__(self, config: BotConfig):
         self.config = config
         self.version = self.get_version()
-        self.message_cache = {}
         self.clash_dates = []
         self.guilds_state = {}
 
