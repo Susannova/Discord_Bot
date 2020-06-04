@@ -57,3 +57,7 @@ class GeneralState:
             raise KeyError(f"{guild_id} does not exists!.")
         else:
             return self.guilds_state[guild_id]
+    
+    def remove_guild_state(self, guild_id: int):
+        """ Removes the guild state """
+        del self.guilds_state[guild_id]
