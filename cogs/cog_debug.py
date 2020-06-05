@@ -52,6 +52,17 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
     async def status_(self, ctx):
         logger.debug('!status called')
         await ctx.send("Bot is alive.")
+    
+    @commands.command(name='get_emoji_id')
+    @checks.is_in_channels()
+    @checks.has_any_role("admin_id")
+    async def get_emoji_id_(self, ctx, emoji_name):
+        logger.debug('!get_emoji_id called')
+
+        for emoji in ctx.guild.emojis:
+            if emoji.name == emoji_name:
+                await ctx.send(f"Emoji id is {emoji.id}.")
+                break
 
     @commands.command(name='reload-config')
     @checks.is_in_channels()
