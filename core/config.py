@@ -265,7 +265,15 @@ class BotConfig:
             self.__guilds_config[guild_id] = GuildConfig(guild_id)
             logger.info("We have added the guild %s to the config!", guild_id)
     
-    def get_guild_config(self, guild_id: str) -> GuildConfig:
+    def remove_guild_config(self,  guild_id: int):
+        """ Remove a guild config """ 
+        if guild_id not in self.__guilds_config:
+            raise LookupError("Guild does not exists!")
+        else:
+            del self.__guilds_config[guild_id]
+            logger.info("We have removed the guild %s from the config!", guild_id)
+    
+    def get_guild_config(self,  guild_id: int) -> GuildConfig:
         """ Gets the guild that belongs to the id. Raises an key error if guild does not exists """
         try:
             return self.__guilds_config[guild_id]
@@ -276,18 +284,10 @@ class BotConfig:
     def check_if_guild_exists(self, guild_id: str) -> bool:
         """ Checks if a guild exists in the config """
         return True if guild_id in self.__guilds_config else False
+    
+    def get_all_guild_ids(self) -> list:
+        return [guild_id for guild_id in self.__guilds_config]
 
-if __name__ == "__main__":
-    general_test_config = GeneralConfig(config_file="./test_config.json")
-    bot_config = BotConfig(general_test_config)
-    bot_config.write_config_to_file("./configuration.json")
-    test_guild_id = "1234"
-    if not bot_config.check_if_guild_exists(test_guild_id):
-        bot_config.add_new_guild_config(test_guild_id)
-    else:
-        print("Guild does exist!")
-    print(bot_config.get_guild_config(test_guild_id))
-    bot_config.write_config_to_file()
 
     bot_config2 = BotConfig(general_test_config)
     bot_config2.get_guild_config(test_guild_id).unsorted_config.command_prefix = "!"

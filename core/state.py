@@ -50,18 +50,27 @@ class GeneralState:
     
     def add_guild_state(self, guild_id: int):
         """ Adds the guild state. Raises a KeyError if guild already exists """
-        if guild_id in self.__guilds_state:
+        if self.check_if_guild_exists(guild_id):
             raise KeyError(f"Can't add {guild_id} because guild already exists.")
         else:
             self.__guilds_state[guild_id] = GuildState()
 
     def get_guild_state(self, guild_id: int) -> GuildState:
         """ Returns the guild state. Raises a KeyError if guild does not exist """
-        if guild_id not in self.__guilds_state:
+        if not self.check_if_guild_exists(guild_id):
             raise KeyError(f"{guild_id} does not exists!.")
         else:
             return self.__guilds_state[guild_id]
     
+    def check_if_guild_exists(self, guild_id: int) -> bool:
+        if guild_id in self.__guilds_state:
+            return True
+        else:
+            return False
+    
     def remove_guild_state(self, guild_id: int):
         """ Removes the guild state """
         del self.__guilds_state[guild_id]
+    
+    def get_all_guild_ids(self) -> list:
+        return [guild_id for guild_id in self.__guilds_state]
