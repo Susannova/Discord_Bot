@@ -26,6 +26,42 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_ready(self):
         logger.info('We have logged in as %s', self.bot.user)
+        guilds = [guild.id for guild in self.bot.guilds]
+
+        # Checks if we are in new guilds
+        for guild_id in guilds:
+
+            if not self.bot.config.check_if_guild_exists(guild_id):
+                self.bot.config.add_new_guild_config(guild_id)
+            
+            if not self.bot.state.check_if_guild_exists(guild_id):
+                self.bot.state.add_guild_state(guild_id)
+
+        logger.debug("Check if we were removed from a guild")
+        # Checks if we were removed from a guild
+        for guild_id in self.bot.config.get_all_guild_ids():
+            if guild_id not in guilds:
+                self.bot.config.remove_guild_config(guild_id)
+        
+        for guild_id in self.bot.state.get_all_guild_ids():
+            if guild_id not in guilds:
+                self.bot.state.remove_guild_state(guild_id)
+        
+        logger.debug("on_ready finished")
+
+
+    
+    @commands.Cog.listener()
+    async def on_guild_join(self, guild: discord.Guild):
+        logger.info("Joined to new server %s with id %s!", guild.name, guild.id)
+        self.bot.config.add_new_guild_config(guild.id)
+        self.bot.state.add_guild_state(guild.id)
+
+    @commands.Cog.listener()
+    async def on_guild_remove(self, guild: discord.Guild):
+        logger.info("Removed from server %s with id %s!", guild.name, guild.id)
+        self.bot.config.remove_guild_config(guild.id)
+        self.bot.state.remove_guild_state(guild.id)
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
