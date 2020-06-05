@@ -181,12 +181,12 @@ class EventCog(commands.Cog):
     # TODO no logging
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
-        guild_config = self.bot.config.get_guild_config(payload.guild.id)
-        if guild_config.toggles.game_selector and payload.message_id == self.bot.config.get_guild_config(payload.guild.id).unsorted_config.game_selector_id:
+        guild_config = self.bot.config.get_guild_config(payload.guild_id)
+        if guild_config.toggles.game_selector and payload.message_id == self.bot.config.get_guild_config(payload.guild_id).unsorted_config.game_selector_id:
             member = discord.utils.find(lambda x: x.id == payload.user_id, list(self.bot.get_all_members()))
             member_roles = member.roles.copy()
             for role in member_roles:
-                if role.id == guild_config.emoji_to_game(payload.emoji.name).role_id:
+                if role.id == guild_config.emoji_to_game(payload.emoji.id).role_id:
                     return
             member_roles.append(discord.utils.find(lambda x: x.name == payload.emoji.name.upper(), member.guild.roles))
             await member.edit(roles=member_roles)
@@ -194,12 +194,12 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_raw_reaction_remove(self, payload):
-        guild_config = self.bot.config.get_guild_config(payload.guild.id)
-        if guild_config.toggles.game_selector and payload.message_id == self.bot.config.get_guild_config(payload.guild.id).unsorted_config.game_selector_id:
+        guild_config = self.bot.config.get_guild_config(payload.guild_id)
+        if guild_config.toggles.game_selector and payload.message_id == self.bot.config.get_guild_config(payload.guild_id).unsorted_config.game_selector_id:
             member = discord.utils.find(lambda x: x.id == payload.user_id, list(self.bot.get_all_members()))
             member_roles = member.roles.copy()
             for role in member_roles:
-                if role.id == guild_config.emoji_to_game(payload.emoji.name).role_id:
+                if role.id == guild_config.emoji_to_game(payload.emoji.id).role_id:
                     member_roles.remove(role)
             await member.edit(roles=member_roles)
         return

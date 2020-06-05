@@ -115,13 +115,14 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
     # dont use this
     @commands.command(name='game-selector', hidden=True)
-    @commands.has_any_role("admin_id")
-    async def game_selector(self, ctx):
+    @checks.has_any_role("admin_id")
+    async def game_selector(self, ctx: commands.Context):
+        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
         message = await ctx.send(self.bot.config.get_guild_config(ctx.guild.id).messages.game_selector)
-        for emoji in ctx.bot.emojis:
-            if emoji.name == 'rl' or emoji.name == 'lol' or emoji.name == 'csgo' or emoji.name == 'apex' or emoji.name == 'val':
-                await message.add_reaction(emoji)
-        self.bot.config.get_guild_config(ctx.guild.id).unsorted_config.game_selector_id = message.id
+        for emoji_id in guild_config.get_all_game_emojis():
+            emoji = self.bot.get_emoji(emoji_id)
+            await message.add_reaction(emoji)
+        guild_config.unsorted_config.game_selector_id = message.id
 
     @commands.command(name='create-channel', help = help_text.create_channel_HelpText.text, brief = help_text.create_channel_HelpText.brief, usage = help_text.create_channel_HelpText.usage)
     @checks.is_in_channels("commands_member")

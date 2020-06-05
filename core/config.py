@@ -17,7 +17,7 @@ class Game:
     name_short: str
     name_long: str
     role_id: int
-    emoji: str
+    emoji: int
     category_id: int
 
 
@@ -155,19 +155,25 @@ class GuildConfig():
         """ Returns a Game class that belongs to the short name of a game """
         if game_short_name in self.__games:
             game_dict = self.__games[game_short_name]
-            return Game(name_short=game_short_name, **game_dict)
+            return Game(**game_dict)
         else:
             raise LookupError("Game not found")
 
-    def add_game(self, game: str, long_name: str, role_id: int, emoji: str, category_id: int):
+    def add_game(self, game: str, long_name: str, role_id: int, emoji: int, category_id: int):
         """ Adds a new game to the bot """
 
         # The asdict prevents one from create a dict that is invalid to Game
         self.__games[game] = dataclasses.asdict(Game(game, long_name, role_id, emoji, category_id))
     
-    def emoji_to_game(self, emoji: str) -> Game:
-        """ Returns the game that belongs to the emoji """
+    def get_all_game_emojis(self):
+        """ Yields all game emojis """
         for game in self.__games:
+            yield Game(**self.__games[game]).emoji
+
+    def emoji_to_game(self, emoji: int) -> Game:
+        """ Returns the game that belongs to the emoji """
+        for game_name in self.__games:
+            game = Game(**self.__games[game_name])
             if game.emoji == emoji:
                 return game
         
