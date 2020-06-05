@@ -91,12 +91,12 @@ class Channel_Ids:
     plots: int = None
     announcement: int = None
 
-    create_team_voice: List[str] = dataclasses.field(default_factory=list)
-    play_request: List[str] = dataclasses.field(default_factory=list)
-    bot: List[str] = dataclasses.field(default_factory=list)
-    member_only: List[str] = dataclasses.field(default_factory=list)
-    commands_member: List[str] = dataclasses.field(default_factory=list)
-    commands: List[str] = dataclasses.field(default_factory=list)
+    create_team_voice: List[int] = dataclasses.field(default_factory=list)
+    play_request: List[int] = dataclasses.field(default_factory=list)
+    bot: List[int] = dataclasses.field(default_factory=list)
+    member_only: List[int] = dataclasses.field(default_factory=list)
+    commands_member: List[int] = dataclasses.field(default_factory=list)
+    commands: List[int] = dataclasses.field(default_factory=list)
 
 
 @dataclasses.dataclass
@@ -228,13 +228,14 @@ class BotConfig:
         return config_dict
     
     def fromdict(self, config_dict: dict):
-        """ Sets the settings given by a dict. The format of the dictionary must be like in self.asdict().
+        """ Sets the settings given by a dict. The format of the dictionary must be like in self.asdict()
+        but the keys can be strings or integers.
         Settings not given in the dict are set to default """
         self.general_config = GeneralConfig(**config_dict["general_config"])
         for guild in config_dict["guilds_config"]:
-            if guild not in self.__guilds_config:
-                self.add_new_guild_config(guild)
-            self.get_guild_config(guild).fromdict(config_dict)
+            if guild not in self.__guilds_config or int(guild) not in self.__guilds_config:
+                self.add_new_guild_config(int(guild))
+            self.get_guild_config(int(guild)).fromdict(config_dict["guilds_config"][guild])
 
     def write_config_to_file(self, filename: str = None):
         """ Write the config to the config file """
@@ -257,7 +258,7 @@ class BotConfig:
         except FileNotFoundError:
             logger.warning("File '%s' does not exist. All settings are set to default.", filename)
 
-    def add_new_guild_config(self, guild_id: str):
+    def add_new_guild_config(self,  guild_id: int):
         """ Adds a new guild config """ 
         if guild_id in self.__guilds_config:
             raise LookupError("Guild already has a config!")
@@ -281,7 +282,7 @@ class BotConfig:
             logger.warning("Guild %s is unknown", guild_id)
             raise
     
-    def check_if_guild_exists(self, guild_id: str) -> bool:
+    def check_if_guild_exists(self,  guild_id: int) -> bool:
         """ Checks if a guild exists in the config """
         return True if guild_id in self.__guilds_config else False
     
