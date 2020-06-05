@@ -12,19 +12,18 @@ import discord
 import pandas as pd
 from core import (
     timers,
-    consts,
-    exceptions
+    exceptions,
+    config
 )
+from core.state import GeneralState
 
 from . import (
     image_transformation,
     riot_utility as utility
 )
-from core.state import global_state as gstate
 
 
-logger = logging.getLogger('riot_commands')
-SEASON_2020_START_EPOCH = timers.convert_human_to_epoch_time(consts.RIOT_SEASON_2020_START)
+logger = logging.getLogger(__name__)
 
 _timers = []
 
@@ -68,35 +67,36 @@ def get_best_bans_for_team(team) -> list:
 # === INTERFACE === #
 
 
-def get_player_stats(discord_user_name, summoner_name, queue_type='RANKED_SOLO_5x5') -> str:
-    summoner = get_or_create_summoner(discord_user_name, summoner_name)
+def get_player_stats(discord_user_name, summoner_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig, queue_type='RANKED_SOLO_5x5') -> str:
+    summoner = get_or_create_summoner(discord_user_name, summoner_name, guild_config, general_config)
     return f'Rank: {summoner.get_rank_string(queue_type)}, Winrate {summoner.get_winrate(queue_type)}%.'
 
 
-def get_smurf(discord_user_name, summoner_name) -> str:
-    summoner = get_or_create_summoner(discord_user_name, summoner_name)
+def get_smurf(discord_user_name, summoner_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig) -> str:
+    summoner = get_or_create_summoner(discord_user_name, summoner_name, guild_config, general_config)
     is_smurf_word = 'kein'
     if summoner.is_smurf():
         is_smurf_word = 'ein'
     return f'Der Spieler **{utility.format_summoner_name(summoner.name)}** ist sehr wahrscheinlich **{is_smurf_word}** Smurf.'
 
 
-def calculate_bans_for_team(*names) -> str:
+def calculate_bans_for_team(bot_config: config.BotConfig, *names) -> str:
     utility.update_champion_json()
     if len(names[0]) != 5:
         logger.exception('Check Failure')
         raise commands.CheckFailure()
-    team = list(utility.create_summoners(list(names[0])))
+    team = list(utility.create_summoners(list(names[0]), bot_config.general_config))
     output = get_best_bans_for_team(team)
-    image_transformation.create_new_image(output)
+    image_transformation.create_new_image(output, bot_config)
     op_url = f'https://euw.op.gg/multi/query={team[0].name}%2C{team[1].name}%2C{team[2].name}%2C{team[3].name}%2C{team[4].name}'
     return f'Team OP.GG: {op_url}\nBest Bans for Team:\n{utility.pretty_print_list(output)}'
 
 
-def link_account(discord_user_name, summoner_name):
+def link_account(discord_user_name, summoner_name, guild_config: config.GuildConfig):
     summoner = utility.create_summoner(summoner_name)
     summoner.discord_user_name = discord_user_name
-    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
+    folder_name = guild_config.folders_and_files.database_directory_summoners.format(guild_id=guild_config.unsorted_config.guild_id)
+    with shelve.open(f'{folder_name}/{guild_config.folders_and_files.database_name_summoners}', 'rc') as database:
         for key in database.keys():
             if key == str(discord_user_name):
                 logger.exception('DataBaseException')
@@ -108,39 +108,40 @@ def link_account(discord_user_name, summoner_name):
         database[str(discord_user_name)] = summoner
 
 
-def update_linked_account_data_by_discord_user_name(discord_user_name):
-    summoner = utility.create_summoner(utility.read_account(discord_user_name).name)
+def update_linked_account_data_by_discord_user_name(discord_user_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig):
+    summoner = utility.create_summoner(utility.read_account(discord_user_name, general_config, guild_config.unsorted_config.guild_id).name)
     summoner.discord_user_name = discord_user_name
-    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
+    folder_name = guild_config.folders_and_files.database_directory_summoners.format(guild_id=guild_config.unsorted_config.guild_id)
+    with shelve.open(f'{folder_name}/{guild_config.folders_and_files.database_name_summoners}', 'rc') as database:
         database[str(discord_user_name)] = summoner
     return summoner
 
-def update_linked_summoners_data(summoners):
+def update_linked_summoners_data(summoners, guild_config: config.GuildConfig, general_config: config.GeneralConfig):
     for summoner in summoners:
-        yield update_linked_account_data_by_discord_user_name(summoner.discord_user_name)
+        yield update_linked_account_data_by_discord_user_name(summoner.discord_user_name, guild_config, general_config)
 
-def get_or_create_summoner(discord_user_name, summoner_name):
+def get_or_create_summoner(discord_user_name, summoner_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig):
     if summoner_name is None:
-        summoner = utility.read_account(discord_user_name)
+        summoner = utility.read_account(discord_user_name, general_config, guild_config.unsorted_config.guild_id)
         if utility.is_in_need_of_update(summoner):
-            update_linked_account_data_by_discord_user_name(discord_user_name)
+            update_linked_account_data_by_discord_user_name(discord_user_name, guild_config, general_config)
         return summoner
     else:
         return utility.create_summoner(summoner_name)
 
-
-def unlink_account(discord_user_name):
-    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'rc') as database:
+def unlink_account(discord_user_name, guild_config: config.GuildConfig):
+    folder_name = guild_config.folders_and_files.database_directory_summoners.format(guild_id=guild_config.unsorted_config.guild_id)
+    with shelve.open(f'{folder_name}/{guild_config.folders_and_files.database_name_summoners}', 'rc') as database:
         for key in database.keys():
             if key == str(discord_user_name):
                 del database[key]
 
 
 # FIXME im still not happy with this
-def create_embed(ctx):
-    summoners = list(utility.read_all_accounts())
+def create_embed(ctx, guild_config: config.GuildConfig, general_config: config.GeneralConfig):
+    summoners = list(utility.read_all_accounts(general_config, guild_config.unsorted_config.guild_id))
     old_summoners = summoners.copy()
-    summoners = list(update_linked_summoners_data(summoners))
+    summoners = list(update_linked_summoners_data(summoners, guild_config, general_config))
     summoners.sort(key=lambda x: x.rank_value['RANKED_SOLO_5x5'], reverse=True)
 
 
@@ -168,10 +169,10 @@ def create_embed(ctx):
     return _embed
 
 
-def create_leaderboard_embed():
-    summoners = list(utility.read_all_accounts())
+def create_leaderboard_embed(guild_config: config.GuildConfig, general_config: config.GeneralConfig):
+    summoners = list(utility.read_all_accounts(general_config, guild_config.unsorted_config.guild_id))
     old_summoners = summoners.copy()
-    summoners = list(update_linked_summoners_data(summoners))
+    summoners = list(update_linked_summoners_data(summoners, guild_config, general_config))
     summoners.sort(key=lambda x: x.rank_value['RANKED_SOLO_5x5'], reverse=True)
 
     for summoner in summoners:
@@ -212,8 +213,7 @@ def create_leaderboard_embed():
 
     fig.tight_layout()
 
-
-    plt.savefig(f'./{consts.FOLDER_CHAMP_SPLICED}/leaderboard.png')
+    plt.savefig('./temp/leaderboard.png')
 
     op_url = 'https://euw.op.gg/multi/query='
     for summoner in summoners:
@@ -226,11 +226,11 @@ def create_leaderboard_embed():
 
 
 
-def update_gstate_clash_dates():
-    clash_dates = utility.get_upcoming_clash_dates()
+def update_state_clash_dates(state: GeneralState, general_config: config.GeneralConfig):
+    clash_dates = utility.get_upcoming_clash_dates(general_config, state)
     for clash_date in clash_dates:
-        if clash_date not in gstate.clash_dates:
-            gstate.clash_dates.append(clash_date)
+        if clash_date not in state.clash_dates:
+            state.clash_dates.append(clash_date)
     return
     
 # === INTERFACE END === #

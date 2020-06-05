@@ -10,23 +10,36 @@ import time
 
 from riotwatcher import LolWatcher as RiotWatcher
 
-from core import consts, exceptions, timers
+from core import (
+    exceptions,
+    timers
+)
+
+from core.state import (
+    GuildState,
+    GeneralState
+)
+
+from core.config import(
+    GeneralConfig,
+    GuildConfig
+)
+
+
 from .summoner import Summoner
-from core.state import global_state as gstate
 
 def load_json(file_name, folder='config'):
     with open(f'./{folder}/{file_name}.json', encoding="utf8") as all_data:
         return json.load(all_data)
 
 
-logger = logging.getLogger('riot_utility')
-tokens = load_json("bot")
+logger = logging.getLogger(__name__)
 data_champ = load_json("champion")
 
 
-def get_champion_name_by_id(id):
+def get_champion_name_by_id(champ_id):
     for value in data_champ['data'].values():
-        if int(value["key"]) == id:
+        if int(value["key"]) == champ_id:
             return value['id']
 
 
@@ -47,36 +60,29 @@ def format_last_time_played(_time):
     return _time.strftime('%d-%m-%Y')
 
 
-def generate_summoner_names(players):
-    for player in players:
-        if player.find('%') > 0:
-            player = player.replace('%', '%20')
-        yield player
-
-
 def format_summoner_name(name):
     if name.find('%20') > 0:
         return name.replace('%20', ' ')
     return name
 
-def get_current_patch_url():
+def get_current_patch_url(guild_config: GuildConfig):
     current_patch_list = get_current_patch().split('.')
-    return consts.MESSAGE_PATCH_NOTES.format(current_patch_list[0], current_patch_list[1])
+    return guild_config.messages.patch_notes.format(current_patch_list[0], current_patch_list[1])
 
 
 def get_current_patch():
-  with urllib.request.urlopen("https://ddragon.leagueoflegends.com/api/versions.json") as url:
-    data = json.loads(url.read().decode())
-    return data[0]
+    with urllib.request.urlopen("https://ddragon.leagueoflegends.com/api/versions.json") as url:
+        data = json.loads(url.read().decode())
+        return data[0]
 
-def update_current_patch():
+def update_current_patch(state: GeneralState):
     current_patch_list = get_current_patch().split('.')
     current_patch = current_patch_list[0] + '.' + current_patch_list[1]
-    if gstate.CONFIG['LOL_PATCH'] == current_patch:
+    if state.lol_patch == current_patch:
         return False
-    gstate.CONFIG['LOL_PATCH'] = current_patch
-    gstate.write_and_reload_config(gstate.CONFIG)
-    return True
+    else:
+        state.lol_patch = current_patch
+        return True
 
 
 def update_champion_json():
@@ -87,16 +93,6 @@ def update_champion_json():
             json.dump(data, f, ensure_ascii=False, indent=4)
 
 
-def is_command_on_cooldown(timer_list):
-    timers.remove_finished_timers(timer_list)
-    if len(timer_list) != 0:
-        return True
-    timer_list.append(timers.start_timer(secs=5))
-    return False
-
-
-def get_median_rank(ranks):
-    return statistics.median(ranks)
 
 def get_average_rank(ranks):
     tmp = 0
@@ -104,22 +100,25 @@ def get_average_rank(ranks):
         tmp += rank
     return tmp / len(ranks)
 
-def read_account(discord_user_name):
-    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'r') as database:
+def read_account(discord_user_name, general_config: GeneralConfig, guild_id: int):
+    folder_name = general_config.database_directory_summoners.format(guild_id=guild_id)
+    with shelve.open(f'{folder_name}/{general_config.folders_and_files.database_name_summoners}', 'r') as database:
         for key in database.keys():
             if key == str(discord_user_name):
                 return database[key]
     raise exceptions.DataBaseException('No lol account linked to this discord account')
 
 
-def read_all_accounts():
-    with shelve.open(f'{consts.DATABASE_DIRECTORY}/{consts.DATABASE_NAME}', 'r') as database:
+def read_all_accounts(general_config: GeneralConfig, guild_id: int):
+    folder_name = general_config.database_directory_summoners.format(guild_id=guild_id)
+    # TODO I think my database in cogs.task is better. And this fails, if the file does not exists
+    with shelve.open(f'{folder_name}/{general_config.database_name_summoners}', 'r') as database:
         for key in database.keys():
             yield database[key]
 
 
-def create_summoners(summoner_names: list):
-    riot_token = str(tokens["riot_token"])
+def create_summoners(summoner_names: list, config: GeneralConfig):
+    riot_token = str(config.riot_token)
     watcher = RiotWatcher(riot_token)
     for player in summoner_names:
         with ThreadPoolExecutor() as executor:
@@ -134,7 +133,7 @@ def create_summoners(summoner_names: list):
 
 
 def create_summoner(summoner_name: str):
-    riot_token = str(tokens["riot_token"])
+    riot_token = str()
     watcher = RiotWatcher(riot_token)
     with ThreadPoolExecutor() as executor:
         future = executor.submit(fetch_summoner, summoner_name, watcher)
@@ -147,8 +146,8 @@ def create_summoner(summoner_name: str):
             )
 
 
-def fetch_summoner(player, watcher):
-    region = consts.RIOT_REGION
+def fetch_summoner(player, watcher, config: GuildConfig):
+    region = config.basic_config.riot_region
     try:
         data_summoner = watcher.summoner.by_name(region, player)
         data_mastery = watcher.champion_mastery.by_summoner(region, data_summoner['id'])
@@ -169,13 +168,13 @@ def is_in_need_of_update(summoner):
     return False
 
 
-def get_upcoming_clash_dates():
-    riot_token = str(tokens['riot_token'])
+def get_upcoming_clash_dates(config: GeneralConfig, state: GeneralState):
+    riot_token = config.riot_token
     clash_url = f'https://euw1.api.riotgames.com/lol/clash/v1/tournaments?api_key={riot_token}'
     clash_json = json.loads(requests.get(clash_url).text)
     clash_dates = []
     for clash in clash_json:
         tmp_clash_date = time.strftime('%d-%m-%Y', time.localtime(clash['schedule'][0]['registrationTime']/1000))
-        if tmp_clash_date not in gstate.clash_dates:
+        if tmp_clash_date not in state.clash_dates:
             clash_dates.append(tmp_clash_date)
     return clash_dates

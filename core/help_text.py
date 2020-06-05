@@ -1,7 +1,5 @@
 """ Used for help texts """
 
-from core import consts
-
 class HelpText(object):
     """
     text : str
@@ -49,7 +47,8 @@ create_channel_HelpText = HelpText(
     '( text | voice ) name [voice_chat_user_limit]'
     )
 
-play_HelpText_long = 'und benachrichtigt alle User, die dieses Spiel auf dem Server aboniert haben. Auf die Anfrage kann mit ' + ':fill:' + ' und ' + consts.EMOJI_PASS + ' reagiert werden, wodurch der Ersteller und bereits beigetretene Spieler eine Benachrichtigung erhalten.'
+# TODO _join_ and _pass_ are different in every guild. How to solve that?
+play_HelpText_long = 'und benachrichtigt alle User, die dieses Spiel auf dem Server aboniert haben. Auf die Anfrage kann mit ' + '_join_' + ' und ' + '_pass_' + ' reagiert werden, wodurch der Ersteller und bereits beigetretene Spieler eine Benachrichtigung erhalten.'
 
 play_HelpText = HelpText(
     'Erstellt eine Spielanfrage ' + play_HelpText_long + ' Der Ersteller und die Spieler bekommen kurz vor Beginn des Spieles eine Nachricht.',

@@ -1,9 +1,6 @@
 import time
 from enum import Enum
 
-import discord
-
-
 class PlayRequestCategory(Enum):
     LOL = 1
     CLASH = 2

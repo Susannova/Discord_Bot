@@ -1,12 +1,10 @@
 {
-    "TOGGLE_AUTO_DELETE": false,
-    "TOGGLE_COMMAND_ONLY": false,
-    "TOGGLE_AUTO_REACT": false,
-    "TOGGLE_AUTO_DM": false,
-    "TOGGLE_RIOT_API": false,
-    "TOGGLE_DEBUG": false,
-    "TOGGLE_GAME_SELECTOR": false,
-    "TOGGLE_SUMONNER_RANK_HISTORY": false,
-    "TOGGLE_CHECK_LOL_PATCH": false,
-    "LOL_PATCH": "10.7"
+    "general_config": {
+        "discord_token": "",
+        "riot_token": "",
+        "log_file": "./log/log",
+        "config_file": "./config/configuration.json"
+    },
+    "guilds_config": {
+    }
 }
