@@ -43,4 +43,6 @@ if __name__ == '__main__':
         bot.exit_status = 2
 
     bot.state.write_state_to_file()
+    bot.config.write_config_to_file()
+    
     sys.exit(bot.exit_status)
