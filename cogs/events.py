@@ -74,18 +74,19 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
 
-        guild_config = self.bot.config.get_guild_config(message.guild.id)
-
         if isinstance(message.channel, discord.DMChannel):
             # TODO Is only the first bot channel
-            bot_channel = self.bot.get_channel(self.bot.config.get_guild_config(message.guild.id).channel_ids.bot[0])
+            # TODO A DM has no guild...
+            # bot_channel = self.bot.get_channel(self.bot.config.get_guild_config(message.guild.id).channel_ids.bot[0])
             message_info = 'Got a message from: {user}. Content: {content}'.format(user=message.author, content=message.content.replace("\n", "\\n"))
             logger.info(message_info)
-            if bot_channel is None:
-                logger.error("Can't send message to bot channel! Channel is None")
+            # if bot_channel is None:
+            #     logger.error("Can't send message to bot channel! Channel is None")
             
-            await bot_channel.send(message_info)
+            # await bot_channel.send(message_info)
             return
+
+        guild_config = self.bot.config.get_guild_config(message.guild.id)
 
         # add all messages in channel to gstate.message_cache
         if guild_config.toggles.auto_delete and utility.is_in_channels(message, guild_config.channel_ids.play_request):
@@ -102,8 +103,8 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
-        guild_config = utility.get_guild_config(self.bot, reaction.guild.id)
-        guild_state = self.bot.state.get_guild_state(reaction.guild.id)
+        guild_config = utility.get_guild_config(self.bot, user.guild.id)
+        guild_state = self.bot.state.get_guild_state(user.guild.id)
 
         # auto dm
         logger.debug("Reaction added to %s by %s", reaction.message.id, user.name)
@@ -125,7 +126,7 @@ class EventCog(commands.Cog):
             await reaction.remove(user)
             return
 
-        if str(reaction.emoji) == guild_config.basic_config.emoji_pass:
+        if str(reaction.emoji) == guild_config.unsorted_config.emoji_pass:
             for player_id in play_request.generate_all_players():
                 if user.id == player_id:
                     logger.info("Remove %s from play_request %s", user.name, reaction.message.id)

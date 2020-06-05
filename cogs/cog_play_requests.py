@@ -53,6 +53,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                 is_not_now = False
                 message = guild_config.messages.play_now.format(
                     role_mention=ctx.guild.get_role(game.role_id).mention,
+                    creator=ctx.message.author.mention,
                     player=ctx.message.author.mention,
                     game=game.name_long
                 )
