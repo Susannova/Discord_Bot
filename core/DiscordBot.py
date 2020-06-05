@@ -33,7 +33,7 @@ class KrautBot(commands.Bot):
         help_command_.verify_checks = False
         self.help_command = help_command_
         try:
-            with open(f'{self.config.general_config.database_directory_global_state}/{self.config.general_config.name_global_state}', 'rb') as file:
+            with open(f'{self.config.general_config.database_directory_global_state}/{self.config.general_config.database_name_global_state}', 'rb') as file:
                 self.state = pickle.load(file)
             self.state.config = self.config
             logger.info('Global State reinitialized.')
@@ -64,4 +64,4 @@ class KrautBot(commands.Bot):
 
 def get_command_prefix(bot: KrautBot, msg: discord.Message):
     """ Returns the command prefix for the guild in that the message is in """
-    return bot.config.get_guild_config(msg.id).unsorted_config.command_prefix
+    return bot.config.get_guild_config(msg.guild.id).unsorted_config.command_prefix

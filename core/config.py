@@ -1,3 +1,7 @@
+""" Used for the bot configarution. If not imported, this can also be used to generate
+a config file. Therefore you need to modify the code at the bottom of the file and run
+this file"""
+
 import logging
 import dataclasses
 import json
@@ -172,18 +176,21 @@ class GuildConfig():
     def get_all_category_ids(self, *role_names) -> list:
         return [game["category_id"] for game in self.__games if game in role_names]
     
+    #TODO Rewrite this
     def get_role_ids(self, *role_names) -> dict:
         role_ids = {
-            "guest": self.unsorted_config.guest_id,
-            "member": self.unsorted_config.member_id,
-            "admin": self.unsorted_config.admin_id
+            "guest_id": self.unsorted_config.guest_id,
+            "member_id": self.unsorted_config.member_id,
+            "admin_id": self.unsorted_config.admin_id
         }
 
         for game in self.__games:
             role_ids[game] = self.get_game(game).role_id
         
-        for role_name in role_names:
-            del role_ids[role_name]
+        for role_name in [_role_name for _role_name in role_ids]:
+            if role_name not in role_names:
+                del role_ids[role_name]
+
         return role_ids
 
 
@@ -251,12 +258,14 @@ class BotConfig:
         """ Updates the config from a file using fromdict """
         if filename is None:
             filename = self.general_config.config_file
+        
         try:
             config_dict = json.load(open(filename, 'r'))
-            self.fromdict(config_dict)
-            logger.info("Settings were updated from file %s", filename)
         except FileNotFoundError:
             logger.warning("File '%s' does not exist. All settings are set to default.", filename)
+        
+        self.fromdict(config_dict)
+        logger.info("Settings were updated from file %s", filename)
 
     def add_new_guild_config(self,  guild_id: int):
         """ Adds a new guild config """ 
@@ -289,7 +298,18 @@ class BotConfig:
     def get_all_guild_ids(self) -> list:
         return [guild_id for guild_id in self.__guilds_config]
 
+# if __name__ == "__main__":
+#     bot_config = BotConfig()
 
-    bot_config2 = BotConfig(general_test_config)
-    bot_config2.get_guild_config(test_guild_id).unsorted_config.command_prefix = "!"
-    bot_config2.write_config_to_file("./test_config2.json")
+#     bot_config.general_config.discord_token = ""
+
+#     new_guild_id = None
+    
+#     if not bot_config.check_if_guild_exists(new_guild_id):
+#         bot_config.add_new_guild_config(new_guild_id)
+#     else:
+#         print("Guild does exist!")
+
+#     bot_config.get_guild_config(new_guild_id).channel_ids.bot.append(None)
+
+#     bot_config.write_config_to_file("./configuration.json")
