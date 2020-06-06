@@ -182,7 +182,7 @@ class GuildConfig():
     def get_category_ids(self, *role_names) -> list:
         return [self.__games[game]["category_id"] for game in self.__games if game in role_names]
 
-    def get_all_category_ids(self) -> list:
+    def get_all_category_ids(self):
         for game in self.__games:
             yield self.__games[game]["category_id"]
     
