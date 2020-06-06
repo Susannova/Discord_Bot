@@ -218,11 +218,11 @@ class EventCog(commands.Cog):
         if before.channel == after.channel:
             return
         else:
-            everyone_role = discord.utils.find(lambda m: m.id == guild_config.unsorted_config.everyone_id, member.guild.roles)
+            everyone_role = member.guild.get_role(guild_config.unsorted_config.everyone_id)
             await update_channels_visibility(everyone_role, before.channel, guild_config, False)
             await update_channels_visibility(everyone_role, after.channel, guild_config, True)
 
-async def update_channels_visibility(role, channel: discord.VoiceChannel, guild_config: config.GuildConfig, bool_after_channel=False):
+async def update_channels_visibility(role: discord.Role, channel: discord.VoiceChannel, guild_config: config.GuildConfig, bool_after_channel=False):
     if channel is not None and channel.category.id in guild_config.get_all_category_ids():
         category_channel = channel.category
         bool_make_visible = False

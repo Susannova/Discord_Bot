@@ -52,7 +52,7 @@ def is_in_channels(*channel_names):
             for channel_name in channel_names:
                 if channel_name in channels_dict:
                     channels_to_check += channels_dict[channel_name]
-            channels_to_check += guild_config.get_all_category_ids(channel_names)
+            channels_to_check += guild_config.get_category_ids(channel_names)
             channels_to_check += channels_dict["bot"]
             
             # if list is empty the condition is false

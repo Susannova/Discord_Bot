@@ -179,8 +179,12 @@ class GuildConfig():
         
         raise LookupError("Game not found")
 
-    def get_all_category_ids(self, *role_names) -> list:
-        return [game["category_id"] for game in self.__games if game in role_names]
+    def get_category_ids(self, *role_names) -> list:
+        return [self.__games[game]["category_id"] for game in self.__games if game in role_names]
+
+    def get_all_category_ids(self) -> list:
+        for game in self.__games:
+            yield self.__games[game]["category_id"]
     
     #TODO Rewrite this
     def get_role_ids(self, *role_names) -> dict:
