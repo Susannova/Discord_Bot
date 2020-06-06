@@ -75,15 +75,10 @@ class EventCog(commands.Cog):
     async def on_message(self, message: discord.Message):
 
         if isinstance(message.channel, discord.DMChannel):
-            # TODO Is only the first bot channel
-            # TODO A DM has no guild...
-            # bot_channel = self.bot.get_channel(self.bot.config.get_guild_config(message.guild.id).channel_ids.bot[0])
+
             message_info = 'Got a message from: {user}. Content: {content}'.format(user=message.author, content=message.content.replace("\n", "\\n"))
             logger.info(message_info)
-            # if bot_channel is None:
-            #     logger.error("Can't send message to bot channel! Channel is None")
-            
-            # await bot_channel.send(message_info)
+
             return
 
         guild_config = self.bot.config.get_guild_config(message.guild.id)
@@ -173,7 +168,7 @@ class EventCog(commands.Cog):
 
 
 
-    # TODO no logging
+
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         guild_config = self.bot.config.get_guild_config(payload.guild_id)
@@ -186,6 +181,7 @@ class EventCog(commands.Cog):
                     return
             member_roles.append(discord.utils.find(lambda x: x.name == payload.emoji.name.upper(), member.guild.roles))
             await member.edit(roles=member_roles)
+            logger.info("Member %s was added to %s", member.name, payload.emoji.name)
         return
 
     @commands.Cog.listener()
@@ -198,6 +194,7 @@ class EventCog(commands.Cog):
                 if role.id == guild_config.emoji_to_game(payload.emoji.id).role_id:
                     member_roles.remove(role)
             await member.edit(roles=member_roles)
+            logger.info("Member %s was removed from %s", member.name, payload.emoji.name)
         return
 
     @commands.Cog.listener()

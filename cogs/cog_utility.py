@@ -86,8 +86,10 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     async def purge_(self, ctx, count: int):
         logger.info("!purge %s called in channel %s", count, ctx.message.channel.name)
         last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
-        # TODO Bad, it is not neccesary to create a list here if we never use it.
-        [await message_.delete() for message_ in last_count_messages if not message_.pinned]
+
+        for message_ in last_count_messages:
+            if not message_.pinned:
+                await message_.delete()
 
     @commands.command(name='leaderboard-old', hidden=True)
     @checks.has_any_role("admin_id")
@@ -159,29 +161,6 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             "name": channel_name
         }
         logger.info("Temporary %s-channel %s with id %s created", kind, channel_name, tmp_channel.id)
-
-# TODO I don't think this should be used like this..
-    # @create_team.error
-    # async def error_handler(self, ctx, error):
-    #     logger.exception('Error handler got called: %s', error)
-    #     if isinstance(error, commands.CheckFailure):
-    #         if str(ctx.command) == 'enable-debug':
-    #             await ctx.send(
-    #                 'Der Debug Toggle in der Konfiguration ist nicht eingeschaltet.')
-    #         elif str(ctx.command) == 'purge':
-    #             await ctx.send(
-    #                 'Du hast nicht die benötigten Rechte um dieses Command auszuführen.')
-    #         elif str(ctx.command) == 'print':
-    #             await ctx.send(
-    #                 f'Der Debug Modus ist zur Zeit nicht aktiviert. Versuche es mit {ctx.bot.command_prefix}enable-debug zu aktivieren.')
-    #         else:
-    #             await ctx.send(
-    #                 'Das hat nicht funktioniert. (Überprüfe, ob du im richtigen Channel bist.)')
-    #     elif isinstance(error, commands.MissingRequiredArgument):
-    #         await ctx.send(
-    #             'Es fehlt ein Parameter. (z.B. der Zeitparameter bei ?play-lol)')
-    #     else:
-    #         await ctx.send(error)
 
 def setup(bot: DiscordBot.KrautBot):
     bot.add_cog(UtilityCog(bot))

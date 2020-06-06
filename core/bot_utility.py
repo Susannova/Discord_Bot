@@ -58,7 +58,6 @@ def switch_to_internal_play_request(message, play_request, guild_config: config.
 
 
 def generate_auto_role_list(member, guild_config: config.GuildConfig):
-    # TODO Needs to be more general!
     if len(member.roles) >= 2:
         return
 
@@ -80,7 +79,6 @@ def is_in_channels(message: discord.message, channel_ids: list):
 #     return message.channel.id == channel_id
 
 
-#Todo dont use find here
 def get_voice_channel(message, id):
     voice_channel = discord.utils.find(lambda x: x.id == id, message.guild.voice_channels)
     return voice_channel if voice_channel is not None else None

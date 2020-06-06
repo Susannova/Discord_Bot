@@ -106,7 +106,6 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     async def create_clash(self, ctx, date):
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
         logger.debug('Create a clash request')
-        # TODO I don't like this. With this you can only have one clash request
         self.bot.state.get_guild_state(ctx.guild.id).clash_date = date
         play_request_message = await ctx.send(guild_config.messages.clash_create.format(
             role_mention=ctx.guild.get_role(guild_config.get_game("clash").role_id).mention,
