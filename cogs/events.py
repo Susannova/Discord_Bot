@@ -10,7 +10,7 @@ from core import (
     DiscordBot,
     config
 )
-from core.play_requests import PlayRequestCategory
+
 from riot import riot_utility
 
 logger = logging.getLogger(__name__)
@@ -158,7 +158,7 @@ class EventCog(commands.Cog):
                         creator=author.name,
                         reaction=str(reaction.emoji)))
 
-        if len(play_request.subscriber_ids) + 1 == 5 and play_request.category == PlayRequestCategory.CLASH:
+        if len(play_request.subscriber_ids) + 1 == 5 and play_request.category == "Clash":
             logger.info("Clash has 5 Members")
             await reaction.channel.send(guild_config.messages.clash_full.format(
                 creator=author,
@@ -166,15 +166,10 @@ class EventCog(commands.Cog):
                 team=utility.pretty_print_list([self.bot.get_user(player_id) for player_id in play_request.subscriber_ids], author)
             ))
 
-        if len(play_request.subscriber_ids) + 1 > 5 and play_request.category == PlayRequestCategory.CLASH:
+        if len(play_request.subscriber_ids) + 1 > 5 and play_request.category == "Clash":
             logger.info("Remove reaction because clash has 5 Members")
             await reaction.remove(user)
             await user.send('Das Clash Team ist zur Zeit leider schon voll.')
-
-        if len(play_request.subscriber_ids) + 1 == 6 and play_request.category == PlayRequestCategory.INTERN:
-            logger.info("Create internal play request")
-            await reaction.channel.send(
-                utility.switch_to_internal_play_request(reaction.message, play_request, guild_config, guild_state))
 
 
 
@@ -182,6 +177,7 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_raw_reaction_add(self, payload):
         guild_config = self.bot.config.get_guild_config(payload.guild_id)
+        
         if guild_config.toggles.game_selector and payload.message_id == self.bot.config.get_guild_config(payload.guild_id).unsorted_config.game_selector_id:
             member = discord.utils.find(lambda x: x.id == payload.user_id, list(self.bot.get_all_members()))
             member_roles = member.roles.copy()

@@ -180,9 +180,11 @@ class GuildConfig():
         raise LookupError("Game not found")
 
     def get_category_ids(self, *role_names) -> list:
+        """ Returns a list of all game channel category ids that matches role_names """
         return [self.__games[game]["category_id"] for game in self.__games if game in role_names]
 
     def get_all_category_ids(self):
+        """ Yields all game channel category ids """
         for game in self.__games:
             yield self.__games[game]["category_id"]
     

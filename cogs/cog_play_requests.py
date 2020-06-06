@@ -14,7 +14,7 @@ from core import (
     DiscordBot
 )
 
-from core.play_requests import PlayRequest, PlayRequestCategory
+from core.play_requests import PlayRequest
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +37,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
             await self.create_clash(ctx, _time)
             return
         game = guild_config.get_game(game_name)
+        
         if _time == 'now':
             arg = None if len(list(args)) == 0 else args[0]
             if arg != None:
@@ -70,8 +71,9 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
             )
         
         play_request_message = await ctx.send(message)
-        _category = self.get_category(game_name)
+        _category = game.name_short
         play_request = PlayRequest(play_request_message.id, ctx.message.author.id, category=_category)
+        
         await self.add_play_request_to_state(ctx.guild.id, play_request)
         await self.add_auto_reaction(ctx, play_request_message)
 
@@ -87,27 +89,10 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         await play_request_message.add_reaction(guild_config.unsorted_config.emoji_pass)
 
 
-    async def add_play_request_to_state(self, guild_id: int, play_request):
+    async def add_play_request_to_state(self, guild_id: int, play_request: PlayRequest):
         logger.debug("Add the message id %s to the global state", play_request.message_id)
         self.bot.state.get_guild_state(guild_id).play_requests[play_request.message_id] = play_request
     
-    def get_category(self, game_name):
-        _category = None
-        if game_name == 'LOL':
-            _category = PlayRequestCategory.LOL
-        elif game_name == 'APEX':
-            _category = PlayRequestCategory.APEX
-        elif game_name == 'CSGO':
-            _category = PlayRequestCategory.CSGO
-        elif game_name == 'RL':
-            _category = PlayRequestCategory.RL
-        elif game_name == 'VAL':
-            _category = PlayRequestCategory.VAL
-        elif game_name == 'CLASH':
-            _category = PlayRequestCategory.CLASH
-        return _category
-
-
     async def auto_reminder(self, message):
         guild_config = self.bot.config.get_guild_config(message.guild.id)
         logger.debug("Create an auto reminder for play request with id %s", message.id)
@@ -129,7 +114,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
             date=date
             )
         )
-        _category = self.get_category("CLASH")
+        _category = "clash"
         play_request = PlayRequest(play_request_message.id, ctx.message.author.id, category=_category)
         await self.add_play_request_to_state(ctx.guild.id, play_request)
         await self.add_auto_reaction(ctx, play_request_message)

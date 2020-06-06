@@ -1,20 +1,9 @@
 import time
-from enum import Enum
-
-class PlayRequestCategory(Enum):
-    LOL = 1
-    CLASH = 2
-    INTERN = 3
-    APEX = 4
-    CSGO = 5
-    RL = 6
-    VAL = 7
-
 
 class PlayRequest():
     subscriber_ids = []
 
-    def __init__(self, message_id: int, author_id: int, category=PlayRequestCategory.LOL):
+    def __init__(self, message_id: int, author_id: int, category: str):
         self.message_id = message_id
         self.author_id = author_id
         self.timestamp_ = time.time()
@@ -22,7 +11,7 @@ class PlayRequest():
         self.clash_date = ''
 
     def add_clash_date(self, clash_date):
-        if self.category == PlayRequestCategory.CLASH:
+        if self.category == "clash":
             self.clash_date = clash_date
 
     def add_subscriber_id(self, user_id: int):
