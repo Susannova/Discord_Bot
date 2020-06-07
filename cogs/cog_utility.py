@@ -27,7 +27,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @commands.command(name='create-team', help = help_text.create_team_HelpText.text, brief = help_text.create_team_HelpText.brief, usage = help_text.create_team_HelpText.usage)
     @checks.is_in_channels("commands")
     @checks.has_any_role("admin_id", "member_id")
-    async def create_team(self, ctx: commands.Context, mv_bool: typing.Optional[bool], players_list: commands.Greedy[discord.Member]):
+    async def create_team(self, ctx: commands.Context, mv_bool: typing.Optional[bool], players_list: commands.Greedy[typing.Union[discord.Member, str]]):
         logger.debug('!create-team command called')
 
         if ctx.author.voice is not None:
@@ -44,7 +44,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             channel_team2 = self.bot.get_channel(guild_config.channel_ids.team_2)
             
             for member in players_list:
-                if member.voice is not None:
+                if isinstance(member, discord.Member) and member.voice is not None:
                     if member in team1:
                         await member.move_to(channel_team1)
                     elif member in team2:
