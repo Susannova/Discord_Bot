@@ -147,7 +147,7 @@ def create_summoner(summoner_name: str):
 
 
 def fetch_summoner(player, watcher, config: GuildConfig):
-    region = config.basic_config.riot_region
+    region = config.unsorted_config.riot_region
     try:
         data_summoner = watcher.summoner.by_name(region, player)
         data_mastery = watcher.champion_mastery.by_summoner(region, data_summoner['id'])

@@ -13,6 +13,7 @@ from . import (
 
 
 def has_any_role(*role_names):
+    """ Checks if the author of the context has any of the roles or is the owner of the guild """
     async def wrapper(ctx: commands.Context):
         bot = ctx.bot
         roles_to_check = bot.config.get_guild_config(ctx.guild.id).get_role_ids(*role_names).values()
@@ -29,7 +30,7 @@ def has_any_role(*role_names):
 
 
 def is_in_channels(*channel_names):
-    """ Decorator to check if ctx is in one of the channels """
+    """ Decorator to check if ctx is in one of the channels or in the bot_channel"""
     async def wrapper(ctx: commands.Context):
         bot = ctx.bot
 

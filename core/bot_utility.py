@@ -62,7 +62,7 @@ def generate_auto_role_list(member, guild_config: config.GuildConfig):
         return
 
     for role in member.guild.roles:
-        if role.id == guild_config.basic_config.everyone_id or role.id == guild_config.basic_config.guest_id:
+        if role.id == guild_config.unsorted_config.everyone_id or role.id == guild_config.unsorted_config.guest_id:
             yield role
 
 
