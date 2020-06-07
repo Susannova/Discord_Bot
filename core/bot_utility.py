@@ -1,6 +1,7 @@
 import random
 import re
 import json
+import typing
 
 import discord
 
@@ -18,10 +19,11 @@ def read_config_file(filename):
     return json.load(open(f'./config/{filename}.json', 'r'))
 
 
-def create_team(players, guild_config: config.GuildConfig):
+def create_team(players: typing.List[discord.Member], guild_config: config.GuildConfig):
+    """ Creates two teams and returns a string, and the two teams as lists. """
     num_players = len(players)
     team1 = random.sample(players, int(num_players / 2))
-    team2 = players
+    team2 = players.copy()
 
     for player in team1:
         team2.remove(player)
@@ -29,11 +31,11 @@ def create_team(players, guild_config: config.GuildConfig):
     teams_message = guild_config.messages.team_header
     teams_message += guild_config.messages.team_1
     for player in team1:
-        teams_message += player + "\n"
+        teams_message += player.mention + "\n"
 
     teams_message += guild_config.messages.team_2
     for player in team2:
-        teams_message += player + "\n"
+        teams_message += player.mention + "\n"
 
     return teams_message, team1, team2
 
