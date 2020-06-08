@@ -1,4 +1,5 @@
 import logging
+import typing
 
 import asyncio, time
 
@@ -25,32 +26,29 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
     @commands.command(name='create-team', help = help_text.create_team_HelpText.text, brief = help_text.create_team_HelpText.brief, usage = help_text.create_team_HelpText.usage)
     @checks.is_in_channels("commands")
-    async def create_team(self, ctx: commands.Context, *player_names):
+    @checks.has_any_role("admin_id", "member_id")
+    async def create_team(self, ctx: commands.Context, mv_bool: typing.Optional[bool], players_list: commands.Greedy[typing.Union[discord.Member, str]]):
         logger.debug('!create-team command called')
-        member = await discord.ext.commands.MemberConverter().convert(ctx, ctx.message.author.name)
-        voice_channel = discord.utils.find(lambda x: member in x.members, ctx.message.guild.voice_channels)
-        # TODO Only the last element of list is taken!
-        voice_channel = voice_channel if voice_channel is not None else utility.get_voice_channel(ctx.message, self.bot.config.get_guild_config(ctx.guild.id).channel_ids.create_team_voice[0])
-        players_list = utility.get_players_in_channel(voice_channel)
-        if len(list(player_names)) != 0:
-            for player_name in player_names:
-                if player_name != 'mv':
-                    players_list.append(player_name)
-        message, team1, team2 = utility.create_team(players_list, utility.get_guild_config(self.bot, ctx.guild.id))
+
+        if ctx.author.voice is not None:
+            current_voice_channel = ctx.author.voice.channel
+            players_list += current_voice_channel.members
+
+        guild_config = utility.get_guild_config(self.bot, ctx.guild.id)
+
+        message, team1, team2 = utility.create_team(players_list, guild_config)
         await ctx.send(message)
 
-        role = discord.utils.find(lambda x: x.name == 'Wurzel', ctx.message.guild.roles)
-        if len(list(player_names)) == 0:
-            return
-
-        if player_names[0] == 'mv' and role in ctx.message.author.roles:
-            channel_team1 = discord.utils.find(lambda x: x.name == 'Team 1', ctx.message.guild.voice_channels)
-            channel_team2 = discord.utils.find(lambda x: x.name == 'Team 2', ctx.message.guild.voice_channels)
-            for member in voice_channel.members:
-                if member.name in team1:
-                    await member.move_to(channel_team1)
-                elif member.name in team2:
-                    await member.move_to(channel_team2)
+        if mv_bool:
+            channel_team1 = self.bot.get_channel(guild_config.channel_ids.team_1)
+            channel_team2 = self.bot.get_channel(guild_config.channel_ids.team_2)
+            
+            for member in players_list:
+                if isinstance(member, discord.Member) and member.voice is not None:
+                    if member in team1:
+                        await member.move_to(channel_team1)
+                    elif member in team2:
+                        await member.move_to(channel_team2)
 
     @commands.command(name='link', help = help_text.link_HelpText.text, brief = help_text.link_HelpText.brief, usage = help_text.link_HelpText.usage)
     @checks.is_riot_enabled

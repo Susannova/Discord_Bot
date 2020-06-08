@@ -94,6 +94,8 @@ class Channel_Ids:
 
     plots: int = None
     announcement: int = None
+    team_1: int = None
+    team_2: int = None
 
     create_team_voice: List[int] = dataclasses.field(default_factory=list)
     play_request: List[int] = dataclasses.field(default_factory=list)
