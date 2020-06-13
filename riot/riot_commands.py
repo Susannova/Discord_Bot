@@ -92,8 +92,8 @@ def calculate_bans_for_team(bot_config: config.BotConfig, *names) -> str:
     return f'Team OP.GG: {op_url}\nBest Bans for Team:\n{utility.pretty_print_list(output)}'
 
 
-def link_account(discord_user_name, summoner_name, guild_config: config.GuildConfig):
-    summoner = utility.create_summoner(summoner_name)
+def link_account(discord_user_name, summoner_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig):
+    summoner = utility.create_summoner(summoner_name, general_config, guild_config=guild_config)
     summoner.discord_user_name = discord_user_name
     folder_name = guild_config.folders_and_files.database_directory_summoners.format(guild_id=guild_config.unsorted_config.guild_id)
     with shelve.open(f'{folder_name}/{guild_config.folders_and_files.database_name_summoners}', 'rc') as database:
@@ -109,10 +109,10 @@ def link_account(discord_user_name, summoner_name, guild_config: config.GuildCon
 
 
 def update_linked_account_data_by_discord_user_name(discord_user_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig):
-    summoner = utility.create_summoner(utility.read_account(discord_user_name, general_config, guild_config.unsorted_config.guild_id).name)
+    summoner = utility.create_summoner(utility.read_account(discord_user_name, general_config, guild_config.unsorted_config.guild_id).name, general_config, guild_config=guild_config)
     summoner.discord_user_name = discord_user_name
-    folder_name = guild_config.folders_and_files.database_directory_summoners.format(guild_id=guild_config.unsorted_config.guild_id)
-    with shelve.open(f'{folder_name}/{guild_config.folders_and_files.database_name_summoners}', 'rc') as database:
+    folder_name = general_config.database_directory_summoners.format(guild_id=guild_config.unsorted_config.guild_id)
+    with shelve.open(f'{folder_name}/{general_config.database_name_summoners}', 'rc') as database:
         database[str(discord_user_name)] = summoner
     return summoner
 
@@ -127,7 +127,7 @@ def get_or_create_summoner(discord_user_name, summoner_name, guild_config: confi
             update_linked_account_data_by_discord_user_name(discord_user_name, guild_config, general_config)
         return summoner
     else:
-        return utility.create_summoner(summoner_name)
+        return utility.create_summoner(summoner_name, general_config, guild_config=guild_config)
 
 def unlink_account(discord_user_name, guild_config: config.GuildConfig):
     folder_name = guild_config.folders_and_files.database_directory_summoners.format(guild_id=guild_config.unsorted_config.guild_id)

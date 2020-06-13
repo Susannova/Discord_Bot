@@ -102,7 +102,7 @@ def get_average_rank(ranks):
 
 def read_account(discord_user_name, general_config: GeneralConfig, guild_id: int):
     folder_name = general_config.database_directory_summoners.format(guild_id=guild_id)
-    with shelve.open(f'{folder_name}/{general_config.folders_and_files.database_name_summoners}', 'r') as database:
+    with shelve.open(f'{folder_name}/{general_config.database_name_summoners}', 'r') as database:
         for key in database.keys():
             if key == str(discord_user_name):
                 return database[key]
@@ -132,11 +132,11 @@ def create_summoners(summoner_names: list, config: GeneralConfig):
             )
 
 
-def create_summoner(summoner_name: str):
-    riot_token = str()
+def create_summoner(summoner_name: str, config: GeneralConfig, guild_config: GuildConfig):
+    riot_token = config.riot_token
     watcher = RiotWatcher(riot_token)
     with ThreadPoolExecutor() as executor:
-        future = executor.submit(fetch_summoner, summoner_name, watcher)
+        future = executor.submit(fetch_summoner, summoner_name, watcher, guild_config)
         data = future.result()
         return Summoner(
             summoner_name,

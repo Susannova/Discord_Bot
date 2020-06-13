@@ -55,7 +55,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @checks.is_in_channels("commands", "commands_member")
     async def link_(self, ctx, summoner_name):
         try:
-            riot_commands.link_account(ctx.message.author.name, summoner_name, self.bot.config.get_guild_config(ctx.guild.id))
+            riot_commands.link_account(ctx.message.author.name, summoner_name, self.bot.config.get_guild_config(ctx.guild.id), general_config=self.bot.config.general_config)
         except Exception as error:
             logger.error("Error linking %s: %s", summoner_name, error)
             #TODO Add a link to our accounts
