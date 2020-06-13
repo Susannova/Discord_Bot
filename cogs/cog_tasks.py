@@ -10,6 +10,8 @@ import discord
 from matplotlib.ticker import MultipleLocator
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import numpy as np
+from itertools import cycle
 
 from riot import (
     riot_commands,
@@ -82,6 +84,16 @@ def plot_all_summoners_data(summoners_data, filename):
         queue_type = args[i][0]
         data = args[i][1]
 
+        # TODO Not that nice
+        colormap = plt.cm.hsv
+        colors = {}
+        sum_keys = summoners_data.keys()
+        sum_num = len(sum_keys)
+        for sum_index in range(0, sum_num):
+            colors[list(sum_keys)[sum_index]] = colormap(sum_index / sum_num)
+        markers = ['.', 'o', 'v', 's', 'x', '+']
+        mark_cycler = cycle(markers)
+
         ax[row, col].set_xlabel('Datum')
         if col == 0:
             ax[row, col].set_ylabel(data)
@@ -109,7 +121,7 @@ def plot_all_summoners_data(summoners_data, filename):
                 time) for time in summoners_data[summoner][queue_type]['date_time']]
 
             ax[row, col].plot_date(x_data, list(
-                summoners_data[summoner][queue_type][data]), ls='-')
+                summoners_data[summoner][queue_type][data]), ls='-', marker=next(mark_cycler), color=colors[summoner])
 
     fig.legend(labels=summoners_data.keys(), loc='center right')
 
