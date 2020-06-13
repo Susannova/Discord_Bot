@@ -28,42 +28,7 @@ from core import (
 logger = logging.getLogger(__name__)
 
 
-def plot_summoners_data(summoners_data, queue_type, data):
-    fig1, ax1 = plt.subplots()
-
-    ax1.set_xlabel('Zeit')
-    ax1.set_ylabel(data)
-
-    ax1.set_title(queue_type)
-
-    if data == "Rang":
-        ax1.set_yticks(list(range(0, 2300, 400)))
-        ax1.set_yticks(list(range(0, 2300, 100)), minor=True)
-        ranks_string = ["Eisen 4", "Bronze 4",
-                        "Silber 4", "Gold 4", "Platin 4", "Diamant 4"]
-        ax1.set_yticklabels(ranks_string)
-        ax1.grid(axis='y')
-
-    for summoner in summoners_data:
-        # TODO Timezone is false
-        x_data = [mdates.epoch2num(
-            time) for time in summoners_data[summoner][queue_type]['date_time']]
-
-        ax1.plot_date(x_data, list(
-            summoners_data[summoner][queue_type][data]), label=summoner, ls='-')
-
-    ax1.legend()
-
-    return fig1, ax1
-
-
-def plot_all_summoners_data(summoners_data, filename):
-    # fig, ax = plt.subplots(2, 2)
-    # fig[0], ax[0] = plot_summoners_data(summoners_data, 'soloq', 'Rang')
-    # fig[1], ax[1] = plot_summoners_data(summoners_data, 'soloq', 'Winrate')
-    # fig[2], ax[2] = plot_summoners_data(summoners_data, 'flex', 'Rang')
-    # fig[3], ax[3] = plot_summoners_data(summoners_data, 'flex', 'Winrate')
-
+def plot_all_summoners_data(summoners_data: dict, filename):
     fig, ax = plt.subplots(2, 2)
 
     args = (
