@@ -74,6 +74,14 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
         self.bot.state.get_version()
         await ctx.send("Done.")
         logger.info('configuration reloaded.')
+    
+    @commands.command(name='write-config')
+    @checks.is_in_channels()
+    @checks.has_any_role("admin_id")
+    async def write_config(self, ctx):
+        logger.info('Try to write the configuration.')
+        self.bot.config.write_config_to_file()
+        await ctx.send("Done.")
 
     # @commands.command(name='enable-debug')
     # @checks.is_in_channels()
