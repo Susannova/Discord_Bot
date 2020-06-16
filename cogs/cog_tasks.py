@@ -3,6 +3,7 @@ import datetime
 import asyncio
 import json
 import logging
+import typing
 
 from discord.ext import tasks, commands
 import discord
@@ -28,8 +29,12 @@ from core import (
 logger = logging.getLogger(__name__)
 
 
-def plot_all_summoners_data(summoners_data: dict, filename):
-    fig, ax = plt.subplots(2, 2)
+def plot_all_summoners_data(summoners_data: dict, filename, enable_xkcd: bool = False):
+    # Hacky! But without the with the style is changed globally and there is no default style
+    if enable_xkcd:
+        with plt.xkcd():
+            plot_all_summoners_data(summoners_data=summoners_data, filename=filename, enable_xkcd=False)
+        return
 
     fig, ax = plt.subplots(2, 2, sharex='col', sharey='row')
 
@@ -112,21 +117,21 @@ class LoopCog(commands.Cog):
         self.auto_delete_purgeable_messages.start()
         self.auto_delete_tmp_channels.start()
 
-    async def print_leaderboard(self, guild_id: int, channel_to_print=None, update=True):
+    async def print_leaderboard(self, guild_id: int, channel_to_print=None, update=True, enable_xkcd=False):
         summoners_data = self.get_summoners_data(guild_id, update)
 
         if channel_to_print is None:
             channel_to_print = self.bot.get_channel(self.bot.config.get_guild_config(guild_id).channel_ids.plots)
 
         filename = 'temp/LoL_plot.png'
-        plot_all_summoners_data(summoners_data, filename)
+        plot_all_summoners_data(summoners_data, filename, enable_xkcd=enable_xkcd)
         await channel_to_print.send(file=discord.File(filename))
 
     @commands.command(name='plot')
-    async def print_leaderboard_command(self, ctx):
+    async def print_leaderboard_command(self, ctx, enable_xkcd: typing.Optional[bool]):
         if utility.get_guild_config(self.bot, ctx.guild.id).toggles.summoner_rank_history:
             logger.debug('!plot command called')
-            await self.print_leaderboard(ctx.guild.id, ctx.channel, False)
+            await self.print_leaderboard(ctx.guild.id, ctx.channel, False, enable_xkcd=enable_xkcd)
         else:
             logger.error("In guild %s: plot called without toggle summoner_rank_history", ctx.guild.id)
 
