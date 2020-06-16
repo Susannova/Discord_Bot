@@ -31,6 +31,8 @@ logger = logging.getLogger(__name__)
 def plot_all_summoners_data(summoners_data: dict, filename):
     fig, ax = plt.subplots(2, 2)
 
+    fig, ax = plt.subplots(2, 2, sharex='col', sharey='row')
+
     args = (
         ('soloq', 'Rang'),
         ('soloq', 'Winrate'),
@@ -59,11 +61,12 @@ def plot_all_summoners_data(summoners_data: dict, filename):
         markers = ['.', 'o', 'v', 's', 'x', '+']
         mark_cycler = cycle(markers)
 
-        ax[row, col].set_xlabel('Datum')
         if col == 0:
             ax[row, col].set_ylabel(data)
-
-        ax[row, col].set_title(queue_type)
+        if row == 1:
+            ax[row, col].set_xlabel('Datum')
+        else:
+            ax[row, col].set_title(queue_type)
 
         if data == 'Rang':
             ax[row, col].set_yticks(list(range(0, 2300, 400)))
@@ -91,7 +94,7 @@ def plot_all_summoners_data(summoners_data: dict, filename):
     fig.legend(labels=summoners_data.keys(), loc='center right')
 
     fig.set_size_inches(10, 10)
-    fig.subplots_adjust(right=0.8)
+    fig.subplots_adjust(right=0.8, wspace=0.075, hspace=0.075)
     fig.savefig(filename)
 
 
