@@ -4,6 +4,7 @@ import asyncio
 import json
 import logging
 import typing
+import pathlib
 
 from discord.ext import tasks, commands
 import discord
@@ -279,14 +280,19 @@ class LoopCog(commands.Cog):
     async def before_create_clash_play_request(self):
         riot_commands.update_state_clash_dates(self.bot.state, self.bot.config.general_config)
     
-    def get_summoners_data(self, guild_id: int, update=True, file_path='./data/summoners_data.json'):
+    def get_summoners_data(self, guild_id: int, update=True, file_path_unformatted='./data/{guild_id}/summoners_data.json'):
         summoners = list(riot_utility.read_all_accounts(self.bot.config.general_config, guild_id))
         time_updated = time.time()
         if update:
             summoners = list(riot_commands.update_linked_summoners_data(summoners, self.bot.config.get_guild_config(guild_id), self.bot.config.general_config))
 
-        with open(file_path) as json_file:
-            summoners_data = json.load(json_file)
+        file_path = file_path_unformatted.format(guild_id=guild_id)
+
+        try:
+            with open(file_path) as json_file:
+                summoners_data = json.load(json_file)
+        except FileNotFoundError:
+            summoners_data = {}
 
         queue_data_empty_dict = {'date_time': [], 'Rang': [], 'Winrate': []}
         for summoner in summoners:
@@ -317,6 +323,10 @@ class LoopCog(commands.Cog):
                         summoner_flex_rank)
                     summoners_data[summoner.discord_user_name]['flex']['Winrate'].append(
                         summoner_flex_winrate)
+
+        path = pathlib.Path(file_path).parent
+        if not path.exists():
+            path.mkdir(parents=True)
 
         with open(file_path, 'w') as json_file:
             json.dump(summoners_data, json_file, indent=4)
