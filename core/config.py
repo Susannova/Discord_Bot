@@ -254,9 +254,10 @@ class BotConfig:
         Settings not given in the dict are set to default """
         self.general_config = GeneralConfig(**config_dict["general_config"])
         for guild in config_dict["guilds_config"]:
-            if guild not in self.__guilds_config or int(guild) not in self.__guilds_config:
-                self.add_new_guild_config(int(guild))
-            self.get_guild_config(int(guild)).fromdict(config_dict["guilds_config"][guild])
+            guild_int = int(guild)
+            if guild_int not in self.__guilds_config:
+                self.add_new_guild_config(guild_int)
+            self.get_guild_config(guild_int).fromdict(config_dict["guilds_config"][guild])
 
     def write_config_to_file(self, filename: str = None):
         """ Write the config to the config file """
