@@ -35,6 +35,7 @@ if __name__ == '__main__':
         bot.load_extension('cogs.cog_utility')
         bot.load_extension('cogs.events')
         bot.load_extension('cogs.cog_tasks')
+        bot.load_extension('cogs.cog_roleplay')
 
         bot.run()
         logger.info("End")
