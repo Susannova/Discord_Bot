@@ -33,6 +33,6 @@ class RoleplayCog(commands.Cog, name='Roleplay Commands'):
             dice_roll_summed_value += random.randint(0, dice_faces)
         await ctx.send(f'{ctx.message.author.mention} I rolled {dice_string} for you wish resulted in {dice_roll_summed_value}.')
 
-            
-
-    
+def setup(bot: DiscordBot.KrautBot):
+    bot.add_cog(RoleplayCog(bot))
+    logger.info('Debug cogs loaded')
