@@ -15,7 +15,7 @@ from riot import riot_commands
 
 logger = logging.getLogger(__name__)
 
-DICE_REGEX = r"[1-9][0-9]{0,2}(d|w)[1-9][0-9]{0,3}(\+[1-9][0-9]{0,3})?"
+DICE_REGEX = r"[1-9][0-9]{0,2}(d|w)[1-9][0-9]{0,3}((\+|\-)[1-9][0-9]{0,3})?"
 
 class RoleplayCog(commands.Cog, name='Roleplay Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
@@ -24,12 +24,26 @@ class RoleplayCog(commands.Cog, name='Roleplay Commands'):
     def parse_dice_string(self, dice_string):
         dice_string = dice_string.split('d')
         dice_string_add = 0
-        if ('+' in dice_string[1]):
-            dice_string_add = (dice_string[1].split('+'))
-            dice_string[1] = dice_string_add[0]
-            dice_string_add = dice_string_add[1]
+        if '+' in dice_string[1]:
+            dice_string_add, dice_string[1] = self.parse_add_subtract_dice_string(dice_string[1], True)
+        elif '-' in dice_string[1]:
+            dice_string_add, dice_string[1] = self.parse_add_subtract_dice_string(dice_string[1], False)
+
+    
         return int(dice_string[0]), int(dice_string[1]), int(dice_string_add)
 
+    def parse_add_subtract_dice_string(self, dice_string, is_adding):
+        add_symbol = '-'
+        if is_adding:
+            add_symbol = '+'
+        dice_string_add = (dice_string.split(add_symbol))
+        dice_string = dice_string_add[0]
+        dice_string_add = int(dice_string_add[1])
+        if not is_adding:
+            dice_string_add = dice_string_add * -1
+            
+        return dice_string_add, dice_string
+    
     @commands.command(name='r')
     @checks.has_any_role("admin_id", "member_id")
     async def roll_dice(self, ctx: commands.Context, dice_string: str, gm_only: typing.Optional[bool]):
@@ -44,6 +58,7 @@ class RoleplayCog(commands.Cog, name='Roleplay Commands'):
             dice_roll_summed_value += random.randint(1, int(dice_faces))
         if dice_add != 0:
             dice_roll_summed_value += dice_add
+        dice_roll_summed_value = 1 if dice_roll_summed_value < 1 else dice_roll_summed_value
         await ctx.send(f'{ctx.message.author.mention} I rolled {dice_string} for you wish resulted in {dice_roll_summed_value}.')
 
 
