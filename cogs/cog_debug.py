@@ -117,21 +117,15 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.is_owner()
     async def end_(self, ctx, *arg):
         if len(list(arg)) == 0:
-            await ctx.send('Use "restart" or "abort".')
-            return
-        exit_status = 2
-        if str(arg[0]) == "restart":
-            exit_status=0
-            await ctx.send('Bot will be restarted if systemd is configured to restart on success.')
-        elif str(arg[0]) == "abort":
+            exit_status = 0
+        if str(arg[0]) == "abort":
+            await ctx.send('Bot will be restarted if systemd is configured to restart on failure.')
             exit_status=3
-            await ctx.send('Bot will be aborted.')
         else:
-            await ctx.send('Use "restart" or "abort".')
+            await ctx.send('Use "abort" or nothing.')
             return
 
-
-        logger.info("Try to abort bot with exit status %s", exit_status)
+        logger.info("Try to end bot with exit status %s", exit_status)
         await self.bot.logout(exit_status)
 
 
