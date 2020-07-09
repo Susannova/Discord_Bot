@@ -117,8 +117,9 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.is_owner()
     async def end_(self, ctx, *arg):
         if len(list(arg)) == 0:
+            await ctx.send('Goodbye!')
             exit_status = 0
-        if str(arg[0]) == "abort":
+        elif str(arg[0]) == "abort":
             await ctx.send('Bot will be restarted if systemd is configured to restart on failure.')
             exit_status=3
         else:
