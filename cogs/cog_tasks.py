@@ -195,7 +195,7 @@ class LoopCog(commands.Cog):
                     annoucement_channel = self.bot.get_channel(guild_config.channel_ids.announcement)
                     
                     text_to_send = guild_config.messages.patch_notes_formatted.format(
-                        role_mention=guild.get_role(guild_config.get_game("LoL").role_id).mention,
+                        role_mention=guild.get_role(guild_config.get_game("LOL").role_id).mention,
                         patch_note=riot_utility.get_current_patch_url(self.bot.config.get_guild_config(guild.id))
                     )
                     
