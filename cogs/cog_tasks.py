@@ -201,6 +201,11 @@ class LoopCog(commands.Cog):
                     
                     await annoucement_channel.send(text_to_send)
 
+    @check_LoL_patch.before_loop
+    async def check_LoL_patch_before_loop(self):
+        await self.bot.wait_until_ready()
+
+
     @tasks.loop(hours=1)
     async def auto_delete_purgeable_messages(self):
         """ auto deletes all purgeable messages """ 
