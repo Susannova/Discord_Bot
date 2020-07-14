@@ -6,8 +6,7 @@ import typing
 import discord
 
 from core import (
-    timers,
-    play_requests
+    timers
 )
 
 from core import config
@@ -41,19 +40,19 @@ def create_team(players: typing.List[typing.Union[discord.Member, str]], guild_c
 
     return teams_message, team1, team2
 
-def create_internal_play_request_message(message, play_request, guild_config: config.GuildConfig, state: GuildState):
-    """
-    Creates an internal play_request message.
-    """
-    play_request_time = re.findall('\d\d:\d\d', message.content)
-    intern_message = guild_config.messages.create_internal_play_request.format(
-        creator=play_request.message_author.name,
-        free_places=10 - len(state.play_requests[message.id]),
-        time=play_request_time
-        )
-    for player_tuple in state.play_requests[message.id]:
-        intern_message += player_tuple[0].name + '\n'
-    return intern_message
+# def create_internal_play_request_message(message, play_request, guild_config: config.GuildConfig, state: GuildState):
+#     """
+#     Creates an internal play_request message.
+#     """
+#     play_request_time = re.findall('\d\d:\d\d', message.content)
+#     intern_message = guild_config.messages.create_internal_play_request.format(
+#         creator=play_request.message_author.name,
+#         free_places=10 - len(state.play_requests[message.id]),
+#         time=play_request_time
+#         )
+#     for player_tuple in state.play_requests[message.id]:
+#         intern_message += player_tuple[0].name + '\n'
+#     return intern_message
 
 
 # TODO: implement this
@@ -97,24 +96,9 @@ def get_players_in_channel(channel):
     return list(generate_players_in_channel(channel))
 
 
-def add_subscriber_to_play_request(user, play_request: play_requests.PlayRequest):
-    play_request.add_subscriber_id(user.id)
-
 
 def is_user_bot(user, bot):
     if user.name in (bot.user.name, "Secret Kraut9 Leader"):
-        return True
-    return False
-
-
-def is_already_subscriber(user, play_request: play_requests.PlayRequest):
-    if user.id in play_request.subscriber_ids:
-        return True
-    return False
-
-
-def is_play_request_author(user_id, play_request: play_requests.PlayRequest):
-    if user_id == play_request.author_id:
         return True
     return False
 
@@ -129,11 +113,6 @@ def get_purgeable_messages_list(message_cache, guild_config: config.GuildConfig)
 def clear_message_cache(message_id, message_cache):
     if message_id in message_cache:
         del message_cache[message_id]
-
-
-def clear_play_requests(message_id: int, state: GuildState):
-    if message_id in state.play_requests:
-        del state.play_requests[message_id]
 
 
 def pretty_print_list(*players) -> str:

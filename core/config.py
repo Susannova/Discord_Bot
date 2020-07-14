@@ -43,7 +43,7 @@ class Messages_Config:
     auto_dm_subscriber: str = '{player} hat auch auf das Play-Request von {creator} reagiert: {reaction} '
     play_now: str = '{role_mention}\n{creator} spielt **__jetzt gerade__** **{game}** und sucht noch nach weiteren Spielern!'
     play_at: str = '{role_mention}\n{player} will **{game}** spielen. Kommt gegen **__{time}__** Uhr online!'
-    play_request_reminder: str = 'REMINDER: Der abonnierte Play-Request geht in 5 Minuten los!'
+    play_request_reminder: str = 'REMINDER: Der abonnierte Play-Request geht in {minutes} Minuten los!'
     clash_create = '{role_mention}\n{player} sucht nach Mitspielern für den LoL Clash am {date}.'
     clash_full: str = 'Das Clash Team von {creator} für den {time} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{team}'
 
@@ -81,7 +81,8 @@ class UnsortedConfig:
 
     riot_region: str = 'euw1'
 
-    play_now_time_add_limit: str = 120
+    play_now_time_add_limit: int = 120
+    play_reminder_seconds: int = 60 * 5
 
     # TODO Move this stuff in an own class
     game_selector_id: int = None

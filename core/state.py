@@ -1,6 +1,7 @@
 import pickle
 import logging
 from core.config import BotConfig
+from core.play_requests import PlayRequest
 
 
 logger = logging.getLogger(__name__)
@@ -13,9 +14,34 @@ class GuildState:
     def __init__(self):
         self.debug = False
         self.message_cache = {}
-        self.play_requests = {}
+        self.__play_requests = {}
         self.tmp_channel_ids = {}
         self.clash_date: str = None
+    
+    def is_play_request(self, message_id: int) -> bool:
+        return True if message_id in self.__play_requests else False
+    
+    def add_play_request(self, play_request: PlayRequest):
+        """ Adds a play request to the state. 
+        Raises LookupError if play request already exists """
+
+        message_id = play_request.message_id
+
+        if not self.is_play_request(message_id):
+            self.__play_requests[message_id] = play_request
+        else:
+            raise LookupError("Play request already exists")
+
+    def remove_play_request(self, message_id: int):
+        """ Removes a play request from the state
+        Does NOT check if the message_id belongs to a play request!"""
+        
+        del self.__play_requests[message_id]
+    
+    def get_play_request(self, message_id: int) -> PlayRequest:
+        """ Returns the play request given by the message_id """
+        return self.__play_requests[message_id]
+
 
 
 class GeneralState:

@@ -88,9 +88,12 @@ class EventCog(commands.Cog):
             utility.insert_in_message_cache(self.bot.state.get_guild_state(message.guild.id).message_cache, message.id, message.channel.id)
 
     @commands.Cog.listener()
-    async def on_message_delete(self, message):
+    async def on_message_delete(self, message: discord.Message):
         guild_state = self.bot.state.get_guild_state(message.guild.id)
-        utility.clear_play_requests(message.id, guild_state)
+        
+        if guild_state.is_play_request(message.id):
+            guild_state.remove_play_request(message.id)
+
         if message.id in guild_state.message_cache:
             utility.clear_message_cache(message.id, guild_state.message_cache)
         else:
@@ -110,13 +113,13 @@ class EventCog(commands.Cog):
         if not guild_config.toggles.auto_dm:
             return
 
-        if reaction.message.id not in guild_state.play_requests:
+        if not guild_state.is_play_request(reaction.message.id):
             logger.debug("Message is not a play request. Ignore reaction")
             return
         
-        play_request = guild_state.play_requests[reaction.message.id]
+        play_request = guild_state.get_play_request(reaction.message.id)
 
-        if utility.is_play_request_author(user.id, play_request):
+        if play_request.is_play_request_author(user.id):
             logger.info("Remove reaction from a play_request_author")
             await reaction.remove(user)
             return
@@ -128,10 +131,10 @@ class EventCog(commands.Cog):
                     play_request.remove_subscriber_id(user.id)
             return
 
-        if utility.is_already_subscriber(user, play_request):
+        if play_request.is_already_subscriber(user.id):
             return
         
-        utility.add_subscriber_to_play_request(user, play_request)
+        play_request.add_subscriber_id(user.id)
 
         author = self.bot.get_user(play_request.author_id)
         
