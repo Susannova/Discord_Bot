@@ -51,7 +51,8 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             riot_commands.calculate_bans_for_team(self.bot.config, team_names), file=discord.File(
                 f'{folder_name}/image.jpg'))
 
-    @commands.command(name='clash', help = help_text.clash_HelpText.text, brief = help_text.clash_HelpText.brief, usage = help_text.clash_HelpText.usage)
+    # TODO Move this to cog_clash
+    @commands.command(name='clash_old', help = help_text.clash_HelpText.text, brief = help_text.clash_HelpText.brief, usage = help_text.clash_HelpText.usage)
     @checks.is_in_channels("commands_member")
     @checks.has_n_attachments(1)
     async def clash_(self, ctx):
