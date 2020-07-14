@@ -6,7 +6,8 @@ from discord.ext import commands
 
 from core import (
     checks,
-    DiscordBot
+    DiscordBot,
+    converters
 )
 
 logger = logging.getLogger(__name__)
@@ -128,6 +129,13 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
 
         logger.info("Try to end bot with exit status %s", exit_status)
         await self.bot.logout(exit_status)
+
+
+    @commands.command(name='dict')
+    @checks.is_in_channels()
+    @checks.has_any_role("admin_id")
+    async def dict_(self, ctx, *, dictonary: converters.ArgsToDict):
+        await ctx.send(str(dictonary))
 
 
 def setup(bot: DiscordBot.KrautBot):
