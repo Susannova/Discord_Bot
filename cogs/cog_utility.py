@@ -51,7 +51,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
                         await member.move_to(channel_team2)
 
     @commands.command(name='link', help = help_text.link_HelpText.text, brief = help_text.link_HelpText.brief, usage = help_text.link_HelpText.usage)
-    @checks.is_riot_enabled
+    @commands.check(checks.is_riot_enabled)
     @checks.is_in_channels("commands", "commands_member")
     async def link_(self, ctx, summoner_name):
         try:

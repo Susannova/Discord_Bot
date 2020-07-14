@@ -75,14 +75,11 @@ def has_n_attachments(n):
     return commands.check(predicate)
 
 
-def is_riot_enabled(func):
+def is_riot_enabled(ctx: commands.Context):
     """ Checks if the riot API is enabled """
-    async def inner(obj: DiscordBot.KrautBot, *args):
-        if obj.config.general_config.riot_api:
-            return await func(obj, *args)
-        else:
-            raise commands.CheckFailure("Riot-API is disabled")
-    return inner
+    bot = ctx.bot
+    return bot.config.general_config.riot_api
+
 
 # def is_debug_config_enabled():
 #     async def predicate(ctx):

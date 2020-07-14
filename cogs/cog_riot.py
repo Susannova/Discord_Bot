@@ -19,7 +19,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
         self.bot = bot
 
     @commands.command(name='player', help = help_text.player_HelpText.text, brief = help_text.player_HelpText.brief, usage = help_text.player_HelpText.usage)
-    @checks.is_riot_enabled
+    @commands.check(checks.is_riot_enabled)
     @checks.is_in_channels("commands_member", "commands")
     async def player_(self, ctx, *summoner_name):
         logger.debug('!player command called')
@@ -30,7 +30,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
         await ctx.send(riot_commands.get_player_stats(ctx.message.author.name, arg, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config))
 
     @commands.command(name='smurf', help = help_text.smurf_HelpText.text, brief = help_text.smurf_HelpText.brief, usage = help_text.smurf_HelpText.usage)
-    @checks.is_riot_enabled
+    @commands.check(checks.is_riot_enabled)
     @checks.is_in_channels("commands_member", "commands")
     async def smurf_(self, ctx, *summoner_name):
         logger.debug('!smurf command called')
@@ -41,7 +41,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
         await ctx.send(riot_commands.get_smurf(ctx.message.author.name, arg, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config))
 
     @commands.command(name='bans', help = help_text.bans_HelpText.text, brief = help_text.bans_HelpText.brief, usage = help_text.bans_HelpText.usage)
-    @checks.is_riot_enabled
+    @commands.check(checks.is_riot_enabled)
     @discord.ext.commands.cooldown(rate=1, per=5)
     @checks.is_in_channels("commands_member", "commands")
     async def bans_(self, ctx, *team_names):
