@@ -31,10 +31,19 @@ if __name__ == '__main__':
 
         bot.load_extension('cogs.cog_debug')
         bot.load_extension('cogs.cog_play_requests')
-        bot.load_extension('cogs.cog_riot')
+
         bot.load_extension('cogs.cog_utility')
         bot.load_extension('cogs.events')
         bot.load_extension('cogs.cog_tasks')
+
+        
+        for guild_id in bot.config.get_all_guild_ids():
+            for cog in bot.config.get_guild_config(guild_id=guild_id).yield_game_cogs():
+                try:
+                    bot.load_extension(cog)
+                except commands.ExtensionAlreadyLoaded:
+                    pass
+
         bot.load_extension('cogs.cog_roleplay')
 
         bot.run()

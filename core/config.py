@@ -13,12 +13,13 @@ logger = logging.getLogger(__name__)
 @dataclasses.dataclass
 class Game:
     """ Represents a game.
-    A game has a long and a short name, belongs to a discord role and category and an emoji """
+    A game has a long and a short name, belongs to a discord role and category and an emoji. It also can have its own cog! """
     name_short: str
     name_long: str
     role_id: int
     emoji: int
     category_id: int
+    cog: str = None
 
 
 @dataclasses.dataclass
@@ -161,11 +162,11 @@ class GuildConfig():
         else:
             raise LookupError("Game not found")
 
-    def add_game(self, game: str, long_name: str, role_id: int, emoji: int, category_id: int):
+    def add_game(self, game: str, long_name: str, role_id: int, emoji: int, category_id: int, cog: str = None):
         """ Adds a new game to the bot """
 
         # The asdict prevents one from create a dict that is invalid to Game
-        self.__games[game] = dataclasses.asdict(Game(game, long_name, role_id, emoji, category_id))
+        self.__games[game] = dataclasses.asdict(Game(name_short=game, name_long=long_name, role_id=role_id, emoji=emoji, category_id=category_id, cog=cog))
     
     def get_all_game_emojis(self):
         """ Yields all game emojis """
@@ -180,6 +181,14 @@ class GuildConfig():
                 return game
         
         raise LookupError("Game not found")
+
+    def yield_game_cogs(self):
+        """ Yields all game_cogs """
+        for game_name in self.__games:
+            game = Game(**self.__games[game_name])
+            game_cog = game.cog
+            if game_cog is not None:
+                yield game_cog
 
     def get_category_ids(self, *role_names) -> list:
         """ Returns a list of all game channel category ids that matches role_names """
