@@ -320,6 +320,7 @@ class BotConfig:
         return True if guild_id in self.__guilds_config else False
     
     def get_all_guild_ids(self) -> list:
+        """ Returns a list with every guild id """
         return [guild_id for guild_id in self.__guilds_config]
 
 # if __name__ == "__main__":
