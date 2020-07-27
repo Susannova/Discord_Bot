@@ -29,6 +29,8 @@ if __name__ == '__main__':
     try:
         logger.info("Start Bot")
 
+        bot.load_extension('cogs.cog_config')
+        
         bot.load_extension('cogs.cog_debug')
         bot.load_extension('cogs.cog_play_requests')
 

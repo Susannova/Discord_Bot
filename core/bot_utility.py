@@ -55,9 +55,9 @@ def create_team(players: typing.List[typing.Union[discord.Member, str]], guild_c
 #     return intern_message
 
 
-# TODO: implement this
-def switch_to_internal_play_request(message, play_request, guild_config: config.GuildConfig, state: GuildState):
-    return create_internal_play_request_message(message, play_request, guild_config, state)
+# # TODO: implement this
+# def switch_to_internal_play_request(message, play_request, guild_config: config.GuildConfig, state: GuildState):
+#     return create_internal_play_request_message(message, play_request, guild_config, state)
 
 
 def generate_auto_role_list(member, guild_config: config.GuildConfig):

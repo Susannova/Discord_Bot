@@ -65,25 +65,6 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
                 await ctx.send(f"Emoji id is {emoji.id}.")
                 break
 
-    @commands.command(name='reload-config')
-    @checks.is_in_channels()
-    @checks.has_any_role("admin_id")
-    async def reload_config(self, ctx):
-        logger.info('Try to reload the configuration.')
-        await ctx.send("Reload configuration.json:")
-        self.bot.config.update_config_from_file()
-        self.bot.state.get_version()
-        await ctx.send("Done.")
-        logger.info('configuration reloaded.')
-    
-    @commands.command(name='write-config')
-    @checks.is_in_channels()
-    @checks.has_any_role("admin_id")
-    async def write_config(self, ctx):
-        logger.info('Try to write the configuration.')
-        self.bot.config.write_config_to_file()
-        await ctx.send("Done.")
-
     # @commands.command(name='enable-debug')
     # @checks.is_in_channels()
     # @checks.is_debug_config_enabled()

@@ -9,11 +9,24 @@ from typing import List
 
 logger = logging.getLogger(__name__)
 
+def update_recursive(old_dict: dict, update_dict: dict):
+    """ Updates old_dict with update_dict
+
+    old_dict -- The dict that will be updated
+    update_dict -- The dict to update from
+    """
+    for key in update_dict:
+        if key in old_dict and isinstance(update_dict[key], dict):
+            update_recursive(old_dict[key], update_dict[key])
+        else:
+            old_dict[key] = update_dict[key]
 
 @dataclasses.dataclass
 class Game:
     """ Represents a game.
-    A game has a long and a short name, belongs to a discord role and category and an emoji. It also can have its own cog! """
+
+    A game has a long and a short name,
+    belongs to a discord role and category and an emoji. It also can have its own cog! """
     name_short: str
     name_long: str
     role_id: int
@@ -72,8 +85,6 @@ class UnsortedConfig:
     guest_id: int = None
     everyone_id: int = None
 
-    guild_id: int = None
-
     command_prefix: str = '?'
 
     emoji_join: str = '✅'
@@ -86,6 +97,7 @@ class UnsortedConfig:
 
     # TODO Move this stuff in an own class
     game_selector_id: int = None
+
 
 
 @dataclasses.dataclass
@@ -106,6 +118,18 @@ class Channel_Ids:
     commands_member: List[int] = dataclasses.field(default_factory=list)
     commands: List[int] = dataclasses.field(default_factory=list)
 
+    def yield_all_channel_ids(self):
+        """ Yields all channel ids """
+        for elem in dataclasses.astuple(self):
+            if isinstance(elem, list):
+                for channel_id in elem:
+                    yield channel_id
+            else:
+                yield elem
+
+
+
+
 
 @dataclasses.dataclass
 class Folders_and_Files:
@@ -116,7 +140,7 @@ class Folders_and_Files:
 class GuildConfig():
     """Configuration for the guild """
 
-    def __init__(self, guild_id: int):
+    def __init__(self):
         self.unsorted_config = UnsortedConfig()
         self.messages = Messages_Config()
         self.channel_ids = Channel_Ids()
@@ -125,8 +149,7 @@ class GuildConfig():
         
         # Dict of classes Game. Use the add and get functions to modify this.
         self.__games = {}
-        
-        self.unsorted_config.guild_id = guild_id
+
 
     def asdict(self) -> dict:
         """ Returns all settings as a dict """
@@ -139,21 +162,43 @@ class GuildConfig():
             "games": self.__games
         }
     
-    def fromdict(self, config_dict):
+    def fromdict(self, config_dict, update: bool = False):
         """ Sets the settings given by a dict. The format of the dictionary must be like in self.asdict().
-        Settings not given in the dict are set to default """
-        if "unsorted_config" in config_dict:
-            self.unsorted_config = UnsortedConfig(**config_dict["unsorted_config"])
-        if "messages" in config_dict:
-            self.messages = Messages_Config(**config_dict["messages"])
-        if "channel_ids" in config_dict:
-            self.channel_ids = Channel_Ids(**config_dict["channel_ids"])
-        if "folder_and_files" in config_dict:
-            self.folders_and_files = Folders_and_Files(**config_dict["folder_and_files"])
-        if "toggles" in config_dict:
-            self.toggles = Toggles(**config_dict["toggles"])
-        if "games" in config_dict:
-            self.__games = config_dict["games"]
+        
+        config_dict -- The dict to set the config from
+        update -- If false, settings not given in the dict are set to default (default)
+        """
+
+        new_config = self.asdict() if update else GuildConfig().asdict()
+        update_recursive(new_config, config_dict)
+
+        self.unsorted_config = UnsortedConfig(**new_config["unsorted_config"])
+        self.messages = Messages_Config(**new_config["messages"])
+        self.channel_ids = Channel_Ids(**new_config["channel_ids"])
+        self.folders_and_files = Folders_and_Files(**new_config["folders_and_files"])
+        self.toggles = Toggles(**new_config["toggles"])
+        self.__games = new_config["games"]
+    
+    def check_for_invalid_channel_ids(self, valid_ids: list):
+        """ Checks and deletes ids that are not in valid_ids and yields tuples of the deleted id and its category"""
+
+        is_invalid = False
+        channel_ids_dict = dataclasses.asdict(self.channel_ids)
+
+        for key in channel_ids_dict:
+            if isinstance(channel_ids_dict[key], list):
+                for channel_id in channel_ids_dict[key]:
+                    if channel_id is not None and channel_id not in valid_ids:
+                        is_invalid = True
+                        channel_ids_dict[key].remove(channel_id)
+                        yield (key, channel_id)
+            elif channel_ids_dict[key] is not None and channel_ids_dict[key] not in valid_ids:
+                is_invalid = True
+                yield (key, channel_ids_dict[key])
+                channel_ids_dict[key] = None
+        
+        if is_invalid:
+            self.channel_ids = Channel_Ids(**channel_ids_dict)
 
     def get_game(self, game_short_name: str) -> Game:
         """ Returns a Game class that belongs to the short name of a game """
@@ -227,6 +272,8 @@ class GeneralConfig:
 
     riot_api: bool = True
 
+    directory_temp_files = "./temp"
+
     log_file: str = './log/log'
     config_file: str = './config/configuration.json'
 
@@ -294,13 +341,16 @@ class BotConfig:
         self.fromdict(config_dict)
         logger.info("Settings were updated from file %s", filename)
 
-    def add_new_guild_config(self,  guild_id: int):
-        """ Adds a new guild config """ 
+    def add_new_guild_config(self,  guild_id: int) -> GuildConfig:
+        """ Adds a new guild config and returns the config"""
+
         if guild_id in self.__guilds_config:
             raise LookupError("Guild already has a config!")
         else:
-            self.__guilds_config[guild_id] = GuildConfig(guild_id)
+            self.__guilds_config[guild_id] = GuildConfig()
             logger.info("We have added the guild %s to the config!", guild_id)
+        
+        return self.__guilds_config[guild_id]
     
     def remove_guild_config(self,  guild_id: int):
         """ Remove a guild config """ 
