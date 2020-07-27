@@ -30,7 +30,6 @@ class KrautBot(commands.Bot):
         super().__init__(command_prefix=get_command_prefix)
         
         help_command_ = commands.DefaultHelpCommand()
-        help_command_.verify_checks = False
         self.help_command = help_command_
         try:
             with open(f'{self.config.general_config.database_directory_global_state}/{self.config.general_config.database_name_global_state}', 'rb') as file:
