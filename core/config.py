@@ -220,6 +220,8 @@ class GuildConfig():
 
 @dataclasses.dataclass
 class GeneralConfig:
+    super_user: List[int] = dataclasses.field(default_factory=list)
+
     discord_token: str = ''
     riot_token: str = ''
 

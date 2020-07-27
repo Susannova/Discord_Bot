@@ -61,6 +61,10 @@ def is_in_channels(*channel_names):
             raise commands.CheckFailure("Command is used in false channel")
     return commands.check(wrapper)
 
+def is_super_user(ctx: commands.Context):
+    """ Checks if the user is a super user """
+    bot = ctx.bot
+    return ctx.message.author.id in bot.config.general_config.super_user
 
 def is_riot_enabled(ctx: commands.Context):
     """ Checks if the riot API is enabled """

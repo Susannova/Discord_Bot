@@ -26,7 +26,7 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
 
     @commands.command(name='reload-ext')
     @checks.is_in_channels()
-    @checks.has_any_role("admin_id")
+    @commands.check(checks.is_super_user)
     async def reload_ext_(self, ctx, ext):
         logger.info('!reload-ext called')
         try:
@@ -103,7 +103,7 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
     @commands.command(name='print')
     @checks.is_in_channels()
     @checks.is_debug_enabled
-    @checks.has_any_role("admin_id")
+    @commands.check(checks.is_super_user)
     async def print_(self, ctx, arg):
         logger.debug('!print %s called', arg)
         # return_string = ast.literal_eval(arg)
@@ -114,8 +114,7 @@ class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
 
     @commands.command(name='end')
     @checks.is_in_channels()
-    @checks.has_any_role("admin_id")
-    @commands.is_owner()
+    @commands.check(checks.is_super_user)
     async def end_(self, ctx, *arg):
         if len(list(arg)) == 0:
             await ctx.send('Goodbye!')
