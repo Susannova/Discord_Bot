@@ -14,7 +14,7 @@ class ArgsToDict(commands.Converter):
 
         # This is a generator that yields generators that yield at first a key and then a value. The value is either a string or a list. Short but really ugly..
         dict_list = (
-            (key_val_str if re.fullmatch("[\[].*[\]]", key_val_str) is None else [item for item in re.findall("[^,\[\]]+", key_val_str)] for key_val_str in arg.split(":")) for arg in re.findall("[^,]:[\[].*?[\]]|[^,]:[^\[\],]", args_formatted)
+            (key_val_str if re.fullmatch("[\[].*[\]]", key_val_str) is None else [item for item in re.findall("[^,\[\]]+", key_val_str)] for key_val_str in arg.split(":")) for arg in re.findall("[^,]*?:[\[].*?[\]]|[^,]*?:[^\[\],]*", args_formatted)
         )
 
         return dict(dict_list)
