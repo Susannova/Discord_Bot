@@ -62,19 +62,6 @@ def is_in_channels(*channel_names):
     return commands.check(wrapper)
 
 
-def has_n_attachments(n):
-    async def predicate(ctx):
-        if len(ctx.message.attachments) == n:
-            return True
-        else:
-            try:
-                raise _exceptions.MissingRequiredAttachment()
-            except _exceptions.MissingRequiredAttachment:
-                await ctx.send(
-                    'Es fehlt ein Attachment. (z.B. das Bild bei ?clash)')
-    return commands.check(predicate)
-
-
 def is_riot_enabled(ctx: commands.Context):
     """ Checks if the riot API is enabled """
     bot = ctx.bot

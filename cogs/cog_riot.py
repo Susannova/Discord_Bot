@@ -53,9 +53,17 @@ class RiotCog(commands.Cog, name='Riot Commands'):
 
     @commands.command(name='clash', help = help_text.clash_HelpText.text, brief = help_text.clash_HelpText.brief, usage = help_text.clash_HelpText.usage)
     @checks.is_in_channels("commands_member")
-    @checks.has_n_attachments(1)
     async def clash_(self, ctx):
         logger.debug('!clash command called')
+
+        if len(ctx.message.attachments) == 0:
+            logger.error("Clash command called without an attachment")
+            await ctx.send("Please attach an image to the command.")
+            return
+        elif len(ctx.message.attachments) > 1:
+            logger.error("Clash command called with multiple attachments")
+            await ctx.send("Only one image is needed. I will take the first.")
+
         attached_image = ctx.message.attachments[0]
         attached_image_file_name = attached_image.filename
         await attached_image.save(attached_image_file_name)
