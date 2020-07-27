@@ -28,17 +28,14 @@ class EventCog(commands.Cog):
         logger.info('We have logged in as %s', self.bot.user)
         guilds = [guild.id for guild in self.bot.guilds]
 
-        # Checks if we are in new guilds
         for guild_id in guilds:
-
+            # Checks if we are in new guilds
             if not self.bot.config.check_if_guild_exists(guild_id):
                 self.bot.config.add_new_guild_config(guild_id)
-            
             if not self.bot.state.check_if_guild_exists(guild_id):
                 self.bot.state.add_guild_state(guild_id)
 
         logger.debug("Check if we were removed from a guild")
-        # Checks if we were removed from a guild
         for guild_id in self.bot.config.get_all_guild_ids():
             if guild_id not in guilds:
                 self.bot.config.remove_guild_config(guild_id)
@@ -47,15 +44,55 @@ class EventCog(commands.Cog):
             if guild_id not in guilds:
                 self.bot.state.remove_guild_state(guild_id)
         
+        logger.debug("Check the channel ids")
+        for guild_id in guilds:
+            # Check if a bot channel was deleted
+            guild = self.bot.get_guild(guild_id)
+            guild_channels = [channel.id for channel in guild.channels]
+            bot_channels = self.bot.config.get_guild_config(guild_id).channel_ids.bot
+
+            channel_found = False
+            removed_channels = []
+            for bot_channel in bot_channels:
+                if bot_channel in guild_channels:
+                    channel_found = True
+                else:
+                    removed_channels.append(bot_channel)
+
+            if not channel_found:
+                await self.bot.create_bot_channel(guild)
+
+            # Second loop is needed because a new bot channel could have beeen created above.
+            if removed_channels:
+                for bot_channel in bot_channels:
+                    if bot_channel not in removed_channels:
+                        await self.bot.get_channel(bot_channel).send(f"I have removed the bot channels {removed_channels} because they don't exists.")
+                    else:
+                        bot_channels.remove(bot_channel)
+
+            # Check for invalid channel ids
+            await self.bot.check_channels_id_in_config(guild_id)
+
         logger.debug("on_ready finished")
+    
+    @commands.Cog.listener()
+    async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
+        if isinstance(error, commands.CommandNotFound):
+            await ctx.send("The command was not found. Avaible commands are:")
+            await ctx.send_help()
+        
+        raise error
 
 
     
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
         logger.info("Joined to new server %s with id %s!", guild.name, guild.id)
-        self.bot.config.add_new_guild_config(guild.id)
         self.bot.state.add_guild_state(guild.id)
+        self.bot.config.add_new_guild_config(guild.id)
+
+        await self.bot.create_bot_channel(guild)
+        
 
     @commands.Cog.listener()
     async def on_guild_remove(self, guild: discord.Guild):
@@ -206,6 +243,16 @@ class EventCog(commands.Cog):
         if channel.id in tmp_channel_ids:
             logger.info("Temporary channel was deleted manually.")
             tmp_channel_ids[channel.id]["deleted"] = True
+        elif channel.id in self.bot.config.get_guild_config(channel.guild.id).channel_ids.bot:
+            guild_id = channel.guild.id
+            guild_config = self.bot.config.get_guild_config(channel.guild.id)
+            guild_config.channel_ids.bot.remove(channel.id)
+            if not guild_config.channel_ids.bot:
+                bot_channel = await self.bot.create_bot_channel(channel.guild)
+                await bot_channel.send("This channel was created because the old one was deleted.")
+            
+
+
 
     @commands.Cog.listener()
     async def on_voice_state_update(self, member: discord.Member, before: discord.VoiceState, after: discord.VoiceState):
