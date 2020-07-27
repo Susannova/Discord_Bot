@@ -24,7 +24,8 @@ from core import (
     bot_utility as utility,
     timers,
     DiscordBot,
-    config
+    config,
+    checks
 )
 
 logger = logging.getLogger(__name__)
@@ -128,6 +129,7 @@ class LoopCog(commands.Cog):
         plot_all_summoners_data(summoners_data, filename, enable_xkcd=enable_xkcd)
         await channel_to_print.send(file=discord.File(filename))
 
+    @commands.check(checks.is_riot_enabled)
     @commands.command(name='plot')
     async def print_leaderboard_command(self, ctx, enable_xkcd: typing.Optional[bool]):
         if utility.get_guild_config(self.bot, ctx.guild.id).toggles.summoner_rank_history:
