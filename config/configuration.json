@@ -1,6 +1,6 @@
 {
     "general_config": {
-        "super_user": []
+        "super_user": [],
         "discord_token": "",
         "riot_token": "",
         "riot_api": false,
