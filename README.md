@@ -1,25 +1,40 @@
 # Discord Bot
 
-## Features:
-- create a team 
-- commit/reject play request with auto react
-- auto dm
-- auto delete non commands
-- version 
-- auto dm for people that subscribed to play-request (reacted with non :x:)
-- integrated riot api
-- lol player information
-- reload config on command
-- auto role
-- play requests
-- play-now requests
-- purges play_requests after 18h if new play_request is made
-- calculate best bans for a given lol team
-- check if player is a smurf
-- automatically generate op.gg link from scanning clash scouting screen
+The discord bot can run on multiple servers at the same time. Every server has it's own config, that can be set with ``config``.
 
-## Using the bot on your server:
-_TODO_
+## Features:
+Most of the features can be (de)activated. Not all are activated per default.
+- Get help messages with ``?help`` _(default if the command_prefix is unchanged)_
+- Create two random teams based on the member in the voice channel
+  - The teams can then automatically be moved to two voice channels
+- Create a request to play a game now or to a given time
+  - Other members can react to the play request with a join or pass reaction
+  - Members that reacted with join get a message if another member joins and 5 minutes before the game starts
+- Automations
+  - Auto delete non commands (not default)
+  - Assign new members to a specific role
+  - Members can choose what games they are interested in. The bot assign the member to corresponding roles
+  - Channel categories can be set visible if no member is connected to a voice channel of the category
+- Integrated riot api
+  - LoL player information
+  - calculate best bans for a given lol team
+  - check if player is a smurf
+  - automatically generate op.gg link from scanning clash scouting screen
+- Features for server owner or member in the admin role
+  - The config can be changed and printed in an automatically created text channel with the ``config`` command
+- Features for 'super users'
+  - Super users can modify generall settings with additional ``config`` commands
+  - Super users can modify the config of other servers
+  - End the bot with a successful or unsuccessful exit code
+
+## Using the bot on your server
+### Run the bot by me
+Just write me a message and I will add the bot to your server
+### Run the bot by yourself
+First clone the repo. In the folder you can install the required packages by running ``pip install -r requirements.txt``. [Create and invite a bot to your server](https://discordpy.readthedocs.io/en/latest/discord.html#discord-intro).
+Update the token in the file ``./config/configuration.json``. Run ``python3 discord_bot.py``. The bot will create a text channel on the server where you can set the settings of the bot. Type ``?help config`` in the text channel for more infos.
+
+The best way is to get the current config as a json file with ``?config print``. Modify this file and attach it to a message with ``?config read``.
 
 ## Commands:
 () = mandatory
