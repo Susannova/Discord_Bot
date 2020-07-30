@@ -4,6 +4,7 @@ import json
 
 import discord
 from discord.ext import commands
+import typing
 
 from core import (
     checks,
@@ -70,7 +71,7 @@ class ConfigCog(commands.Cog, name='Configuration commands'):
         """ Set the bot config for this server
 
         Keyword arguments:
-        category -- The category
+        category -- The config category
         configs -- A string with the format "setting: value". Value can be a list. Then the values have to be surrounded by parentheses and seperated by commatas"
         """
 
@@ -86,6 +87,20 @@ class ConfigCog(commands.Cog, name='Configuration commands'):
         await ctx.send("Config updated")
         logger.info("Update the guild config category %s to %s for guild %i", category, configs, ctx.guild.id)
     
+    @config.command(name='get')
+    async def config_get(self, ctx: commands.Context, category: str, config: typing.Optional[str]):
+        """ Get the bot config for this server
+
+        Keyword arguments:
+        category -- The config category
+        config -- The config to get (optional)
+        """
+
+        guild_config_as_dict = self.bot.config.get_guild_config(ctx.guild.id).asdict()
+        if config is None:
+            await ctx.send(guild_config_as_dict[category])
+        else:
+            await ctx.send(guild_config_as_dict[category][config])
 
     @commands.check(checks.is_super_user)
     @config.command(name='reload')
