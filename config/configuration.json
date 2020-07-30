@@ -1,9 +1,17 @@
 {
     "general_config": {
+        "super_user": [],
         "discord_token": "",
         "riot_token": "",
+        "riot_api": false,
         "log_file": "./log/log",
-        "config_file": "./config/configuration.json"
+        "config_file": "./config/configuration.json",
+        "folder_champ_icon": "./data/champ-icon/",
+		"folder_champ_spliced": "./data/champ-spliced/",
+		"database_directory_global_state": "./db/global_state",
+		"database_name_global_state": "global_state_db",
+		"database_directory_summoners": "./db/{guild_id}/summoners",
+		"database_name_summoners": "summoner_db"
     },
     "guilds_config": {
     }
