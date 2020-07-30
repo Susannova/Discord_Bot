@@ -75,7 +75,11 @@ class ConfigCog(commands.Cog, name='Configuration commands'):
         """
 
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
-        guild_config.fromdict({category: configs}, update=True)
+        try:
+            guild_config.fromdict({category: configs}, update=True)
+        except TypeError as e:
+            await ctx.send(str(e))
+            return
 
         await self.bot.check_channels_id_in_config(ctx.guild.id)
 

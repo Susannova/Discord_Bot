@@ -5,6 +5,7 @@ this file"""
 import logging
 import dataclasses
 import json
+import typing
 from typing import List
 
 logger = logging.getLogger(__name__)
@@ -21,6 +22,38 @@ def update_recursive(old_dict: dict, update_dict: dict):
         else:
             old_dict[key] = update_dict[key]
 
+def auto_conversion(obj, field: dataclasses.Field):
+    """ Tries to convert the field to the right type
+
+    Raises a TypeError if conversion fails.
+
+    obj -- The obj the field belongs to
+    field -- The field to check
+    """
+    field_val = getattr(obj, field.name)
+    if not field_val is None and not isinstance(field_val, field.type):
+        try:
+            setattr(obj, field.name, field.type(field_val))
+        except TypeError as error:
+            error_handling_auto_conversion(obj, field, error)
+
+def error_handling_auto_conversion(obj, field: dataclasses.Field, error: Exception):
+    """ Logs a error during the conversion of a field and raises a TypeError with an explaination """
+    error_message = f"{field.name} is a {type(getattr(obj, field.name))} but should be a {field.type}. Not all settings are set."
+    logger.error("%s. Python error text: %s", error_message, error)
+    raise TypeError(error_message)
+
+def check_if_channel_id_valid(channel_id: int, valid_ids: List) -> bool:
+    """ Checks if a channel_id is valid
+
+    Returns True if channel_id is valid and false otherwise.
+    """
+
+    if channel_id is not None and channel_id not in valid_ids:
+        return False
+    else:
+        return True
+
 @dataclasses.dataclass
 class Game:
     """ Represents a game.
@@ -34,9 +67,22 @@ class Game:
     category_id: int
     cog: str = None
 
+    def __post_init__(self):
+        """ Checks if the types are valid and tries to convert the fields if not
+
+        Raises an TypeError if conversion fails """
+        
+        for field in dataclasses.fields(self):
+            auto_conversion(self, field)
+
 
 @dataclasses.dataclass
 class Toggles:
+    """ A class for toggles
+    
+    A post init function checks if the toggles are booleans or not
+    """
+
     auto_delete: bool = False
     command_only: bool = False
     auto_react: bool = False
@@ -46,6 +92,13 @@ class Toggles:
     summoner_rank_history: bool = False
     leaderboard_loop: bool = False
     check_LoL_patch: bool = False
+
+    def __post_init__(self):
+        """ Checks if the type of the fields are valid and converts them if not.
+
+        Raises a TypeError if conversion fails """
+        for field in dataclasses.fields(self):
+            auto_conversion(self, field)
 
 
 @dataclasses.dataclass
@@ -78,7 +131,10 @@ class Messages_Config:
 
 @dataclasses.dataclass
 class UnsortedConfig:
-    """ Some basic config """
+    """ Some basic config
+    
+    A post init function checks the types of the fields and tries to convert them.
+    """
 
     admin_id: int = None
     member_id: int = None
@@ -98,13 +154,24 @@ class UnsortedConfig:
     # TODO Move this stuff in an own class
     game_selector_id: int = None
 
+    def __post_init__(self):
+        """ Tries to convert false types to the right type
+        
+        Raises an TypeError if conversion fails """
+
+        for field in dataclasses.fields(self):
+            auto_conversion(self, field)
+
 
 
 @dataclasses.dataclass
 class Channel_Ids:
-    """ Channel id lists """
+    """ Channel id lists
 
-    category_temporary: str = None
+    All attributes have to be ints or list of ints
+    """
+
+    category_temporary: int = None
 
     plots: int = None
     announcement: int = None
@@ -118,6 +185,44 @@ class Channel_Ids:
     commands_member: List[int] = dataclasses.field(default_factory=list)
     commands: List[int] = dataclasses.field(default_factory=list)
 
+    def __post_init__(self):
+        """ Checks if the types are valid and tries to convert them if not
+
+        At first all str or list of str are casted to ints or list of ints.
+        After that the atttribute is casted to the right type.
+        Raises a TypeError if casting fails.
+        """
+
+        for field in dataclasses.fields(self):
+            field_val = getattr(self, field.name)
+            
+            if field_val is None or field_val == []:
+                continue
+
+            # Check if field is a str or a list of str and convert it to int or list of ints
+            try:
+                if isinstance(field_val, str):
+                    setattr(self, field.name, int(field_val))
+                elif isinstance(field_val, list):
+                    for elem in field_val:
+                        if isinstance(elem, str):
+                            setattr(self, field.name, int(field_val))
+
+                #Check if type is right and tries to convert to the right type if not
+                desired_type = field.type if not field.type is List[int] else list
+                field_val = getattr(self, field.name)
+                if not isinstance(field_val, desired_type):
+                    logger.warning("Type of %s is %s. Try to convert it to %s", field.name, type(field_val), desired_type)
+                    if desired_type is list and not isinstance(field_val, list):
+                        setattr(self, field.name, [field_val])
+                    else:
+                        setattr(self, field.name, desired_type(field_val))
+            except TypeError as error:
+                error_handling_auto_conversion(self, field, error)
+                
+        
+        logger.debug("Post_init finished")
+
     def yield_all_channel_ids(self):
         """ Yields all channel ids """
         for elem in dataclasses.astuple(self):
@@ -126,10 +231,6 @@ class Channel_Ids:
                     yield channel_id
             else:
                 yield elem
-
-
-
-
 
 @dataclasses.dataclass
 class Folders_and_Files:
@@ -185,14 +286,15 @@ class GuildConfig():
         is_invalid = False
         channel_ids_dict = dataclasses.asdict(self.channel_ids)
 
+        # TODO Rewrite: A lot of copy paste
         for key in channel_ids_dict:
             if isinstance(channel_ids_dict[key], list):
                 for channel_id in channel_ids_dict[key]:
-                    if channel_id is not None and channel_id not in valid_ids:
+                    if not check_if_channel_id_valid(channel_id, valid_ids):
                         is_invalid = True
-                        channel_ids_dict[key].remove(channel_id)
                         yield (key, channel_id)
-            elif channel_ids_dict[key] is not None and channel_ids_dict[key] not in valid_ids:
+                        channel_ids_dict[key].remove(channel_id)
+            elif not check_if_channel_id_valid(channel_ids_dict[key], valid_ids):
                 is_invalid = True
                 yield (key, channel_ids_dict[key])
                 channel_ids_dict[key] = None
@@ -272,7 +374,7 @@ class GeneralConfig:
 
     riot_api: bool = True
 
-    directory_temp_files = "./temp"
+    directory_temp_files: str = "./temp"
 
     log_file: str = './log/log'
     config_file: str = './config/configuration.json'
@@ -326,7 +428,7 @@ class BotConfig:
         with open(filename, 'w') as json_file:
             json.dump(self.asdict(), json_file)
         logger.info("Saved the config to %s",
-                    filename)  
+                    filename)
 
     def update_config_from_file(self, filename = None):
         """ Updates the config from a file using fromdict """
