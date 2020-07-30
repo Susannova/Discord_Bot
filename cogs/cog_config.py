@@ -28,9 +28,9 @@ class ConfigCog(commands.Cog, name='Configuration commands'):
             await ctx.send_help(self.config)
     
     
-    @config.command(name='print')
+    @config.command(name='json')
     async def config_print(self, ctx: commands.Context):
-        """ Prints the bot config for this server """
+        """ Gets the bot config for this server as a json file """
 
         guild_id = ctx.guild.id
 
