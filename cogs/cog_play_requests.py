@@ -33,7 +33,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     @commands.group()
     async def play(self, ctx: commands.Context, games: commands.Greedy[converters.StrToGame], play_time: typing.Optional[converters.StrToTime], *, should_be_empty: typing.Optional[str]):
         """ Create a play request
-        
+
         Other players can react to the play request which will notify the other players.
         5 Minutes before the play time, all players will be notified too.
 
@@ -43,9 +43,9 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
             should_be_empty: A string to check if everything worked. Leave this always empty please.
         """
         if ctx.invoked_subcommand is None:
-        logger.info('Create a play request')
+            logger.info('Create a play request')
             guild_config = self.bot.config.get_guild_config(ctx.guild.id)
-        
+
             if should_be_empty is not None:
                 logger.warning("Something went wrong. Was able to interpret the play request until: %s.", should_be_empty)
                 await ctx.send(f"Something went wrong. I was able to interpret the command until '{should_be_empty}'. Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`.")
@@ -55,44 +55,44 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                 logger.debug("Play request created without a game. Create list of games based on author")
                 user_role_ids = [role.id for role in ctx.author.roles]
                 games = [game for game in guild_config.yield_all_games() if game.role_id in user_role_ids]
-        
+            
             is_now = True if play_time is None else False
-        
+
             if not is_now:
                 if (play_time - datetime.datetime.now()).total_seconds() / 60 > guild_config.unsorted_config.play_now_time_add_limit:
                     logger.warning("Play request denied because of time")
                     await ctx.send(f"Play requests that are going more than {guild_config.unsorted_config.play_now_time_add_limit} minutes in the future are not allowed.")
-                return
-        else:
+                    return
+            else:
                 play_time = datetime.datetime.now()
 
-        message_unformated = guild_config.messages.play_now if is_now else guild_config.messages.play_at
-        
+            message_unformated = guild_config.messages.play_now if is_now else guild_config.messages.play_at
+            
             game_names = games[0].name_long
             if len(games) > 1:
                 # TODO Make this more general!
                 for game in games[1:-1]:
                     game_names += f", {game.name_long}"
                 game_names += f" oder  {games[-1].name_long}"
-        message = message_unformated.format(
+            message = message_unformated.format(
                     role_mention=" ".join((ctx.guild.get_role(game.role_id).mention for game in games)),
-                creator=ctx.message.author.mention,
-                player=ctx.message.author.mention,
+                    creator=ctx.message.author.mention,
+                    player=ctx.message.author.mention,
                     game=game_names,
-                time=play_time.strftime("%H:%M")
-            )
-        
-        play_request_message = await ctx.send(message)
+                    time=play_time.strftime("%H:%M")
+                )
+            
+            play_request_message = await ctx.send(message)
             _category = [game.name_short for game in games]
-        play_request = PlayRequest(play_request_message.id, ctx.message.author.id, category=_category, play_time=play_time)
-        
-        self.bot.state.get_guild_state(ctx.guild.id).add_play_request(play_request)
+            play_request = PlayRequest(play_request_message.id, ctx.message.author.id, category=_category, play_time=play_time)
+
+            self.bot.state.get_guild_state(ctx.guild.id).add_play_request(play_request)
             await self.add_auto_reaction(play_request_message, games)
 
-        await ctx.message.delete()
+            await ctx.message.delete()
 
-        if not is_now:
-            await play_request.auto_reminder(guild_config=guild_config, bot=self.bot)
+            if not is_now:
+                await play_request.auto_reminder(guild_config=guild_config, bot=self.bot)
 
 
     async def add_auto_reaction(self, play_request_message: discord.Message, games: typing.List[config.Game]):
@@ -175,10 +175,6 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                             player=user.name,
                             creator=author.name,
                             reaction=str(reaction.emoji)))
-
-
-        await play_request_message.add_reaction(guild_config.unsorted_config.emoji_join)
-        await play_request_message.add_reaction(guild_config.unsorted_config.emoji_pass)
 
 
     # async def create_clash(self, ctx, date):
