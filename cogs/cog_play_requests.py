@@ -13,7 +13,8 @@ from core import (
     exceptions,
     timers,
     help_text,
-    DiscordBot
+    DiscordBot,
+    converters
 )
 
 from core.play_requests import PlayRequest
@@ -26,41 +27,40 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
 
-    @commands.command(name='play', help = help_text.play_HelpText.text, brief = help_text.play_HelpText.brief, usage = help_text.play_HelpText.usage)
     @checks.is_in_channels("play_request")
-    async def play_(self, ctx: commands.Context, game_name, time_string: str, minutes_delta: typing.Optional[int] = 0):
-        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
+    @commands.group()
+    async def play(self, ctx: commands.Context, game: converters.StrToGame, play_time: typing.Optional[converters.StrToTime], *, should_be_empty: typing.Optional[str]):
+        """ Create a play request
         
-        logger.info('Create a play request')
-        game_name = game_name.upper()
-        message = 'Something went wrong.'
-        # if game_name == 'CLASH':
-        #     await self.create_clash(ctx, time_string)
-        #     return
-        
-        game = guild_config.get_game(game_name)
-        
-        is_now = True if time_string == 'now' else False
-        
-        if is_now:
-            is_now = True if minutes_delta == 0 else False
-            if minutes_delta < 0 or minutes_delta > guild_config.unsorted_config.play_now_time_add_limit:
-                await ctx.send("Bitte benutze für die Zeitdifferenz nur positive Zahlen kleiner als {guild_config.unsorted_config.play_now_time_add_limit}")
-                return
-            time_delta = datetime.timedelta(minutes=minutes_delta)
-            play_time = datetime.datetime.now() + time_delta
-        else:
-            time_string_splitted = time_string.split(":")
-            if len(time_string_splitted) > 2:
-                await ctx.send("Bitte benutzte für die Zeit das Format 'hh:mm'.")
-                return
-            else:
-                time_now = datetime.datetime.now()
-                play_time = time_now.replace(hour=int(time_string_splitted[0]), minute=int(time_string_splitted[1]))
-                
-                if time_now > play_time:
-                    play_time += datetime.timedelta(days=1)
+        Other players can react to the play request which will notify the other players.
+        5 Minutes before the play time, all players will be notified too.
 
+        Args:
+            game: The game to play
+            play_time: The time to play. Either a time in the format hh:mm or +xm where x are the minutes relative to now
+            should_be_empty: A string to check if everything worked. Leave this always empty please.
+        """
+        if ctx.invoked_subcommand is None:
+        logger.info('Create a play request')
+            guild_config = self.bot.config.get_guild_config(ctx.guild.id)
+        
+            if should_be_empty is not None:
+                logger.warning("Something went wrong. Was able to interpret the play request until: %s.", should_be_empty)
+                await ctx.send(f"Something went wrong. I was able to interpret the command until '{should_be_empty}'. Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`.")
+                raise ValueError("Was not able to interpret the command")
+
+            if game is None:
+                logger.warning("Play request failed: games is None. Original message: %s", ctx.message.content)
+        
+            is_now = True if play_time is None else False
+        
+            if not is_now:
+                if (play_time - datetime.datetime.now()).total_seconds() / 60 > guild_config.unsorted_config.play_now_time_add_limit:
+                    logger.warning("Play request denied because of time")
+                    await ctx.send(f"Play requests that are going more than {guild_config.unsorted_config.play_now_time_add_limit} minutes in the future are not allowed.")
+                return
+        else:
+                play_time = datetime.datetime.now()
 
         message_unformated = guild_config.messages.play_now if is_now else guild_config.messages.play_at
         
@@ -83,6 +83,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
 
         if not is_now:
             await play_request.auto_reminder(guild_config=guild_config, bot=self.bot)
+
 
     async def add_auto_reaction(self, ctx: commands.Context, play_request_message: discord.Message):
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)

@@ -462,7 +462,7 @@ class BotConfig:
             del self.__guilds_config[guild_id]
             logger.info("We have removed the guild %s from the config!", guild_id)
     
-    def get_guild_config(self,  guild_id: int) -> GuildConfig:
+    def get_guild_config(self, guild_id: int) -> GuildConfig:
         """ Gets the guild that belongs to the id. Raises an key error if guild does not exists """
         try:
             return self.__guilds_config[guild_id]
