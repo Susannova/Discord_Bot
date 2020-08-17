@@ -310,7 +310,10 @@ class GuildConfig():
         else:
             raise LookupError("Game not found")
 
-    def add_game(self, game: str, long_name: str, role_id: int, emoji: int, category_id: int, cog: str = None):
+    def yield_all_game_role_ids(self):
+        for game in self.__games:
+            yield Game(**self.__games[game]).role_id
+
         """ Adds a new game to the bot """
 
         # The asdict prevents one from create a dict that is invalid to Game
@@ -329,6 +332,12 @@ class GuildConfig():
                 return game
         
         raise LookupError("Game not found")
+
+    def yield_all_games(self) -> Game:
+        """ Yields all games """
+        for game in self.__games:
+            yield self.get_game(game)
+            
 
     def yield_game_cogs(self):
         """ Yields all game_cogs """

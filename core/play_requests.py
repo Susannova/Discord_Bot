@@ -9,7 +9,7 @@ from core.config import GuildConfig
 logger = logging.getLogger(__name__)
 
 class PlayRequest():
-    def __init__(self, message_id: int, author_id: int, category: str, play_time: datetime.datetime):
+    def __init__(self, message_id: int, author_id: int, category: list, play_time: datetime.datetime):
         self.message_id = message_id
         self.author_id = author_id
         self.timestamp_ = time.time()
@@ -19,14 +19,8 @@ class PlayRequest():
 
         self.subscriber_ids = []
 
-
-    def add_clash_date(self, clash_date):
-        if self.category == "clash":
-            self.clash_date = clash_date
-
     def add_subscriber_id(self, user_id: int):
         self.subscriber_ids.append(user_id)
-
 
     def remove_subscriber_id(self, user_id: int):
         self.subscriber_ids.remove(user_id)
@@ -38,7 +32,6 @@ class PlayRequest():
     
     def is_already_subscriber(self, user_id: int):
         return True if user_id in self.subscriber_ids else False
-
 
     def is_play_request_author(self, user_id: int) -> bool:
         return user_id == self.author_id

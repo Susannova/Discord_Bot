@@ -28,6 +28,16 @@ def has_any_role(*role_names):
     
     return commands.check(wrapper)
 
+def is_play_request(ctx: commands.Context):
+    """ Checks if the message is a play request """
+    bot = ctx.bot
+    guild_state = bot.state.get_guild_state(ctx.guild.id)
+    return guild_state.is_play_request(ctx.message.id)
+
+
+def is_not_the_bot(ctx: commands.Context):
+    """ Checks if the user is the bot """
+    return ctx.bot.user != ctx.author
 
 def is_in_channels(*channel_names):
     """ Decorator to check if ctx is in one of the channels or in the bot_channel"""
