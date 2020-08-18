@@ -97,7 +97,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if message.author == self.bot.user:
+        if isinstance(message.channel, discord.DMChannel) or message.author == self.bot.user:
             return
         
         guild_id = message.guild.id
