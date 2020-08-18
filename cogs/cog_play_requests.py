@@ -121,6 +121,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
             await self.send_auto_dm(guild_config, play_request, user, reaction)
         else:
             await reaction.remove()
+            logger.info("Removed new reaction %s", reaction.emoji)
     
     @commands.Cog.listener()
     async def on_reaction_remove(self, reaction: discord.Reaction, user: discord.Member):
