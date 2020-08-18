@@ -67,13 +67,13 @@ def get_best_bans_for_team(team) -> list:
 # === INTERFACE === #
 
 
-def get_player_stats(discord_user_name, summoner_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig, queue_type='RANKED_SOLO_5x5') -> str:
-    summoner = get_or_create_summoner(discord_user_name, summoner_name, guild_config, general_config)
+def get_player_stats(discord_user_name, summoner_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id: int, queue_type='RANKED_SOLO_5x5') -> str:
+    summoner = get_or_create_summoner(discord_user_name, summoner_name, guild_config, general_config, guild_id=guild_id)
     return f'Rank: {summoner.get_rank_string(queue_type)}, Winrate {summoner.get_winrate(queue_type)}%.'
 
 
-def get_smurf(discord_user_name, summoner_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig) -> str:
-    summoner = get_or_create_summoner(discord_user_name, summoner_name, guild_config, general_config)
+def get_smurf(discord_user_name, summoner_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id: int) -> str:
+    summoner = get_or_create_summoner(discord_user_name, summoner_name, guild_config, general_config, guild_id)
     is_smurf_word = 'kein'
     if summoner.is_smurf():
         is_smurf_word = 'ein'
@@ -92,10 +92,10 @@ def calculate_bans_for_team(bot_config: config.BotConfig, *names) -> str:
     return f'Team OP.GG: {op_url}\nBest Bans for Team:\n{utility.pretty_print_list(output)}'
 
 
-def link_account(discord_user_name, summoner_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig):
+def link_account(discord_user_name, summoner_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id: int):
     summoner = utility.create_summoner(summoner_name, general_config, guild_config=guild_config)
     summoner.discord_user_name = discord_user_name
-    folder_name = guild_config.folders_and_files.database_directory_summoners.format(guild_id=guild_config.unsorted_config.guild_id)
+    folder_name = guild_config.folders_and_files.database_directory_summoners.format(guild_id=guild_id)
     with shelve.open(f'{folder_name}/{guild_config.folders_and_files.database_name_summoners}', 'rc') as database:
         for key in database.keys():
             if key == str(discord_user_name):
@@ -108,29 +108,29 @@ def link_account(discord_user_name, summoner_name, guild_config: config.GuildCon
         database[str(discord_user_name)] = summoner
 
 
-def update_linked_account_data_by_discord_user_name(discord_user_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig):
-    summoner = utility.create_summoner(utility.read_account(discord_user_name, general_config, guild_config.unsorted_config.guild_id).name, general_config, guild_config=guild_config)
+def update_linked_account_data_by_discord_user_name(discord_user_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id: int):
+    summoner = utility.create_summoner(utility.read_account(discord_user_name, general_config, guild_id).name, general_config, guild_config=guild_config)
     summoner.discord_user_name = discord_user_name
-    folder_name = general_config.database_directory_summoners.format(guild_id=guild_config.unsorted_config.guild_id)
+    folder_name = general_config.database_directory_summoners.format(guild_id=guild_id)
     with shelve.open(f'{folder_name}/{general_config.database_name_summoners}', 'rc') as database:
         database[str(discord_user_name)] = summoner
     return summoner
 
-def update_linked_summoners_data(summoners, guild_config: config.GuildConfig, general_config: config.GeneralConfig):
+def update_linked_summoners_data(summoners, guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id: int):
     for summoner in summoners:
-        yield update_linked_account_data_by_discord_user_name(summoner.discord_user_name, guild_config, general_config)
+        yield update_linked_account_data_by_discord_user_name(summoner.discord_user_name, guild_config, general_config, guild_id)
 
-def get_or_create_summoner(discord_user_name, summoner_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig):
+def get_or_create_summoner(discord_user_name, summoner_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id: int):
     if summoner_name is None:
-        summoner = utility.read_account(discord_user_name, general_config, guild_config.unsorted_config.guild_id)
+        summoner = utility.read_account(discord_user_name, general_config, guild_id)
         if utility.is_in_need_of_update(summoner):
-            update_linked_account_data_by_discord_user_name(discord_user_name, guild_config, general_config)
+            update_linked_account_data_by_discord_user_name(discord_user_name, guild_config, general_config, guild_id)
         return summoner
     else:
         return utility.create_summoner(summoner_name, general_config, guild_config=guild_config)
 
-def unlink_account(discord_user_name, guild_config: config.GuildConfig):
-    folder_name = guild_config.folders_and_files.database_directory_summoners.format(guild_id=guild_config.unsorted_config.guild_id)
+def unlink_account(discord_user_name, guild_config: config.GuildConfig, guild_id: int):
+    folder_name = guild_config.folders_and_files.database_directory_summoners.format(guild_id=guild_id)
     with shelve.open(f'{folder_name}/{guild_config.folders_and_files.database_name_summoners}', 'rc') as database:
         for key in database.keys():
             if key == str(discord_user_name):
@@ -138,10 +138,10 @@ def unlink_account(discord_user_name, guild_config: config.GuildConfig):
 
 
 # FIXME im still not happy with this
-def create_embed(ctx, guild_config: config.GuildConfig, general_config: config.GeneralConfig):
-    summoners = list(utility.read_all_accounts(general_config, guild_config.unsorted_config.guild_id))
+def create_embed(ctx, guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id):
+    summoners = list(utility.read_all_accounts(general_config, guild_id))
     old_summoners = summoners.copy()
-    summoners = list(update_linked_summoners_data(summoners, guild_config, general_config))
+    summoners = list(update_linked_summoners_data(summoners, guild_config, general_config, guild_id))
     summoners.sort(key=lambda x: x.rank_value['RANKED_SOLO_5x5'], reverse=True)
 
 
@@ -169,10 +169,10 @@ def create_embed(ctx, guild_config: config.GuildConfig, general_config: config.G
     return _embed
 
 
-def create_leaderboard_embed(guild_config: config.GuildConfig, general_config: config.GeneralConfig):
+def create_leaderboard_embed(guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id):
     summoners = list(utility.read_all_accounts(general_config, guild_config.unsorted_config.guild_id))
     old_summoners = summoners.copy()
-    summoners = list(update_linked_summoners_data(summoners, guild_config, general_config))
+    summoners = list(update_linked_summoners_data(summoners, guild_config, general_config, guild_id))
     summoners.sort(key=lambda x: x.rank_value['RANKED_SOLO_5x5'], reverse=True)
 
     for summoner in summoners:

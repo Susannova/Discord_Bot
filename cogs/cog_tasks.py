@@ -291,7 +291,7 @@ class LoopCog(commands.Cog):
         summoners = list(riot_utility.read_all_accounts(self.bot.config.general_config, guild_id))
         time_updated = time.time()
         if update:
-            summoners = list(riot_commands.update_linked_summoners_data(summoners, self.bot.config.get_guild_config(guild_id), self.bot.config.general_config))
+            summoners = list(riot_commands.update_linked_summoners_data(summoners, self.bot.config.get_guild_config(guild_id), self.bot.config.general_config, guild_id))
 
         file_path = file_path_unformatted.format(guild_id=guild_id)
 

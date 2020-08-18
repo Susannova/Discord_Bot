@@ -55,7 +55,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @checks.is_in_channels("commands", "commands_member")
     async def link_(self, ctx, summoner_name):
         try:
-            riot_commands.link_account(ctx.message.author.name, summoner_name, self.bot.config.get_guild_config(ctx.guild.id), general_config=self.bot.config.general_config)
+            riot_commands.link_account(ctx.message.author.name, summoner_name, self.bot.config.get_guild_config(ctx.guild.id), general_config=self.bot.config.general_config, guild_id=ctx.guild.id)
         except Exception as error:
             logger.error("Error linking %s: %s", summoner_name, error)
             #TODO Add a link to our accounts
@@ -74,7 +74,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         if len(list(summoner_names)) != 0:
             raise commands.CommandInvokeError
         
-        riot_commands.unlink_account(ctx.message.author.name, self.bot.config.get_guild_config(ctx.guild.id))
+        riot_commands.unlink_account(ctx.message.author.name, self.bot.config.get_guild_config(ctx.guild.id), ctx.guild.id)
         await ctx.message.author.send(
             'Dein Lol-Account wurde erfolgreich von deinem Discord Account getrennt!')
         logger.info("%s was unlinked", ctx.message.author.name)
@@ -93,7 +93,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @checks.has_any_role("admin_id")
     async def test_embed(self, ctx):
         logger.debug("!leaderboard-old called")
-        await ctx.send(embed=riot_commands.create_embed(ctx, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config))
+        await ctx.send(embed=riot_commands.create_embed(ctx, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, ctx.guild.id))
 
     @commands.command(name='leaderboard', help = help_text.leaderboard_HelpText.text, brief = help_text.leaderboard_HelpText.brief, usage = help_text.leaderboard_HelpText.usage)
     @checks.has_any_role("admin_id")
@@ -101,7 +101,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         logger.debug("!leaderboard called")
         if False:
             loading_message = await ctx.send("This will take a few seconds. Processing...")
-            _embed = riot_commands.create_leaderboard_embed(self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config)
+            _embed = riot_commands.create_leaderboard_embed(self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, ctx.guild.id)
             guild_config = self.bot.config.get_guild_config(ctx.guild.id)
             folder_name = guild_config.folders_and_files.folders_and_files.folder_champ_spliced.format(guild_id=ctx.guild.id)
             message = await ctx.send(file=discord.File(f'{folder_name}/leaderboard.png'))
