@@ -111,18 +111,10 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
 
-        if isinstance(message.channel, discord.DMChannel):
-
+        if isinstance(message.channel, discord.DMChannel) and message.author != self.bot.user:
             message_info = 'Got a message from: {user}. Content: {content}'.format(user=message.author, content=message.content.replace("\n", "\\n"))
             logger.info(message_info)
-
             return
-
-        guild_config = self.bot.config.get_guild_config(message.guild.id)
-
-        # add all messages in channel to gstate.message_cache
-        if guild_config.toggles.auto_delete and utility.is_in_channels(message, guild_config.channel_ids.play_request):
-            utility.insert_in_message_cache(self.bot.state.get_guild_state(message.guild.id).message_cache, message.id, message.channel.id)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
@@ -131,10 +123,7 @@ class EventCog(commands.Cog):
         if guild_state.is_play_request(message.id):
             guild_state.remove_play_request(message.id)
 
-        if message.id in guild_state.message_cache:
-            utility.clear_message_cache(message.id, guild_state.message_cache)
-        else:
-            logger.info('Manually deleted message %s', message.id)
+        logger.info('message %s deleted', message.id)
 
 
 

@@ -13,7 +13,6 @@ class GuildState:
     """
     def __init__(self):
         self.debug = False
-        self.message_cache = {}
         self.__play_requests = {}
         self.tmp_channel_ids = {}
         self.clash_date: str = None

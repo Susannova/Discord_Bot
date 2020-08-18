@@ -103,18 +103,6 @@ def is_user_bot(user, bot):
     return False
 
 
-def get_purgeable_messages_list(message_cache, guild_config: config.GuildConfig):
-    messages_list = []
-    if guild_config.toggles.auto_delete:
-        messages_list = [msg for msg in message_cache if timers.is_timer_done(message_cache[msg]["timer"])]
-    return messages_list
-
-
-def clear_message_cache(message_id, message_cache):
-    if message_id in message_cache:
-        del message_cache[message_id]
-
-
 def pretty_print_list(*players) -> str:
     pretty_print = ''
     player_list = list(players[0])
@@ -126,11 +114,6 @@ def pretty_print_list(*players) -> str:
             pretty_print += player + '\n'
     return pretty_print
 
-def insert_in_message_cache(message_cache, message_id, channel_id, time=10):
-    message_cache[message_id] = {
-        "timer": timers.start_timer(hrs=time),
-        "channel": channel_id
-    }
 
 def get_guild_config(bot: KrautBot, guild_id: int) -> config.GuildConfig:
     return bot.config.get_guild_config(guild_id)
