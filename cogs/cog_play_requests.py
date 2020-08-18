@@ -111,7 +111,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
 
         play_request = guild_state.get_play_request(reaction.message.id)
         user_id = user.id
-        emoji_id = reaction.emoji.id
+        emoji_id = None if isinstance(reaction.emoji, str) else reaction.emoji.id
 
         if play_request.is_play_request_author(user_id):
             logger.info("Remove reaction from a play_request_author")
