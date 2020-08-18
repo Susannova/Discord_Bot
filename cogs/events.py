@@ -114,7 +114,8 @@ class EventCog(commands.Cog):
         if isinstance(message.channel, discord.DMChannel) and message.author != self.bot.user:
             message_info = 'Got a message from: {user}. Content: {content}'.format(user=message.author, content=message.content.replace("\n", "\\n"))
             logger.info(message_info)
-            return
+            for super_user in self.bot.config.general_config.super_user:
+                await self.bot.get_user(super_user).send(message_info)
 
     @commands.Cog.listener()
     async def on_message_delete(self, message: discord.Message):
