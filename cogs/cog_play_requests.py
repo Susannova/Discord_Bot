@@ -116,12 +116,12 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         if play_request.is_play_request_author(user_id):
             logger.info("Remove reaction from a play_request_author")
             await reaction.remove(user)
-        elif emoji_id in guild_config.get_all_game_emojis():
+        elif emoji_id in guild_config.get_all_game_emojis() and guild_config.emoji_to_game(emoji_id).name_short in play_request.category:
             play_request.add_subscriber_id(user_id)
             await self.send_auto_dm(guild_config, play_request, user, reaction)
         else:
-            await reaction.remove()
-            logger.info("Removed new reaction %s", reaction.emoji)
+            await reaction.remove(user)
+            logger.info("Removed new reaction %s from %s", reaction.emoji, user.name)
     
     @commands.Cog.listener()
     async def on_reaction_remove(self, reaction: discord.Reaction, user: discord.Member):
@@ -149,7 +149,8 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
 
             play_request = guild_state.get_play_request(reaction.message.id)
 
-            play_request.remove_subscriber_id(user.id)
+            if play_request.is_already_subscriber(user.id):
+                play_request.remove_subscriber_id(user.id)
             
 
 
