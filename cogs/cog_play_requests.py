@@ -157,14 +157,8 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                 remove_from_subscriber = False
                 break
         
-        if remove_from_subscriber:
-            guild_id = reaction.message.guild.id
-            guild_state = self.bot.state.get_guild_state(guild_id)
-
-            play_request = guild_state.get_play_request(reaction.message.id)
-
-            if play_request.is_already_subscriber(user.id):
-                play_request.remove_subscriber_id(user.id)
+        if remove_from_subscriber and play_request.is_already_subscriber(user.id):
+            play_request.remove_subscriber_id(user.id)
             
 
 
