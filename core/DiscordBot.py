@@ -98,5 +98,8 @@ class KrautBot(commands.Bot):
         self.exit_status = exit_status_input
 
 def get_command_prefix(bot: KrautBot, msg: discord.Message):
-        """ Returns the command prefix for the guild in that the message is in """
+    """ Returns the command prefix for the guild in that the message is in """
+    if not isinstance(msg.channel, discord.DMChannel):
         return bot.get_command_prefix(msg.guild.id)
+    else:
+        return "Some string that is defenitly no command prefix"

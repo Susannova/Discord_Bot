@@ -115,8 +115,6 @@ class LoopCog(commands.Cog):
             self.update_summoners.start()
             self.print_leaderboard_loop.start()
             self.check_LoL_patch.start()
-
-        self.auto_delete_purgeable_messages.start()
         self.auto_delete_tmp_channels.start()
 
     async def print_leaderboard(self, guild_id: int, channel_to_print=None, update=True, enable_xkcd=False):
@@ -207,32 +205,6 @@ class LoopCog(commands.Cog):
     async def check_LoL_patch_before_loop(self):
         await self.bot.wait_until_ready()
 
-
-    @tasks.loop(hours=1)
-    async def auto_delete_purgeable_messages(self):
-        """ auto deletes all purgeable messages """ 
-        logger.info('Look for purgeable messages')
-        
-        for guild in self.bot.guilds:
-            guild_config = self.bot.config.get_guild_config(guild.id)
-
-            if not guild_config.toggles.auto_delete:
-                return
-
-            message_cache = self.bot.state.get_guild_state(guild.id).message_cache
-            
-            purgeable_message_list = utility.get_purgeable_messages_list(message_cache, guild_config)
-            for purgeable_message_id in purgeable_message_list:
-                channel = self.bot.get_channel(message_cache[purgeable_message_id]["channel"])
-                utility.clear_message_cache(purgeable_message_id, message_cache)
-                if channel is None:
-                    logger.error("Message with id: %s can't be deleted. Channel is None.", purgeable_message_id)
-                    return
-                purgeable_message = await channel.fetch_message(purgeable_message_id)
-                await purgeable_message.delete()
-                logger.info(
-                    "Message with id %s was deleted automatically", purgeable_message_id)
-
     @tasks.loop(hours=1)
     async def auto_delete_tmp_channels(self):
         """ auto deletes all tmp_channels """
@@ -265,10 +237,6 @@ class LoopCog(commands.Cog):
                             temp_channel_name)
                 del guild_state.tmp_channel_ids[channel]
 
-    @auto_delete_purgeable_messages.before_loop
-    async def before_auto_delete_purgeable_messages(self):
-        await self.bot.wait_until_ready()
-
     # TODO how often? at what time should this trigger
     @tasks.loop(hours=12)
     async def create_clash_play_request(self):
@@ -291,7 +259,7 @@ class LoopCog(commands.Cog):
         summoners = list(riot_utility.read_all_accounts(self.bot.config.general_config, guild_id))
         time_updated = time.time()
         if update:
-            summoners = list(riot_commands.update_linked_summoners_data(summoners, self.bot.config.get_guild_config(guild_id), self.bot.config.general_config))
+            summoners = list(riot_commands.update_linked_summoners_data(summoners, self.bot.config.get_guild_config(guild_id), self.bot.config.general_config, guild_id))
 
         file_path = file_path_unformatted.format(guild_id=guild_id)
 

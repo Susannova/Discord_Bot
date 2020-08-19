@@ -82,17 +82,31 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                     time=play_time.strftime("%H:%M")
                 )
             
-            play_request_message = await ctx.send(message)
+            play_request_message = await ctx.send(message, delete_after=guild_config.unsorted_config.auto_delete_after_seconds)
+            
             _category = [game.name_short for game in games]
             play_request = PlayRequest(play_request_message.id, ctx.message.author.id, category=_category, play_time=play_time)
 
             self.bot.state.get_guild_state(ctx.guild.id).add_play_request(play_request)
             await self.add_auto_reaction(play_request_message, games)
 
-            await ctx.message.delete()
+            await ctx.message.delete(delay=3)
 
             if not is_now:
                 await play_request.auto_reminder(guild_config=guild_config, bot=self.bot)
+    
+    @commands.Cog.listener()
+    async def on_message(self, message: discord.Message):
+        if isinstance(message.channel, discord.DMChannel) or message.author == self.bot.user:
+            return
+        
+        guild_id = message.guild.id
+        guild_config = self.bot.config.get_guild_config(guild_id)
+        
+        if message.channel.id not in guild_config.channel_ids.play_request:
+            return
+        
+        await message.delete(delay=guild_config.unsorted_config.auto_delete_after_seconds)
 
 
     async def add_auto_reaction(self, play_request_message: discord.Message, games: typing.List[config.Game]):

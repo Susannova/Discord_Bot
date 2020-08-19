@@ -27,7 +27,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             arg = None
         else:
             arg = summoner_name[0]
-        await ctx.send(riot_commands.get_player_stats(ctx.message.author.name, arg, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config))
+        await ctx.send(riot_commands.get_player_stats(ctx.message.author.name, arg, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, guild_id=ctx.guild.id))
 
     @commands.command(name='smurf', help = help_text.smurf_HelpText.text, brief = help_text.smurf_HelpText.brief, usage = help_text.smurf_HelpText.usage)
     @commands.check(checks.is_riot_enabled)
@@ -38,7 +38,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             arg = None
         else:
             arg = summoner_name[0]
-        await ctx.send(riot_commands.get_smurf(ctx.message.author.name, arg, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config))
+        await ctx.send(riot_commands.get_smurf(ctx.message.author.name, arg, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, guild_id=ctx.guild.id))
 
     @commands.command(name='bans', help = help_text.bans_HelpText.text, brief = help_text.bans_HelpText.brief, usage = help_text.bans_HelpText.usage)
     @commands.check(checks.is_riot_enabled)

@@ -150,6 +150,7 @@ class UnsortedConfig:
 
     play_now_time_add_limit: int = 120
     play_reminder_seconds: int = 60 * 5
+    auto_delete_after_seconds: int = 60 * 60 * 10
 
     # TODO Move this stuff in an own class
     game_selector_id: int = None
