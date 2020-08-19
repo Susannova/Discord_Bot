@@ -68,7 +68,7 @@ class ConfigCog(commands.Cog, name='Configuration commands'):
     @config.command(name='set')
     # @config.after_invoke(after_config)
     async def config_set(self, ctx: commands.Context, category: str, *, configs: converters.ArgsToDict):
-        """ Set the bot config for this server
+        """ Set the bot config for this server.
 
         Keyword arguments:
         category -- The config category
@@ -88,19 +88,24 @@ class ConfigCog(commands.Cog, name='Configuration commands'):
         logger.info("Update the guild config category %s to %s for guild %i", category, configs, ctx.guild.id)
     
     @config.command(name='get')
-    async def config_get(self, ctx: commands.Context, category: str, config: typing.Optional[str]):
+    async def config_get(self, ctx: commands.Context, category: typing.Optional[str], config: typing.Optional[str]):
         """ Get the bot config for this server
 
+        If no category is given, the possible categories are printed.
+
         Keyword arguments:
-        category -- The config category
+        category -- The config category (optional)
         config -- The config to get (optional)
         """
 
         guild_config_as_dict = self.bot.config.get_guild_config(ctx.guild.id).asdict()
-        if config is None:
-            await ctx.send(guild_config_as_dict[category])
+        if category is None or category not in guild_config_as_dict:
+            categories = [cat for cat in guild_config_as_dict]
+            await ctx.send(f"Avaible categories are {categories}")
+        elif config is None:
+            await ctx.send(f"```json\n{json.dumps(guild_config_as_dict[category])}```")
         else:
-            await ctx.send(guild_config_as_dict[category][config])
+            await ctx.send(f"```json\n{json.dumps(guild_config_as_dict[category][config])}```")
 
     @commands.check(checks.is_super_user)
     @config.command(name='reload')
