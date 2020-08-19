@@ -34,7 +34,7 @@ Just write me a message and I will add the bot to your server
 First clone the repo. In the folder you can install the required packages by running ``pip install -r requirements.txt``. [Create and invite a bot to your server](https://discordpy.readthedocs.io/en/latest/discord.html#discord-intro).
 Update the token in the file ``./config/configuration.json``. Run ``python3 discord_bot.py``. The bot will create a text channel on the server where you can set the server settings of the bot. Type ``?help config`` in the text channel for more infos.
 
-The best way to modify the server settings of the bot is to get the current config as a json file with ``?config json``. Modify this file and attach it to a message with ``?config read``.
+The best way to modify the server settings of the bot is to get the current config as a json file with ``?config json``. Modify this file and attach it to a message with ``?config load``.
 
 ## Commands:
 () = mandatory
