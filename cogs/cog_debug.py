@@ -14,7 +14,7 @@ from core import (
 logger = logging.getLogger(__name__)
 
 
-class DebugCog(commands.Cog, command_attrs=dict(hidden=True)):
+class DebugCog(commands.Cog):
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
 
