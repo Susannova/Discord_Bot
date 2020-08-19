@@ -43,7 +43,7 @@ class ConfigCog(commands.Cog, name='Configuration commands'):
         
         await ctx.send(file=discord.File(file_name))
     
-    @config.command(name='read')
+    @config.command(name='load')
     # @config.after_invoke(after_config)
     async def config_read(self, ctx: commands.Context):
         """ Set the bot config for this server using an attached json file
