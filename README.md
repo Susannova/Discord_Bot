@@ -56,7 +56,6 @@ The best way to modify the server settings of the bot is to get the current conf
 ### DEBUG/DEV Commands:
 - `!version`
 - `!enable-debug`
-- `!reload-config`
 - `!reload-ext extension`
 - `!print command`
 - `!end (restart | abort)`
