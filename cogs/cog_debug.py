@@ -1,6 +1,6 @@
 import asyncio
 import logging
-
+import typing
 
 import discord
 from discord.ext import commands
@@ -121,19 +121,25 @@ class DebugCog(commands.Cog):
     @commands.command()
     @checks.is_in_channels()
     @checks.has_any_role("admin_id")
-    async def send_to_channel(self, ctx: commands.Context, text_channel: discord.TextChannel, *, text: str):
-        """ Send a message to a text channel
+    async def send_to_channel(self, ctx: commands.Context, text_channel: discord.TextChannel, pin: typing.Optional[bool] = True, *, text: str):
+        """ Send a message to a text channel and pins it per default
 
         Args:
             text_channel The text channel
             text (str): The text to send
+            pin (bool): If the message should be pinned
         """
         logger.info("Send a text to channel %s: %s", text_channel.name, text)
         if text_channel.guild != ctx.guild:
             logger.warning("%s tried to send a text to a channel of another guild!", ctx.author)
             return
-        await text_channel.send(text)
-
+        try:
+            self.bot.sending_message = True
+            message = await text_channel.send(text)
+            if pin:
+                await message.pin()
+        finally:
+            self.bot.sending_message = False
 
 def setup(bot: DiscordBot.KrautBot):
     bot.add_cog(DebugCog(bot))

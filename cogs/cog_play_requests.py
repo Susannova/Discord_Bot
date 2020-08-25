@@ -97,16 +97,22 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-        if isinstance(message.channel, discord.DMChannel) or message.author == self.bot.user:
+        if isinstance(message.channel, discord.DMChannel):
             return
         
         guild_id = message.guild.id
         guild_config = self.bot.config.get_guild_config(guild_id)
         
-        if message.channel.id not in guild_config.channel_ids.play_request:
-            return
-        
-        await message.delete(delay=guild_config.unsorted_config.auto_delete_after_seconds)
+        if message.channel.id in guild_config.channel_ids.play_request:
+            if message.author == self.bot.user:
+                seconds_slept = 0
+                while self.bot.sending_message:
+                    await asyncio.sleep(1)
+                    seconds_slept += 1
+                    if seconds_slept > 10:
+                        raise RuntimeError("Waited for at least 10 seconds for sending_message to become False")
+            if not message.pinned:
+                await message.delete(delay=guild_config.unsorted_config.auto_delete_after_seconds)
 
 
     async def add_auto_reaction(self, play_request_message: discord.Message, games: typing.List[config.Game]):

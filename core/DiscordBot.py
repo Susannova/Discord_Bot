@@ -22,6 +22,8 @@ class KrautBot(commands.Bot):
 
     exit_status = 1
 
+    sending_message = False
+
     def __init__(self):
         """ Sets the Command Prefix and then
         call the __init__ method of the commands.Bot
