@@ -159,6 +159,35 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             "name": channel_name
         }
         logger.info("Temporary %s-channel %s with id %s created", kind, channel_name, tmp_channel.id)
+    
+    @checks.is_in_channels("commands", "commands_member")
+    @commands.command()
+    async def highlights(self, ctx: commands.Context):
+        ranking = {}
+        highlight_channel = self.bot.get_channel(606864764936781837)
+        test = await highlight_channel.history().flatten()
+        for message in test:
+            users = []
+            for reaction in message.reactions:
+                reaction_users = await reaction.users().flatten()
+                for user in reaction_users:
+                    if user not in users:
+                        users.append(user)
+            count = len(users)
+            if count in ranking:
+                ranking[count].append(message)
+            else:
+                ranking[count] = [message]
+        
+        counts = list(ranking.keys())
+        counts.sort(reverse=True)
+
+        text = "**The best highlights**\n\n"
+        for standing in range(0, 1):
+            urls = (message.jump_url for message in ranking[counts[standing]])
+            text += f"Platz {standing + 1} ({counts[standing]} votes): {', '.join(urls)}\n"
+        
+        message = await ctx.send(text)
 
 def setup(bot: DiscordBot.KrautBot):
     bot.add_cog(UtilityCog(bot))
