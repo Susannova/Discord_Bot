@@ -119,7 +119,7 @@ class Messages_Config:
                 {command_prefix}bans {team}'
     )
 
-    team_header: str = '\n@here\n**__===Teams===__**\n'
+    team_header: str = '\n**__===Teams===__**\n'
     team_1: str = 'Team 1:\n'
     team_2: str = '\nTeam 2:\n'
 
