@@ -165,12 +165,12 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     async def highlights(self, ctx: commands.Context):
         ranking = {}
         highlight_channel = self.bot.get_channel(606864764936781837)
-        test = await highlight_channel.history().flatten()
-        for message in test:
+        limit = 300
+
+        async for message in highlight_channel.history(limit=limit):
             users = []
             for reaction in message.reactions:
-                reaction_users = await reaction.users().flatten()
-                for user in reaction_users:
+                async for user in reaction.users():
                     if user not in users:
                         users.append(user)
             count = len(users)
@@ -182,12 +182,26 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         counts = list(ranking.keys())
         counts.sort(reverse=True)
 
-        text = "**The best highlights**\n\n"
-        for standing in range(0, 1):
-            urls = (message.jump_url for message in ranking[counts[standing]])
-            text += f"Platz {standing + 1} ({counts[standing]} votes): {', '.join(urls)}\n"
+        embed = discord.Embed(title="Highlights Leaderboard", type="rich", description=f"Wähle die besten Highlights in {highlight_channel.mention}")
+        embed.set_footer(text=f"Nur die letzten {limit} Highlights werden berücksichtigt.")
+
+        text_too_long = False
+
+        for standing in range(0, 3):
+            text = ""
+            for message in ranking[counts[standing]]:
+                appended_text = f"- [{message.author.name}]({message.jump_url})\n"
+                if len(text) + len(appended_text) > 1024:
+                    text_too_long = True
+                    logger.warning("Too many highlights. Some were rejected.")
+                    break
+                text += appended_text
+            
+            embed.add_field(name=f"Platz {standing + 1}", value=text, inline=False)
         
-        message = await ctx.send(text)
+        message = await ctx.send(embed=embed)
+        if text_too_long:
+            await ctx.send("There where too many highlights so some older highlights were not taken in account.", delete_after=10)
 
 def setup(bot: DiscordBot.KrautBot):
     bot.add_cog(UtilityCog(bot))
