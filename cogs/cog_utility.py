@@ -188,9 +188,9 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         text_too_long = False
 
         for standing in range(0, 3):
-            text = ""
+            text = f"Stimmen: **{counts[standing]}**\n"
             for message in ranking[counts[standing]]:
-                appended_text = f"- [{message.author.name}]({message.jump_url})\n"
+                appended_text = f" - [{message.author.name}]({message.jump_url})\n"
                 if len(text) + len(appended_text) > 1024:
                     text_too_long = True
                     logger.warning("Too many highlights. Some were rejected.")
