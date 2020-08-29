@@ -111,6 +111,8 @@ class RiotCog(commands.Cog, name='Riot Commands'):
         embed.add_field(name="Rank", value="\n".join((summoner.get_rank_string(queue_type) for summoner in summoners)), inline=True)
         embed.add_field(name="WR", value="\n".join((f'{summoner.get_winrate(queue_type)}%' for summoner in summoners)), inline=True)
 
+        embed.set_footer(text=f"To link your account use {self.bot.get_command_prefix(ctx.guild.id)}link")
+
         await ctx.send(embed=embed)
 
 
