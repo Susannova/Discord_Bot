@@ -88,6 +88,11 @@ class RiotCog(commands.Cog, name='Riot Commands'):
     @commands.check(checks.is_riot_enabled)
     @checks.is_in_channels("commands", "commands_member")
     async def leaderboard(self, ctx: commands.Context, queue_type: str = 'RANKED_SOLO_5x5'):
+        """ Prints the LoL leaderboard.
+
+        Args:
+            queue_type (str, optional): 'RANKED_SOLO_5x5' or 'flex'. Defaults to 'RANKED_SOLO_5x5'.
+        """
 
         if queue_type == 'flex':
             queue_type = 'RANKED_FLEX_SR'

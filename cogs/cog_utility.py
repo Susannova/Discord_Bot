@@ -163,6 +163,10 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @checks.is_in_channels("commands", "commands_member")
     @commands.command()
     async def highlights(self, ctx: commands.Context):
+        """ Prints the best highlights.
+
+        Vote for your favorite highlight with adding a reaction to the highlight.
+        """
         ranking = {}
         highlight_channel = self.bot.get_channel(606864764936781837)
         limit = 300
