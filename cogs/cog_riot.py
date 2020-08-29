@@ -88,6 +88,10 @@ class RiotCog(commands.Cog, name='Riot Commands'):
     @commands.check(checks.is_riot_enabled)
     @checks.is_in_channels("commands", "commands_member")
     async def leaderboard(self, ctx: commands.Context, queue_type: str = 'RANKED_SOLO_5x5'):
+
+        if queue_type == 'flex':
+            queue_type = 'RANKED_FLEX_SR'
+
         summoners = list(riot_utility.read_all_accounts(self.bot.config.general_config, ctx.guild.id))
         summoners = list(riot_commands.update_linked_summoners_data(summoners, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, ctx.guild.id))
 
@@ -102,7 +106,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             op_url = op_url + f'{summoner.name}%2C'
         
         embed = discord.Embed(
-            title='Kraut9 Leaderboard',
+            title=f'Kraut9 Leaderboard: {"Flex" if queue_type == "RANKED_FLEX_SR" else "SoloQ"}',
             colour=discord.Color.from_rgb(62, 221, 22),
             url=op_url[:-3]
         )
