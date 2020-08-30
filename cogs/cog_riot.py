@@ -116,7 +116,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             url=op_url[:-3]
         )
 
-        embed.add_field(name="User", value="\n".join((f'[{summoner.name}](https://euw.op.gg/summoner/userName={summoner.name})') for summoner in summoners), inline=True)
+        embed.add_field(name="User", value="\n".join((f'[{summoner.discord_user_name}](https://euw.op.gg/summoner/userName={summoner.name})') for summoner in summoners), inline=True)
         embed.add_field(name="Rank", value="\n".join((summoner.get_rank_string(queue_type) for summoner in summoners)), inline=True)
         embed.add_field(name="WR", value="\n".join((f'{summoner.get_winrate(queue_type)}%' for summoner in summoners)), inline=True)
 
