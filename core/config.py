@@ -129,9 +129,9 @@ class Messages_Config:
 
     game_selector: str = "@everyone\nWähle hier durch das Klicken auf eine Reaktion aus zu welchen Spielen du Benachrichtungen erhalten willst!"
 
-    highlight_leaderboard_description: str = "Wähle die besten Highlights in {highlight_channel_mention}"
-    highlight_leaderboard_footer: str = "Nur die letzten {limit} Highlights werden berücksichtigt."
-    place: str = "Platz"
+    highlight_leaderboard_description: str = "Vote for the best highlights in {highlight_channel_mention}."
+    highlight_leaderboard_footer: str = "Only the last {limit} highlights can be taken in account."
+    place: str = "Place"
 
 @dataclasses.dataclass
 class UnsortedConfig:
