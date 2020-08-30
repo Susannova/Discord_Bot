@@ -89,12 +89,6 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             if not message_.pinned:
                 await message_.delete()
 
-    @commands.command(name='leaderboard-old', hidden=True)
-    @checks.has_any_role("admin_id")
-    async def test_embed(self, ctx):
-        logger.debug("!leaderboard-old called")
-        await ctx.send(embed=riot_commands.create_embed(ctx, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, ctx.guild.id))
-
     # @commands.command(name='leaderboard', help = help_text.leaderboard_HelpText.text, brief = help_text.leaderboard_HelpText.brief, usage = help_text.leaderboard_HelpText.usage)
     # @checks.has_any_role("admin_id")
     # async def leaderboard_(self, ctx):

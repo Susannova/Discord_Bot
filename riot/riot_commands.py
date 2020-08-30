@@ -137,38 +137,6 @@ def unlink_account(discord_user_name, guild_config: config.GuildConfig, guild_id
                 del database[key]
 
 
-# FIXME im still not happy with this
-def create_embed(ctx, guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id):
-    summoners = list(utility.read_all_accounts(general_config, guild_id))
-    old_summoners = summoners.copy()
-    summoners = list(update_linked_summoners_data(summoners, guild_config, general_config, guild_id))
-    summoners.sort(key=lambda x: x.rank_value['RANKED_SOLO_5x5'], reverse=True)
-
-
-
-    op_url = 'https://euw.op.gg/multi/query='
-    for summoner in summoners:
-        op_url = op_url + f'{summoner.name}%2C'
-    _embed = discord.Embed(
-        title='Kraut9 Leaderboard',
-        colour=discord.Color.from_rgb(62, 221, 22),
-        url=op_url[:-3])
-
-    rank_strings = []
-    white_space_pattern = '\u200b \u200b'
-    for summoner in summoners:
-        rank_string = summoner.get_rank_string()
-        length = len(rank_string)
-        rank_string = rank_string + f' %!{summoner.get_winrate()}%'
-        rank_string = rank_string.replace('%!', f'{white_space_pattern * (25 - length)}')
-        rank_strings.append(rank_string)
-
-    _embed.add_field(name='User', value='\n'.join([summoner.discord_user_name for summoner in summoners]))
-    _embed.add_field(name='Summoner', value='\n'.join([summoner.name for summoner in summoners]))
-    _embed.add_field(name='Rank \t\t\t\t\t\t\t\t Winrate', value='\n'.join(rank_strings))
-    return _embed
-
-
 def create_leaderboard_embed(guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id):
     summoners = list(utility.read_all_accounts(general_config, guild_config.unsorted_config.guild_id))
     old_summoners = summoners.copy()
