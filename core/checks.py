@@ -81,6 +81,15 @@ def is_riot_enabled(ctx: commands.Context):
     bot = ctx.bot
     return bot.config.general_config.riot_api
 
+def is_activated(*toggles):
+    """ Checks if the toggles are activated """
+    async def wrapper(ctx: commands.Context):
+        bot = ctx.bot
+        guild_toggles = bot.config.get_guild_config(ctx.guild.id).toggles
+        return all((getattr(guild_toggles, toggle) for toggle in toggles))
+    
+    return commands.check(wrapper)
+
 
 # def is_debug_config_enabled():
 #     async def predicate(ctx):

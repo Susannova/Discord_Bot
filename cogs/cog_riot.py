@@ -9,6 +9,11 @@ from core import (
     help_text
 )
 
+from riot import (
+    riot_utility,
+    riot_commands
+)
+
 from core import DiscordBot
 from riot import riot_commands
 logger = logging.getLogger(__name__)
@@ -78,6 +83,46 @@ class RiotCog(commands.Cog, name='Riot Commands'):
     async def clash_dates(self, ctx):
         riot_commands.update_state_clash_dates(self.bot.state, self.bot.config.general_config)
         await ctx.send(self.bot.state.clash_dates)
+    
+    @commands.command()
+    @commands.check(checks.is_riot_enabled)
+    @checks.is_in_channels("commands", "commands_member")
+    async def leaderboard(self, ctx: commands.Context, queue_type: str = 'RANKED_SOLO_5x5'):
+        """ Prints the LoL leaderboard.
+
+        Args:
+            queue_type (str, optional): 'RANKED_SOLO_5x5' or 'flex'. Defaults to 'RANKED_SOLO_5x5'.
+        """
+
+        if queue_type == 'flex':
+            queue_type = 'RANKED_FLEX_SR'
+
+        summoners = list(riot_utility.read_all_accounts(self.bot.config.general_config, ctx.guild.id))
+        summoners = list(riot_commands.update_linked_summoners_data(summoners, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, ctx.guild.id))
+
+        for summoner in summoners:
+            if queue_type not in summoner.rank_values:
+                summoners.remove(summoner)
+
+        summoners.sort(key=lambda x: x.rank_values[queue_type], reverse=True)
+
+        op_url = 'https://euw.op.gg/multi/query='
+        for summoner in summoners:
+            op_url = op_url + f'{summoner.name}%2C'
+        
+        embed = discord.Embed(
+            title=f'Kraut9 Leaderboard: {"Flex" if queue_type == "RANKED_FLEX_SR" else "SoloQ"}',
+            colour=discord.Color.from_rgb(62, 221, 22),
+            url=op_url[:-3]
+        )
+
+        embed.add_field(name="User", value="\n".join((f'[{summoner.name}](https://euw.op.gg/summoner/userName={summoner.name})') for summoner in summoners), inline=True)
+        embed.add_field(name="Rank", value="\n".join((summoner.get_rank_string(queue_type) for summoner in summoners)), inline=True)
+        embed.add_field(name="WR", value="\n".join((f'{summoner.get_winrate(queue_type)}%' for summoner in summoners)), inline=True)
+
+        embed.set_footer(text=f"To link your account use {self.bot.get_command_prefix(ctx.guild.id)}link")
+
+        await ctx.send(embed=embed)
 
 
 def setup(bot: DiscordBot.KrautBot):

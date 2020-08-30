@@ -89,28 +89,22 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             if not message_.pinned:
                 await message_.delete()
 
-    @commands.command(name='leaderboard-old', hidden=True)
-    @checks.has_any_role("admin_id")
-    async def test_embed(self, ctx):
-        logger.debug("!leaderboard-old called")
-        await ctx.send(embed=riot_commands.create_embed(ctx, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, ctx.guild.id))
-
-    @commands.command(name='leaderboard', help = help_text.leaderboard_HelpText.text, brief = help_text.leaderboard_HelpText.brief, usage = help_text.leaderboard_HelpText.usage)
-    @checks.has_any_role("admin_id")
-    async def leaderboard_(self, ctx):
-        logger.debug("!leaderboard called")
-        if False:
-            loading_message = await ctx.send("This will take a few seconds. Processing...")
-            _embed = riot_commands.create_leaderboard_embed(self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, ctx.guild.id)
-            guild_config = self.bot.config.get_guild_config(ctx.guild.id)
-            folder_name = guild_config.folders_and_files.folders_and_files.folder_champ_spliced.format(guild_id=ctx.guild.id)
-            message = await ctx.send(file=discord.File(f'{folder_name}/leaderboard.png'))
-            _embed = _embed.set_image(url=message.attachments[0].url)
-            await ctx.send(embed=_embed)
-            await loading_message.delete()
-            await message.delete()
-        else:
-            await ctx.send("Not available right now. Use ``!plot`` instead.")
+    # @commands.command(name='leaderboard', help = help_text.leaderboard_HelpText.text, brief = help_text.leaderboard_HelpText.brief, usage = help_text.leaderboard_HelpText.usage)
+    # @checks.has_any_role("admin_id")
+    # async def leaderboard_(self, ctx):
+    #     logger.debug("!leaderboard called")
+    #     if False:
+    #         loading_message = await ctx.send("This will take a few seconds. Processing...")
+    #         _embed = riot_commands.create_leaderboard_embed(self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, ctx.guild.id)
+    #         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
+    #         folder_name = guild_config.folders_and_files.folders_and_files.folder_champ_spliced.format(guild_id=ctx.guild.id)
+    #         message = await ctx.send(file=discord.File(f'{folder_name}/leaderboard.png'))
+    #         _embed = _embed.set_image(url=message.attachments[0].url)
+    #         await ctx.send(embed=_embed)
+    #         await loading_message.delete()
+    #         await message.delete()
+    #     else:
+    #         await ctx.send("Not available right now. Use ``!plot`` instead.")
         
 
     # dont use this
@@ -159,6 +153,76 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             "name": channel_name
         }
         logger.info("Temporary %s-channel %s with id %s created", kind, channel_name, tmp_channel.id)
+    
+    @checks.is_in_channels("commands", "commands_member")
+    @checks.is_activated("highlights")
+    @commands.command()
+    async def highlights(self, ctx: commands.Context):
+        """ Prints the best highlights.
+
+        Vote for your favorite highlight with adding a reaction to the highlight.
+        """
+        ranking = {}
+        limit = 300
+
+        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
+
+        for highlight_channel_id in guild_config.channel_ids.highlights:
+            highlight_channel = self.bot.get_channel(highlight_channel_id)
+            async for message in highlight_channel.history(limit=limit):
+                users = []
+                for reaction in message.reactions:
+                    async for user in reaction.users():
+                        if user not in users:
+                            users.append(user)
+                count = len(users)
+                if count in ranking:
+                    ranking[count].append(message)
+                else:
+                    ranking[count] = [message]
+        
+        counts = list(ranking.keys())
+        counts.sort(reverse=True)
+
+        embed = discord.Embed(
+            title="Highlights Leaderboard",
+            type="rich",
+            description=guild_config.messages.highlight_leaderboard_description.format(
+                highlight_channel_mention=", ".join(
+                    (self.bot.get_channel(channel).mention for channel in guild_config.channel_ids.highlights)
+                    )
+            )
+        )
+
+        embed.set_footer(text=guild_config.messages.highlight_leaderboard_footer.format(limit=limit))
+
+        text_too_long = False
+
+        max_standing = 3 if len(counts) >=3 else len(counts)
+        if max_standing == 0:
+            if not guild_config.channel_ids.highlights:
+                await ctx.send("I found no highlight channel.")
+                logger.warning("highlights called but no highlight channel set for guild %i", ctx.guild.id)
+            else:
+                await ctx.send("Sorry, I found no highlights...")
+                logger.warning("highlights called but no highlight were found for guild %i", ctx.guild.id)
+            return
+
+        for standing in range(0, max_standing):
+            text = f"Votes: **{counts[standing]}**\n"
+            for message in ranking[counts[standing]]:
+                appended_text = f" - [{message.author.name}]({message.jump_url})\n"
+                if len(text) + len(appended_text) > 1024:
+                    text_too_long = True
+                    logger.warning("Too many highlights. Some were rejected.")
+                    break
+                text += appended_text
+            
+            embed.add_field(name=f"{standing + 1}. {guild_config.messages.place}", value=text, inline=False)
+        
+        message = await ctx.send(embed=embed)
+        if text_too_long:
+            await ctx.send("There were too many highlights so some older highlights were not taken in account.", delete_after=10)
 
 def setup(bot: DiscordBot.KrautBot):
     bot.add_cog(UtilityCog(bot))

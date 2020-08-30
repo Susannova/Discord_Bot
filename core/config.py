@@ -92,6 +92,7 @@ class Toggles:
     summoner_rank_history: bool = False
     leaderboard_loop: bool = False
     check_LoL_patch: bool = False
+    highlights: bool = False
 
     def __post_init__(self):
         """ Checks if the type of the fields are valid and converts them if not.
@@ -119,7 +120,7 @@ class Messages_Config:
                 {command_prefix}bans {team}'
     )
 
-    team_header: str = '\n@here\n**__===Teams===__**\n'
+    team_header: str = '\n**__===Teams===__**\n'
     team_1: str = 'Team 1:\n'
     team_2: str = '\nTeam 2:\n'
 
@@ -128,6 +129,9 @@ class Messages_Config:
 
     game_selector: str = "@everyone\nWähle hier durch das Klicken auf eine Reaktion aus zu welchen Spielen du Benachrichtungen erhalten willst!"
 
+    highlight_leaderboard_description: str = "Vote for the best highlights in {highlight_channel_mention}."
+    highlight_leaderboard_footer: str = "Only the last {limit} highlights can be taken in account."
+    place: str = "Place"
 
 @dataclasses.dataclass
 class UnsortedConfig:
@@ -185,6 +189,7 @@ class Channel_Ids:
     member_only: List[int] = dataclasses.field(default_factory=list)
     commands_member: List[int] = dataclasses.field(default_factory=list)
     commands: List[int] = dataclasses.field(default_factory=list)
+    highlights: List[int] = dataclasses.field(default_factory=list)
 
     def __post_init__(self):
         """ Checks if the types are valid and tries to convert them if not
