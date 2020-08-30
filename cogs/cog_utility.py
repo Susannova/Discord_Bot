@@ -161,6 +161,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         logger.info("Temporary %s-channel %s with id %s created", kind, channel_name, tmp_channel.id)
     
     @checks.is_in_channels("commands", "commands_member")
+    @checks.is_activated("highlights")
     @commands.command()
     async def highlights(self, ctx: commands.Context):
         """ Prints the best highlights.
@@ -168,31 +169,53 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         Vote for your favorite highlight with adding a reaction to the highlight.
         """
         ranking = {}
-        highlight_channel = self.bot.get_channel(606864764936781837)
         limit = 300
 
-        async for message in highlight_channel.history(limit=limit):
-            users = []
-            for reaction in message.reactions:
-                async for user in reaction.users():
-                    if user not in users:
-                        users.append(user)
-            count = len(users)
-            if count in ranking:
-                ranking[count].append(message)
-            else:
-                ranking[count] = [message]
+        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
+
+        for highlight_channel_id in guild_config.channel_ids.highlights:
+            highlight_channel = self.bot.get_channel(highlight_channel_id)
+            async for message in highlight_channel.history(limit=limit):
+                users = []
+                for reaction in message.reactions:
+                    async for user in reaction.users():
+                        if user not in users:
+                            users.append(user)
+                count = len(users)
+                if count in ranking:
+                    ranking[count].append(message)
+                else:
+                    ranking[count] = [message]
         
         counts = list(ranking.keys())
         counts.sort(reverse=True)
 
-        embed = discord.Embed(title="Highlights Leaderboard", type="rich", description=f"Wähle die besten Highlights in {highlight_channel.mention}")
-        embed.set_footer(text=f"Nur die letzten {limit} Highlights werden berücksichtigt.")
+        embed = discord.Embed(
+            title="Highlights Leaderboard",
+            type="rich",
+            description=guild_config.messages.highlight_leaderboard_description.format(
+                highlight_channel_mention=", ".join(
+                    (self.bot.get_channel(channel).mention for channel in guild_config.channel_ids.highlights)
+                    )
+            )
+        )
+
+        embed.set_footer(text=guild_config.messages.highlight_leaderboard_footer.format(limit=limit))
 
         text_too_long = False
 
-        for standing in range(0, 3):
-            text = f"Stimmen: **{counts[standing]}**\n"
+        max_standing = 3 if len(counts) >=3 else len(counts)
+        if max_standing == 0:
+            if not guild_config.channel_ids.highlights:
+                await ctx.send("I found no highlight channel.")
+                logger.warning("highlights called but no highlight channel set for guild %i", ctx.guild.id)
+            else:
+                await ctx.send("Sorry, I found no highlights...")
+                logger.warning("highlights called but no highlight were found for guild %i", ctx.guild.id)
+            return
+
+        for standing in range(0, max_standing):
+            text = f"Votes: **{counts[standing]}**\n"
             for message in ranking[counts[standing]]:
                 appended_text = f" - [{message.author.name}]({message.jump_url})\n"
                 if len(text) + len(appended_text) > 1024:
@@ -201,11 +224,11 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
                     break
                 text += appended_text
             
-            embed.add_field(name=f"Platz {standing + 1}", value=text, inline=False)
+            embed.add_field(name=f"{standing + 1}. {guild_config.messages.place}", value=text, inline=False)
         
         message = await ctx.send(embed=embed)
         if text_too_long:
-            await ctx.send("There where too many highlights so some older highlights were not taken in account.", delete_after=10)
+            await ctx.send("There were too many highlights so some older highlights were not taken in account.", delete_after=10)
 
 def setup(bot: DiscordBot.KrautBot):
     bot.add_cog(UtilityCog(bot))
