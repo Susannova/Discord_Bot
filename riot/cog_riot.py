@@ -86,7 +86,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
     
     @commands.command()
     @commands.check(checks.is_riot_enabled)
-    @checks.is_in_channels("commands", "commands_member")
+    @checks.is_in_channels("commands", "commands_member", "plots")
     async def leaderboard(self, ctx: commands.Context, queue_type: str = 'RANKED_SOLO_5x5'):
         """ Prints the LoL leaderboard.
 
