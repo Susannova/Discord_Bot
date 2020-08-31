@@ -64,7 +64,12 @@ class VoteCog(commands.Cog, name='Vote Commands'):
         vote = self.get_vote(message.id)
         
         counts = {}
+        participants = []
         for reaction in message.reactions:
+            async for user in reaction.users():
+                if user not in participants and user != self.bot.user:
+                    participants.append(user)
+            
             count = reaction.count
             if count in counts:
                 counts[count].append(reaction.emoji)
@@ -75,22 +80,22 @@ class VoteCog(commands.Cog, name='Vote Commands'):
         counts_list.sort(reverse=True)
 
         embed = discord.Embed(
-            title=vote.title
+            title=f"Results: {vote.title}"
         )
 
         for count in counts_list:
             embed.add_field(
                 name=f"Votes: {count}",
                 value="\n".join(
-                    (vote.options[self.emoji_number[emoji]] for emoji in counts[count])
+                    (f"- {vote.options[self.emoji_number[emoji]]}" for emoji in counts[count])
                 ),
                 inline=False
             )
         
-        await message.channel.send(embed=embed)
+        await message.channel.send(" ".join((participant.mention for participant in participants)), embed=embed)
     
     @commands.command()
-    async def vote(self, ctx: commands.Context, title: str, time: converters.StrToTime, *, options: typing.Optional[converters.LinesToList]):
+    async def vote(self, ctx: commands.Context, time: converters.StrToTime, *, title_and_options: converters.LinesToList):
         """ Start a vote
         
         Options are seperated by lines. If no options are given a yes-no vote is started.
@@ -100,20 +105,23 @@ class VoteCog(commands.Cog, name='Vote Commands'):
             options (typing.Optional[converters.LinesToList]): The vote options seperated by lines
         """
         
-        number_of_options = len(options)
+        title = title_and_options[0]
+        title_and_options.remove(title)
+
+        number_of_options = len(title_and_options)
         
-        options_text = (f"**{option+1}**: {options[option]}" for option in range(0, number_of_options))
+        options_text = (f"**{option+1}**: {title_and_options[option]}" for option in range(0, number_of_options))
 
         embed = discord.Embed(
             title=title,
             description="\n".join(options_text)
         )
 
-        if len(options) > len(self.number_emoji):
+        if len(title_and_options) > len(self.number_emoji):
             logger.error("Guild: %i: Vote started with too much options.", ctx.guild.id)
             raise RuntimeError("Too much options")
 
-        if len(embed) > 6000:
+        if len(embed) > 5000: # Max would be 6000 but the conclusion needs space too
             await ctx.send("The text is too long. PLease try again with shorter options")
             raise RuntimeError()
 
@@ -124,13 +132,14 @@ class VoteCog(commands.Cog, name='Vote Commands'):
         for number in range(0, number_of_options):
             emoji = self.number_emoji[number+1]
             await message.add_reaction(emoji)
-            new_vote.options[number+1] = options[number]
+            new_vote.options[number+1] = title_and_options[number]
             
 
         
         self.votes[message.id] = new_vote
 
-        await asyncio.sleep((time - datetime.datetime.now()).seconds)
+        # await asyncio.sleep((time - datetime.datetime.now()).seconds)
+        await asyncio.sleep(5)
         await self.end_vote(await message.channel.fetch_message(message.id))
 
 
