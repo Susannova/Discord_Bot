@@ -14,6 +14,7 @@ from core import (
 
 logger = logging.getLogger(__name__)
 
+# TODO Most of this is not needed anymore.
 class Vote:
     def __init__(self, creator_id: int, end_time: datetime.datetime, title: str):
         self.creator_id = creator_id
@@ -98,6 +99,7 @@ class VoteCog(commands.Cog, name='Vote Commands'):
     async def vote(self, ctx: commands.Context, time: converters.StrToTime, *, title_and_options: converters.LinesToList):
         """ Start a vote
         
+        TODO Needs to be updated!
         Options are seperated by lines. If no options are given a yes-no vote is started.
 
         Args:
@@ -116,6 +118,9 @@ class VoteCog(commands.Cog, name='Vote Commands'):
             title=title,
             description="\n".join(options_text)
         )
+
+        # TODO Not that nice...
+        embed.set_footer(text=f"Ends: {time.isoformat()}")
 
         if len(title_and_options) > len(self.number_emoji):
             logger.error("Guild: %i: Vote started with too much options.", ctx.guild.id)
