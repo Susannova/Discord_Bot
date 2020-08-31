@@ -23,6 +23,12 @@ class ArgsToDict(commands.Converter):
 
         return dict(dict_list)
 
+class LinesToList(commands.Converter):
+    async def convert(self, ctx: commands.Context, lines: str) -> list:
+        """ Converts multiple lines to list of strings """
+
+        return lines.split(sep="\n")
+
 class StrToTime(commands.Converter):
     async def convert(self, ctx: commands.Context, time_str: str) -> datetime.datetime:
         """ Converts a time str in a datetime.datetime
