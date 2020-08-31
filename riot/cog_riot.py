@@ -94,6 +94,10 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             queue_type (str, optional): 'RANKED_SOLO_5x5' or 'flex'. Defaults to 'RANKED_SOLO_5x5'.
         """
 
+        logger.info("Leaderboard called")
+
+        message_wait = await ctx.send("This can take some time...")
+
         if queue_type == 'flex':
             queue_type = 'RANKED_FLEX_SR'
 
@@ -123,6 +127,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
         embed.set_footer(text=f"To link your account use {self.bot.get_command_prefix(ctx.guild.id)}link")
 
         await ctx.send(embed=embed)
+        await message_wait.delete()
 
 
 def setup(bot: DiscordBot.KrautBot):
