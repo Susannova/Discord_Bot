@@ -22,9 +22,11 @@ logger = logging.getLogger(__name__)
 class RiotCog(commands.Cog, name='Riot Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
+    
+    def cog_check(self, ctx: commands.Context):
+        return checks.is_riot_enabled(ctx)
 
     @commands.command(name='player', help = help_text.player_HelpText.text, brief = help_text.player_HelpText.brief, usage = help_text.player_HelpText.usage)
-    @commands.check(checks.is_riot_enabled)
     @checks.is_in_channels("commands_member", "commands")
     async def player_(self, ctx, *summoner_name):
         logger.debug('!player command called')
@@ -35,7 +37,6 @@ class RiotCog(commands.Cog, name='Riot Commands'):
         await ctx.send(riot_commands.get_player_stats(ctx.message.author.name, arg, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, guild_id=ctx.guild.id))
 
     @commands.command(name='smurf', help = help_text.smurf_HelpText.text, brief = help_text.smurf_HelpText.brief, usage = help_text.smurf_HelpText.usage)
-    @commands.check(checks.is_riot_enabled)
     @checks.is_in_channels("commands_member", "commands")
     async def smurf_(self, ctx, *summoner_name):
         logger.debug('!smurf command called')
@@ -46,7 +47,6 @@ class RiotCog(commands.Cog, name='Riot Commands'):
         await ctx.send(riot_commands.get_smurf(ctx.message.author.name, arg, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, guild_id=ctx.guild.id))
 
     @commands.command(name='bans', help = help_text.bans_HelpText.text, brief = help_text.bans_HelpText.brief, usage = help_text.bans_HelpText.usage)
-    @commands.check(checks.is_riot_enabled)
     @discord.ext.commands.cooldown(rate=1, per=5)
     @checks.is_in_channels("commands_member", "commands")
     async def bans_(self, ctx, *team_names):
@@ -85,7 +85,6 @@ class RiotCog(commands.Cog, name='Riot Commands'):
         await ctx.send(self.bot.state.clash_dates)
     
     @commands.command()
-    @commands.check(checks.is_riot_enabled)
     @checks.is_in_channels("commands", "commands_member", "plots")
     async def leaderboard(self, ctx: commands.Context, queue_type: str = 'RANKED_SOLO_5x5'):
         """ Prints the LoL leaderboard.
