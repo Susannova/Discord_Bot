@@ -138,8 +138,7 @@ class VoteCog(commands.Cog, name='Vote Commands'):
         
         self.votes[message.id] = new_vote
 
-        # await asyncio.sleep((time - datetime.datetime.now()).seconds)
-        await asyncio.sleep(5)
+        await asyncio.sleep((time - datetime.datetime.now()).seconds)
         await self.end_vote(await message.channel.fetch_message(message.id))
 
 
