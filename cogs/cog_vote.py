@@ -71,7 +71,7 @@ class VoteCog(commands.Cog, name='Vote Commands'):
                 if user not in participants and user != self.bot.user:
                     participants.append(user)
             
-            count = reaction.count
+            count = reaction.count - 1
             if count in counts:
                 counts[count].append(reaction.emoji)
             else:
