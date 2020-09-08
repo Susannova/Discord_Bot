@@ -51,6 +51,12 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                 await ctx.send(f"Something went wrong. I was able to interpret the command until '{should_be_empty}'. Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`.")
                 raise ValueError("Was not able to interpret the command")
 
+            games_temp = []
+            for game in games:
+                if game not in games_temp:
+                    games_temp.append(game)
+            games = games_temp
+
             if not games:
                 logger.debug("Play request created without a game. Create list of games based on author")
                 user_role_ids = [role.id for role in ctx.author.roles]
