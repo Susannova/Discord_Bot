@@ -54,13 +54,13 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         channel_team1 = self.bot.get_channel(guild_config.channel_ids.team_1)
         channel_team2 = self.bot.get_channel(guild_config.channel_ids.team_2)
 
-        for member in self.bot.state.get_guild_state(ctx.guild.guild_id).last_team:
+        for member in self.bot.state.get_guild_state(ctx.guild.id).last_team:
             if isinstance(member, discord.Member) and member.voice is not None:
                 if member in self.team1:
                     await member.move_to(channel_team1)
                 elif member in self.team2:
                     await member.move_to(channel_team2)
-        self.bot.state.get_guild_state(ctx.guild.guild_id).last_team = []
+        self.bot.state.get_guild_state(ctx.guild.id).last_team = []
 
     @commands.command(name='link', help = help_text.link_HelpText.text, brief = help_text.link_HelpText.brief, usage = help_text.link_HelpText.usage)
     @commands.check(checks.is_riot_enabled)
