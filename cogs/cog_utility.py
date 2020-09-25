@@ -30,13 +30,22 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     @checks.is_in_channels("commands", "kraut-commands")
     @checks.has_any_role("admin_id", "member_id")
     async def team(self, ctx: commands.Context):
+        """ Creates random teams
+        
+            The teams are created with the subcommand create and can be moved afterwards with move
+        """
+
+
         logger.debug('!team command called')
         if ctx.invoked_subcommand is None:
-            await ctx.send('Invalid team command usage...')
+            await ctx.send_help(self.team)
 
-    @team.command(name='create', help=help_text.create_team_HelpText.text, brief=help_text.create_team_HelpText.brief, usage=help_text.create_team_HelpText.usage)
+    @team.command(name='create')
     async def create_team(self, ctx: commands.Context, players_list: commands.Greedy[typing.Union[discord.Member, str]]):
+        """ Creates two random teams
 
+        The player of the team are all the members of your current voice channel and every given player. The bot tries to find a discord user for the given names and will mentions all discord users.
+        """
         if ctx.author.voice is not None:
             current_voice_channel = ctx.author.voice.channel
             players_list += current_voice_channel.members
@@ -48,8 +57,12 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         self.bot.state.get_guild_state(ctx.guild.id).last_team = players_list
 
 
-    @team.command(name='move', help=help_text.move_team_HelpText.text, brief=help_text.move_team_HelpText.brief, usage=help_text.move_team_HelpText.usage)
+    @team.command(name='move')
     async def move_team_members(self, ctx: commands.Context):
+        """ Moves the last created team
+        
+            First a team has to be created with the subcommand create otherwise an error message will be send
+        """
         guild_config = utility.get_guild_config(self.bot, ctx.guild.id)
         channel_team1 = self.bot.get_channel(guild_config.channel_ids.team_1)
         channel_team2 = self.bot.get_channel(guild_config.channel_ids.team_2)
