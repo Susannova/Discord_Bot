@@ -54,7 +54,13 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         channel_team1 = self.bot.get_channel(guild_config.channel_ids.team_1)
         channel_team2 = self.bot.get_channel(guild_config.channel_ids.team_2)
 
-        for member in self.bot.state.get_guild_state(ctx.guild.id).last_team:
+        last_team = self.bot.state.get_guild_state(ctx.guild.id).last_team
+
+        if not last_team:
+            await ctx.send(f"Team is empty. Please use ``{self.bot.get_command_prefix(ctx.guild.id)}team create`` first.")
+            return
+
+        for member in last_team:
             if isinstance(member, discord.Member) and member.voice is not None:
                 if member in self.team1:
                     await member.move_to(channel_team1)
