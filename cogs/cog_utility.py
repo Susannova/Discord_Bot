@@ -45,7 +45,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
         message, self.team1, self.team2 = utility.create_team(players_list, guild_config)
         await ctx.send(message)
-        self.bot.state.get_guild_state(ctx.guild.guild_id).last_team = players_list
+        self.bot.state.get_guild_state(ctx.guild.id).last_team = players_list
 
 
     @team.command(name='move', help=help_text.move_team_HelpText.text, brief=help_text.move_team_HelpText.brief, usage=help_text.move_team_HelpText.usage)
