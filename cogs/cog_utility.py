@@ -35,7 +35,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         if ctx.invoked_subcommand is None:
             await ctx.send('Invalid team command usage...')
 
-    @team.command(name='create')
+    @team.command(name='create', help=help_text.create_team_HelpText.text, brief=help_text.create_team_HelpText.brief, usage=help_text.create_team_HelpText.usage)
     async def create_team(self, ctx: commands.Context, players_list: commands.Greedy[typing.Union[discord.Member, str]]):
 
         if ctx.author.voice is not None:
@@ -48,7 +48,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         await ctx.send(message)
         self.last_team = players_list
 
-    @team.command(name='move')
+    @team.command(name='move', help=help_text.move_team_HelpText.text, brief=help_text.move_team_HelpText.brief, usage=help_text.move_team_HelpText.usage)
     async def move_team_members(self, ctx: commands.Context):
         guild_config = utility.get_guild_config(self.bot, ctx.guild.id)
         channel_team1 = self.bot.get_channel(guild_config.channel_ids.team_1)
