@@ -23,12 +23,20 @@ logger = logging.getLogger(__name__)
 class UtilityCog(commands.Cog, name='Utility Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
+        self.last_team = []
+        self.team1 = []
+        self.team2 = []
 
-    @commands.command(name='create-team', help = help_text.create_team_HelpText.text, brief = help_text.create_team_HelpText.brief, usage = help_text.create_team_HelpText.usage)
-    @checks.is_in_channels("commands")
+    @commands.group(name='team')
+    @checks.is_in_channels("commands", "kraut-commands")
     @checks.has_any_role("admin_id", "member_id")
-    async def create_team(self, ctx: commands.Context, mv_bool: typing.Optional[bool], players_list: commands.Greedy[typing.Union[discord.Member, str]]):
-        logger.debug('!create-team command called')
+    async def team(self, ctx: commands.Context):
+        logger.debug('!team command called')
+        if ctx.invoked_subcommand is None:
+            await ctx.send('Invalid team command usage...')
+
+    @team.command(name='create')
+    async def create_team(self, ctx: commands.Context, players_list: commands.Greedy[typing.Union[discord.Member, str]]):
 
         if ctx.author.voice is not None:
             current_voice_channel = ctx.author.voice.channel
@@ -36,19 +44,23 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
         guild_config = utility.get_guild_config(self.bot, ctx.guild.id)
 
-        message, team1, team2 = utility.create_team(players_list, guild_config)
+        message, self.team1, self.team2 = utility.create_team(players_list, guild_config)
         await ctx.send(message)
+        self.last_team = players_list
 
-        if mv_bool:
-            channel_team1 = self.bot.get_channel(guild_config.channel_ids.team_1)
-            channel_team2 = self.bot.get_channel(guild_config.channel_ids.team_2)
-            
-            for member in players_list:
-                if isinstance(member, discord.Member) and member.voice is not None:
-                    if member in team1:
-                        await member.move_to(channel_team1)
-                    elif member in team2:
-                        await member.move_to(channel_team2)
+    @team.command(name='move')
+    async def move_team_members(self, ctx: commands.Context):
+        guild_config = utility.get_guild_config(self.bot, ctx.guild.id)
+        channel_team1 = self.bot.get_channel(guild_config.channel_ids.team_1)
+        channel_team2 = self.bot.get_channel(guild_config.channel_ids.team_2)
+
+        for member in self.last_team:
+            if isinstance(member, discord.Member) and member.voice is not None:
+                if member in self.team1:
+                    await member.move_to(channel_team1)
+                elif member in self.team2:
+                    await member.move_to(channel_team2)
+
 
     @commands.command(name='link', help = help_text.link_HelpText.text, brief = help_text.link_HelpText.brief, usage = help_text.link_HelpText.usage)
     @commands.check(checks.is_riot_enabled)

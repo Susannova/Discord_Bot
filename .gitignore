@@ -11,3 +11,4 @@ test-sequence
 /strings/
 /.VSCodeCounter/
 /.env/
+configuration.json
