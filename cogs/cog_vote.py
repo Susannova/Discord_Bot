@@ -51,12 +51,13 @@ class VoteCog(commands.Cog, name='Vote Commands'):
     
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
-        if reaction.message.id not in self.votes and user == self.bot.user:
+        if reaction.message.id not in self.votes or user == self.bot.user:
             return
         
-        if reaction not in reaction.message.reactions:
+        # if reaction.count == 1:
+        if self.bot.user not in await reaction.users().flatten():
             logger.warning("Removing a new reaction in vote %i", reaction.message.id)
-            await reaction.remove()
+            await reaction.remove(user)
     
     async def end_vote(self, message: discord.Message):
         if message.id not in self.votes:
