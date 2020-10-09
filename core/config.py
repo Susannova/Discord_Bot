@@ -320,6 +320,7 @@ class GuildConfig():
         for game in self.__games:
             yield Game(**self.__games[game]).role_id
 
+    def add_game(self, game: str, long_name: str, role_id: int, emoji: int, category_id: int, cog: str = None):
         """ Adds a new game to the bot """
 
         # The asdict prevents one from create a dict that is invalid to Game
