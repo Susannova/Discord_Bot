@@ -87,9 +87,10 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                     game=game_names,
                     time=play_time.strftime("%H:%M")
                 )
-            
-            play_request_message = await ctx.send(message, delete_after=guild_config.unsorted_config.auto_delete_after_seconds)
-            
+
+            play_request_channel = self.bot.get_channel(guild_config.channel_ids.play_request)
+            play_request_message = await play_request_channel.send(message, delete_after=guild_config.unsorted_config.auto_delete_after_seconds)
+
             _category = [game.name_short for game in games]
             play_request = PlayRequest(play_request_message.id, ctx.message.author.id, category=_category, play_time=play_time)
 
@@ -109,7 +110,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         guild_id = message.guild.id
         guild_config = self.bot.config.get_guild_config(guild_id)
         
-        if message.channel.id in guild_config.channel_ids.play_request:
+        if message.channel.id == guild_config.channel_ids.play_request:
             if message.author == self.bot.user:
                 seconds_slept = 0
                 while self.bot.sending_message:

@@ -182,9 +182,9 @@ class Channel_Ids:
     announcement: int = None
     team_1: int = None
     team_2: int = None
+    play_request: int = None
 
     create_team_voice: List[int] = dataclasses.field(default_factory=list)
-    play_request: List[int] = dataclasses.field(default_factory=list)
     bot: List[int] = dataclasses.field(default_factory=list)
     member_only: List[int] = dataclasses.field(default_factory=list)
     commands_member: List[int] = dataclasses.field(default_factory=list)
