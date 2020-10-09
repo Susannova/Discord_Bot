@@ -105,11 +105,13 @@ class Toggles:
 @dataclasses.dataclass
 class Messages_Config:
     """ Configuration data of the messages from the bot """
+    date_format: str = '{day}.{month}.'
     create_internal_play_request: str = '@everyone Das Play-Request von {creator} hat 6 oder mehr Mitspieler. Ein **__internes Match__** wird aufgebaut!\nEs sind noch **__{free_places}__** Plätze frei. \nUhrzeit: {time} Uhr \nSpieler:\n'
     auto_dm_creator: str = '{player} hat auf dein Play-Request reagiert: {reaction} '
     auto_dm_subscriber: str = '{player} hat auch auf das Play-Request von {creator} reagiert: {reaction} '
     play_now: str = '{role_mention}\n{creator} spielt **__jetzt gerade__** **{game}** und sucht noch nach weiteren Spielern!'
-    play_at: str = '{role_mention}\n{player} will **{game}** spielen. Kommt um **__{time}__** Uhr online!'
+    play_at: str = '{role_mention}\n{player} will **{game}** spielen. Kommt {date_str} um {time} Uhr online!'
+    play_at_date: str = 'am {date}'
     play_request_reminder: str = 'REMINDER: Der abonnierte Play-Request geht in {minutes} Minuten los!'
     clash_create = '{role_mention}\n{player} sucht nach Mitspielern für den LoL Clash am {date}.'
     clash_full: str = 'Das Clash Team von {creator} für den {time} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{team}'

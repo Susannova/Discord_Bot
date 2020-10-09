@@ -80,12 +80,22 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                 for game in games[1:-1]:
                     game_names += f", {game.name_long}"
                 game_names += f" oder  {games[-1].name_long}"
+            
+            date_str = ""
+            if not play_time.date() == datetime.datetime.now().date():
+                date = guild_config.messages.date_format.format(
+                    day=play_time.strftime("%d"),
+                    month=play_time.strftime("%m")
+                )
+                date_str = guild_config.messages.play_at_date.format(date=date)
+
             message = message_unformated.format(
                     role_mention=" ".join((ctx.guild.get_role(game.role_id).mention for game in games)),
                     creator=ctx.message.author.mention,
                     player=ctx.message.author.mention,
                     game=game_names,
-                    time=play_time.strftime("%H:%M")
+                    time=play_time.strftime("%H:%M"),
+                    date_str=date_str
                 )
 
             play_request_channel = self.bot.get_channel(guild_config.channel_ids.play_request)
