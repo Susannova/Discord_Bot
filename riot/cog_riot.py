@@ -22,6 +22,9 @@ logger = logging.getLogger(__name__)
 class RiotCog(commands.Cog, name='Riot Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
+        if self.bot.state.lol_patch is None:
+            riot_utility.update_current_patch(self.bot.state)
+            riot_utility.download_champ_icons(self.bot.state.lol_patch, self.bot.config.general_config)
     
     def cog_check(self, ctx: commands.Context):
         return checks.is_riot_enabled(ctx)

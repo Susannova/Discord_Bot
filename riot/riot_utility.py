@@ -182,3 +182,13 @@ def get_upcoming_clash_dates(config: GeneralConfig, state: GeneralState):
         if tmp_clash_date not in state.clash_dates:
             clash_dates.append(tmp_clash_date)
     return clash_dates
+
+def download_champ_icons(LoL_patch: str, config: GeneralConfig):
+    logger.info("Download all champ icons")
+    champions = requests.get(f'http://ddragon.leagueoflegends.com/cdn/{LoL_patch}/data/en_US/champion.json').json()
+    for champ in champions['data']:
+        logger.debug("Download champ icon for %s", champ)
+        image = requests.get(f'http://ddragon.leagueoflegends.com/cdn/{LoL_patch}/img/champion/{champ}.png')
+        with open(f'{config.folder_champ_icon}{champ}.png', 'wb') as file:
+            file.write(image.content)
+    logger.info("All champ icons were downloaded.")
