@@ -8,7 +8,7 @@ Most of the features can be (de)activated. Not all are activated per default.
 - Create two random teams based on the member in the voice channel
   - The teams can then automatically be moved to two voice channels
 - Create a request to play a game now or to a given time
-  - Other members can react to the play request with a join or pass reaction
+  - Other members can react to the play request if they want to join
   - Members that reacted with join get a message if another member joins and 5 minutes before the game starts
 - Automations
   - Auto delete non commands (not default)
@@ -40,26 +40,22 @@ The best way to modify the server settings of the bot is to get the current conf
 () = mandatory
 [] = optional
 
+Not all commands are listed here.
+
 ### General Commands:
-- `!create-team [mv] [names]`: Creates two teams based on the voice channel the user is in. With `mv`, the players are moved to the voice channels 'Team 1' and 'Team 2'
-- `!play game (time | "now" [+minutes])`: Creates a play-request for the game `game` for now or for the time in the format hh:mm. Other users can react to the fame with :fill: or :x:.
-- `!help [command]`: Prints a list of the availble commands and a short description or a longer description for a given command.
+- `?team (move | (create [members]))`: Creates two teams based on the voice channel the user is in. With `move`, the players are moved to the voice channels 'Team 1' and 'Team 2'
+- `?play [game...] [time]`: Creates a play-request for the games `game` for now or for the time in the format hh:mm. Other users can react to the request
+- `?help [command]`: Prints a list of the availble commands and a short description or a longer description for a given command.
 
 ### Riot Commands:
-- `!bans summoner x5`: Returns the best bans for the summoners
-- `!player summoner`: Gives some basic infos of the summoner.
-- `!smurf summoner`: Checks if the summoner is a smurf or not
-- `!link summoner`: Links a Riot account to the user.
-- `!unlink`: Unlinks the Riot account.
-- `!plot`: Plots a time graph of the winrate and rank of the LoL SoloQ and Flex games for the linked users.
+- `?bans summoner x5`: Returns the best bans for the summoners
+- `?player summoner`: Gives some basic infos of the summoner.
+- `?smurf summoner`: Checks if the summoner is a smurf or not
+- `?link summoner`: Links a Riot account to the user.
+- `?unlink`: Unlinks the Riot account.
+- `?plot`: Plots a time graph of the winrate and rank of the LoL SoloQ and Flex games for the linked users.
 
 ### DEBUG/DEV Commands:
-- `!version`
-- `!enable-debug`
-- `!reload-ext extension`
-- `!print command`
-- `!end (restart | abort)`
-
-## Known Bugs:
-
-## Developer Wiki:
+- `?version`
+- `?reload-ext extension`
+- `?end [abort]`
