@@ -21,7 +21,6 @@ from riot import (
 )
 
 from core import (
-    bot_utility as utility,
     timers,
     DiscordBot,
     config,
@@ -130,7 +129,7 @@ class LoopCog(commands.Cog):
     @commands.check(checks.is_riot_enabled)
     @commands.command(name='plot')
     async def print_leaderboard_command(self, ctx, enable_xkcd: typing.Optional[bool]):
-        if utility.get_guild_config(self.bot, ctx.guild.id).toggles.summoner_rank_history:
+        if self.bot.config.get_guild_config(self.bot, ctx.guild.id).toggles.summoner_rank_history:
             logger.debug('!plot command called')
             await self.print_leaderboard(ctx.guild.id, ctx.channel, False, enable_xkcd=enable_xkcd)
         else:
@@ -140,7 +139,7 @@ class LoopCog(commands.Cog):
     async def update_summoners(self):
         logger.info("Update the summoners")
         for guild in self.bot.guilds:
-            if utility.get_guild_config(self.bot, guild.id).toggles.summoner_rank_history:
+            if self.bot.config.get_guild_config(self.bot, guild.id).toggles.summoner_rank_history:
                 self.get_summoners_data(guild.id, True)
 
     @update_summoners.before_loop

@@ -17,7 +17,6 @@ import discord
 from discord.ext import commands
 
 from core import (
-    bot_utility as utility,
     state,
     DiscordBot
 )

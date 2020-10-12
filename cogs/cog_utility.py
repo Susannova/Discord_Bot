@@ -7,18 +7,39 @@ import discord
 from discord.ext import commands
 
 from core import (
-    bot_utility as utility,
     checks,
     exceptions,
     timers,
     help_text,
-    DiscordBot
+    DiscordBot,
+    config
 )
 
 from riot import riot_commands
 
 logger = logging.getLogger(__name__)
 
+def create_team(players: typing.List[typing.Union[discord.Member, str]], guild_config: config.GuildConfig):
+    """ Creates two teams and returns a string, and the two teams as lists. """
+    num_players = len(players)
+    team1 = random.sample(players, int(num_players / 2))
+    team2 = players.copy()
+
+    for player in team1:
+        team2.remove(player)
+
+    teams_message = guild_config.messages.team_header
+    teams_message += guild_config.messages.team_1
+    for player in team1:
+        name = player.mention if isinstance(player, discord.Member) else player
+        teams_message += name + "\n"
+
+    teams_message += guild_config.messages.team_2
+    for player in team2:
+        name = player.mention if isinstance(player, discord.Member) else player
+        teams_message += name + "\n"
+
+    return teams_message, team1, team2
 
 class UtilityCog(commands.Cog, name='Utility Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
@@ -50,9 +71,9 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             current_voice_channel = ctx.author.voice.channel
             players_list += current_voice_channel.members
 
-        guild_config = utility.get_guild_config(self.bot, ctx.guild.id)
+        guild_config = self.bot.config.get_guild_config(self.bot, ctx.guild.id)
 
-        message, self.team1, self.team2 = utility.create_team(players_list, guild_config)
+        message, self.team1, self.team2 = create_team(players_list, guild_config)
         await ctx.send(message)
         self.bot.state.get_guild_state(ctx.guild.id).last_team = players_list
 
@@ -63,7 +84,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         
             First a team has to be created with the subcommand create otherwise an error message will be send
         """
-        guild_config = utility.get_guild_config(self.bot, ctx.guild.id)
+        guild_config = self.bot.config.get_guild_config(self.bot, ctx.guild.id)
         channel_team1 = self.bot.get_channel(guild_config.channel_ids.team_1)
         channel_team2 = self.bot.get_channel(guild_config.channel_ids.team_2)
 
