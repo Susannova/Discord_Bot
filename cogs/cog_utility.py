@@ -71,7 +71,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             current_voice_channel = ctx.author.voice.channel
             players_list += current_voice_channel.members
 
-        guild_config = self.bot.config.get_guild_config(self.bot, ctx.guild.id)
+        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
 
         message, self.team1, self.team2 = create_team(players_list, guild_config)
         await ctx.send(message)
@@ -84,7 +84,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         
             First a team has to be created with the subcommand create otherwise an error message will be send
         """
-        guild_config = self.bot.config.get_guild_config(self.bot, ctx.guild.id)
+        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
         channel_team1 = self.bot.get_channel(guild_config.channel_ids.team_1)
         channel_team2 = self.bot.get_channel(guild_config.channel_ids.team_2)
 
