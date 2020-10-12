@@ -6,7 +6,7 @@ import logging
 import dataclasses
 import json
 import typing
-from typing import List
+from typing import List, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -53,6 +53,28 @@ def check_if_channel_id_valid(channel_id: int, valid_ids: List) -> bool:
         return False
     else:
         return True
+
+@dataclasses.dataclass
+class Command:
+    """ Represent a command
+    Used for command specific options like the channel that the command is allowed in
+    """
+
+    allowed_in_channel_ids: Tuple[int] = dataclasses.field(default_factory=tuple)
+    allowed_in_channels: Tuple[str] = dataclasses.field(default_factory=tuple)
+    allowed_from_role_ids: Tuple[int] = dataclasses.field(default_factory=tuple)
+    allowed_from_roles: Tuple[str] = dataclasses.field(default_factory=tuple)
+    enabled: bool = True
+
+    # TODO Does not work!!!
+    # def __post_init__(self):
+    #     """ Checks if the types are valid and tries to convert the fields if not
+
+    #     Raises an TypeError if conversion fails """
+        
+    #     for field in dataclasses.fields(self):
+    #         auto_conversion(self, field)
+
 
 @dataclasses.dataclass
 class Game:
@@ -256,8 +278,9 @@ class GuildConfig():
         self.folders_and_files = Folders_and_Files()
         self.toggles = Toggles()
         
-        # Dict of classes Game. Use the add and get functions to modify this.
+        # Some dicts. Use the add and get functions to modify this.
         self.__games = {}
+        self.__commands = {} 
 
 
     def asdict(self) -> dict:
@@ -268,7 +291,8 @@ class GuildConfig():
             "channel_ids": dataclasses.asdict(self.channel_ids),
             "folders_and_files": dataclasses.asdict(self.folders_and_files),
             "toggles": dataclasses.asdict(self.toggles),
-            "games": self.__games
+            "games": self.__games,
+            "commands": self.__commands
         }
     
     def fromdict(self, config_dict, update: bool = False):
@@ -287,6 +311,7 @@ class GuildConfig():
         self.folders_and_files = Folders_and_Files(**new_config["folders_and_files"])
         self.toggles = Toggles(**new_config["toggles"])
         self.__games = new_config["games"]
+        self.__commands = new_config["commands"]
     
     def check_for_invalid_channel_ids(self, valid_ids: list):
         """ Checks and deletes ids that are not in valid_ids and yields tuples of the deleted id and its category"""
@@ -355,6 +380,43 @@ class GuildConfig():
             game_cog = game.cog
             if game_cog is not None:
                 yield game_cog
+    
+    def add_command_config(self, command_name: str, **kwargs):
+        """Adds a new command config
+
+        Args:
+            command_name (str): The name of the command
+            kwargs: The command options. Must be a class variable of Command
+        """
+        self.__commands[command_name] = dataclasses.asdict(Command(**kwargs))
+    
+    def command_has_config(self, command_name: str) -> bool:
+        """Checks if the command has a config
+
+        Args:
+            command_name (str): The command name
+
+        Returns:
+            bool: True if the command has a config
+        """
+        return command_name in self.__commands
+
+    def get_command(self, command_name: str) -> Command:
+        """Return the config for a command
+
+        Args:
+            command_name (str): The command name
+
+        Raises:
+            LookupError: If the command has no config
+
+        Returns:
+            Command: The config for the command
+        """
+        if self.command_has_config(command_name):
+            return Command(**self.__commands[command_name])
+        else:
+            raise LookupError("Command has no config")
 
     def get_category_ids(self, *role_names) -> list:
         """ Returns a list of all game channel category ids that matches role_names """
