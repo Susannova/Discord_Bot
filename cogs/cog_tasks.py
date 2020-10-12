@@ -200,7 +200,7 @@ class LoopCog(commands.Cog):
                     
                     await annoucement_channel.send(text_to_send)
         
-        riot_utility.download_champ_icons(self.bot.state.LoL_patch, self.bot.config.general_config)
+        riot_utility.download_champ_icons(self.bot.state.lol_patch, self.bot.config.general_config)
 
     @check_LoL_patch.before_loop
     async def check_LoL_patch_before_loop(self):
