@@ -60,7 +60,11 @@ def is_in_channels(*channel_names):
         channels_to_check = []
         for channel_name in channel_names:
             if channel_name in channels_dict:
-                channels_to_check += channels_dict[channel_name]
+                channel_to_append = channels_dict[channel_name]
+                if isinstance(channel_to_append, list):
+                    channels_to_check += channel_to_append
+                else:
+                    channels_to_check.append(channel_to_append)
         channels_to_check += guild_config.get_category_ids(channel_names)
         channels_to_check += channels_dict["bot"]
         

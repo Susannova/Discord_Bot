@@ -19,10 +19,17 @@ class HelpText(object):
         self.brief = brief
         self.usage = usage
 
+
 create_team_HelpText = HelpText(
-    'Erstellt zwei zufällige Teams aus den Mitgliedern des Voice Channels und gegebenfalls weiteren, angegebene Spielern. Mit der Option \'mv\' werden die Spieler automatisch in die entsprechende Channels bewegt.',
+    'Erstellt zwei zufällige Teams aus den Mitgliedern des Voice Channels und gegebenfalls weiteren, angegebene Spielern.',
     'Erstellt zwei zufällige Teams',
-    '[mv] [names]'
+    '[names]'
+)
+
+move_team_HelpText = HelpText(
+    'Bewegt die zwei mit !team create erstellten Teams in ihre entsprechenden Team Channel.',
+    'Bewegt die zwei  Teams',
+    ''
 )
 
 link_HelpText = HelpText(

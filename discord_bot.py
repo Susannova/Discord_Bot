@@ -33,7 +33,7 @@ if __name__ == '__main__':
         
         bot.load_extension('cogs.cog_debug')
         bot.load_extension('cogs.cog_play_requests')
-
+        bot.load_extension('cogs.cog_vote')
         bot.load_extension('cogs.cog_utility')
         bot.load_extension('cogs.events')
         bot.load_extension('cogs.cog_tasks')
