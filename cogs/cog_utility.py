@@ -171,7 +171,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         guild_config.unsorted_config.game_selector_id = message.id
 
     @commands.command(name='create-channel', help = help_text.create_channel_HelpText.text, brief = help_text.create_channel_HelpText.brief, usage = help_text.create_channel_HelpText.usage)
-    @checks.is_in_channels("commands_member")
+    @checks.is_in_channels("commands", "commands_member")
     @discord.ext.commands.cooldown(rate=3, per=30)
     async def create_channel(self, ctx, kind, channel_name, *user_limit):
         logger.debug("!create-channel %s %s called by %s", kind, channel_name, ctx.message.author.name)

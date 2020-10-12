@@ -60,7 +60,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
                 f'{folder_name}/image.jpg'))
 
     @commands.command(name='clash', help = help_text.clash_HelpText.text, brief = help_text.clash_HelpText.brief, usage = help_text.clash_HelpText.usage)
-    @checks.is_in_channels("commands_member")
+    @checks.is_in_channels("commands", "commands_member")
     async def clash_(self, ctx):
         logger.debug('!clash command called')
 
@@ -82,7 +82,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             self.bot.config.get_guild_config(ctx.guild.id).messages.bans.format(ocr.get_formatted_summoner_names()))
 
     @commands.command(name='clash_dates')
-    @checks.is_in_channels("commands_member")
+    @checks.is_in_channels("commands", "commands_member")
     async def clash_dates(self, ctx):
         riot_commands.update_state_clash_dates(self.bot.state, self.bot.config.general_config)
         await ctx.send(self.bot.state.clash_dates)
