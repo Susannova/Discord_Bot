@@ -70,18 +70,15 @@ def get_current_patch_url(guild_config: GuildConfig):
     return guild_config.messages.patch_notes.format(current_patch_list[0], current_patch_list[1])
 
 
-def get_current_patch():
-    with urllib.request.urlopen("https://ddragon.leagueoflegends.com/api/versions.json") as url:
-        data = json.loads(url.read().decode())
-        return data[0]
+def get_current_patch() -> str:
+    return requests.get("https://ddragon.leagueoflegends.com/api/versions.json").json()[0]
 
-def update_current_patch(state: GeneralState):
+def update_current_patch(state: GeneralState) -> bool:
     ''' Checks if the LoL version is equal to state.lol_patch.
     If not, returns True and sets state.lol_patch to current patch.
     If state.lol_patch is None, sets state.lol_patch to current patch and returns False.
     '''
-    current_patch_list = get_current_patch().split('.')
-    current_patch = current_patch_list[0] + '.' + current_patch_list[1]
+    current_patch = get_current_patch()
     if state.lol_patch is None:
         state.lol_patch = current_patch
         return False
