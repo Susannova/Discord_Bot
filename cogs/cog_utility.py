@@ -159,17 +159,6 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     #         await ctx.send("Not available right now. Use ``!plot`` instead.")
         
 
-    # dont use this
-    @commands.command(name='game-selector', hidden=True)
-    @checks.has_any_role("admin_id")
-    async def game_selector(self, ctx: commands.Context):
-        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
-        message = await ctx.send(self.bot.config.get_guild_config(ctx.guild.id).messages.game_selector)
-        for emoji_id in guild_config.get_all_game_emojis():
-            emoji = self.bot.get_emoji(emoji_id)
-            await message.add_reaction(emoji)
-        guild_config.unsorted_config.game_selector_id = message.id
-
     @commands.command(name='create-channel', help = help_text.create_channel_HelpText.text, brief = help_text.create_channel_HelpText.brief, usage = help_text.create_channel_HelpText.usage)
     @discord.ext.commands.cooldown(rate=3, per=30)
     async def create_channel(self, ctx, kind, channel_name, *user_limit):
