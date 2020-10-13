@@ -131,16 +131,6 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             'Dein Lol-Account wurde erfolgreich von deinem Discord Account getrennt!')
         logger.info("%s was unlinked", ctx.message.author.name)
 
-    @commands.command(name='purge', hidden=True)
-    @checks.has_any_role("admin_id")
-    async def purge_(self, ctx, count: int):
-        logger.info("!purge %s called in channel %s", count, ctx.message.channel.name)
-        last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
-
-        for message_ in last_count_messages:
-            if not message_.pinned:
-                await message_.delete()
-
     # @commands.command(name='leaderboard', help = help_text.leaderboard_HelpText.text, brief = help_text.leaderboard_HelpText.brief, usage = help_text.leaderboard_HelpText.usage)
     # @checks.has_any_role("admin_id")
     # async def leaderboard_(self, ctx):
