@@ -28,8 +28,10 @@ logger = logging.getLogger(__name__)
 class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
+    
+    async def cog_check(self, ctx: commands.Context):
+        return await checks.command_is_allowed(ctx)
 
-    @checks.is_in_channels("play_request", "commands", "commands_member")
     @commands.group()
     async def play(self, ctx: commands.Context, games: commands.Greedy[converters.StrToGame], play_time: typing.Optional[converters.StrToTime], *, should_be_empty: typing.Optional[str]):
         """ Create a play request

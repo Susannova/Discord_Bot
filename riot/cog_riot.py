@@ -26,11 +26,10 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             riot_utility.update_current_patch(self.bot.state)
             riot_utility.download_champ_icons(self.bot.state.lol_patch, self.bot.config.general_config)
     
-    def cog_check(self, ctx: commands.Context):
-        return checks.is_riot_enabled(ctx)
+    async def cog_check(self, ctx: commands.Context):
+        return all(checks.is_riot_enabled(ctx), await checks.command_is_allowed(ctx))
 
     @commands.command(name='player', help = help_text.player_HelpText.text, brief = help_text.player_HelpText.brief, usage = help_text.player_HelpText.usage)
-    @checks.is_in_channels("commands_member", "commands")
     async def player_(self, ctx, *summoner_name):
         logger.debug('!player command called')
         if len(list(summoner_name)) == 0:
@@ -40,7 +39,6 @@ class RiotCog(commands.Cog, name='Riot Commands'):
         await ctx.send(riot_commands.get_player_stats(ctx.message.author.name, arg, self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, guild_id=ctx.guild.id))
 
     @commands.command(name='smurf', help = help_text.smurf_HelpText.text, brief = help_text.smurf_HelpText.brief, usage = help_text.smurf_HelpText.usage)
-    @checks.is_in_channels("commands_member", "commands")
     async def smurf_(self, ctx, *summoner_name):
         logger.debug('!smurf command called')
         if len(list(summoner_name)) == 0:
@@ -51,7 +49,6 @@ class RiotCog(commands.Cog, name='Riot Commands'):
 
     @commands.command(name='bans', help = help_text.bans_HelpText.text, brief = help_text.bans_HelpText.brief, usage = help_text.bans_HelpText.usage)
     @discord.ext.commands.cooldown(rate=1, per=5)
-    @checks.is_in_channels("commands_member", "commands")
     async def bans_(self, ctx, *team_names):
         logger.debug('!bans command called')
         folder_name = self.bot.config.get_guild_config(ctx.guild.id).folders_and_files.folder_champ_spliced.format(guild_id=ctx.guild.id)
@@ -60,7 +57,6 @@ class RiotCog(commands.Cog, name='Riot Commands'):
                 f'{folder_name}/image.jpg'))
 
     @commands.command(name='clash', help = help_text.clash_HelpText.text, brief = help_text.clash_HelpText.brief, usage = help_text.clash_HelpText.usage)
-    @checks.is_in_channels("commands", "commands_member")
     async def clash_(self, ctx):
         logger.debug('!clash command called')
 
@@ -82,13 +78,11 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             self.bot.config.get_guild_config(ctx.guild.id).messages.bans.format(ocr.get_formatted_summoner_names()))
 
     @commands.command(name='clash_dates')
-    @checks.is_in_channels("commands", "commands_member")
     async def clash_dates(self, ctx):
         riot_commands.update_state_clash_dates(self.bot.state, self.bot.config.general_config)
         await ctx.send(self.bot.state.clash_dates)
     
     @commands.command()
-    @checks.is_in_channels("commands", "commands_member", "plots")
     async def leaderboard(self, ctx: commands.Context, queue_type: str = 'RANKED_SOLO_5x5'):
         """ Prints the LoL leaderboard.
 

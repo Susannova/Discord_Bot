@@ -67,6 +67,14 @@ class KrautBot(commands.Bot):
         await channel.send(f"{owner.mention} I have automatically created this channel because this channel did not exist or was not found in the config. The channel is invisible for everyone except you. In this channel you can use ``{self.get_command_prefix(guild.id)}config`` to configure {guild.me.mention}.")
         
         return channel
+    
+    def yield_guild_admin_ids(self, guild: discord.Guild) -> int:
+        guild_config = self.config.get_guild_config(guild.id)
+        admin_role = guild.get_role(guild_config.unsorted_config.admin_id)
+        for member in admin_role.members:
+            yield member.id
+
+
 
     async def check_channels_id_in_config(self, guild_id: int):
         """ Checks if the channels set in the config are part of the guild and removes it if not """

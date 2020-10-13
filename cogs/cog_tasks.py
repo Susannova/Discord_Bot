@@ -115,6 +115,9 @@ class LoopCog(commands.Cog):
             self.print_leaderboard_loop.start()
             self.check_LoL_patch.start()
         self.auto_delete_tmp_channels.start()
+    
+    async def cog_check(self, ctx: commands.Context):
+        return await checks.command_is_allowed(ctx)
 
     async def print_leaderboard(self, guild_id: int, channel_to_print=None, update=True, enable_xkcd=False):
         summoners_data = self.get_summoners_data(guild_id, update)
