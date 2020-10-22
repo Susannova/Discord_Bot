@@ -29,7 +29,11 @@ class KrautBot(commands.Bot):
         call the __init__ method of the commands.Bot
         class.
         """
-        super().__init__(command_prefix=get_command_prefix)
+        
+        intents = discord.Intents.default()
+        intents.members = True
+
+        super().__init__(command_prefix=get_command_prefix, intents=intents)
         
         help_command_ = commands.DefaultHelpCommand()
         self.help_command = help_command_
