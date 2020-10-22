@@ -6,6 +6,7 @@ import logging
 import dataclasses
 import json
 import typing
+import os
 from typing import List, Tuple
 
 logger = logging.getLogger(__name__)
@@ -336,9 +337,12 @@ class GuildConfig():
         if is_invalid:
             self.channel_ids = Channel_Ids(**channel_ids_dict)
 
+    def game_exists(self, game_short_name: str) -> bool:
+        return game_short_name in self.__games
+
     def get_game(self, game_short_name: str) -> Game:
         """ Returns a Game class that belongs to the short name of a game """
-        if game_short_name in self.__games:
+        if self.game_exists(game_short_name):
             game_dict = self.__games[game_short_name]
             return Game(**game_dict)
         else:
@@ -473,10 +477,14 @@ class GeneralConfig:
 class BotConfig:
     """ Configuration of the bot """
 
-    def __init__(self, general_config=GeneralConfig()):
+    def __init__(self, general_config=GeneralConfig(), *, config_file: str = None, update_config: bool = True):
         self.general_config = general_config
         self.__guilds_config = {}
-        self.update_config_from_file()
+
+        if config_file:
+            general_config.config_file = config_file
+        if update_config:
+            self.update_config_from_file()
     
     def asdict(self) -> dict:
         """ Returns the general configs as a dict """
@@ -501,13 +509,14 @@ class BotConfig:
                 self.add_new_guild_config(guild_int)
             self.get_guild_config(guild_int).fromdict(config_dict["guilds_config"][guild])
 
-    def write_config_to_file(self, filename: str = None):
+    def write_config_to_file(self, filename: str = None, nice_format: bool = False):
         """ Write the config to the config file """
         if filename is None:
             filename = self.general_config.config_file
 
         with open(filename, 'w') as json_file:
-            json.dump(self.asdict(), json_file)
+            intent = "\t" if nice_format else None
+            json.dump(self.asdict(), json_file, indent=intent)
         logger.info("Saved the config to %s",
                     filename)
 
@@ -559,18 +568,92 @@ class BotConfig:
         """ Returns a list with every guild id """
         return [guild_id for guild_id in self.__guilds_config]
 
-# if __name__ == "__main__":
-#     bot_config = BotConfig()
+def is_Y(input: str) -> bool:
+    if input == "Y":
+        return True
+    elif input == "N":
+        return False
+    else:
+        raise RuntimeError("Enter Y or N")
 
-#     bot_config.general_config.discord_token = ""
+if __name__ == "__main__":
+    config_file = input("Please enter the path to the config file. This is just needed if you want to check new options. The bot will only find the config in the default path. If you enter no path, the default path will be taken. ")
+    config_file = config_file if config_file else "../config/configuration.json"
 
-#     new_guild_id = None
+    reset = is_Y(input("Do you want to reset the config? [Y/N] "))
+    file_exists = os.path.exists(config_file)
+    if not file_exists and not reset:
+        if not is_Y(input("The config file does not exists! Do you want to create a new one?")):
+            exit(1)
+        else:
+            reset = True
+
+    bot_config = BotConfig(config_file=config_file, update_config=not reset)
+
     
-#     if not bot_config.check_if_guild_exists(new_guild_id):
-#         bot_config.add_new_guild_config(new_guild_id)
-#     else:
-#         print("Guild does exist!")
+    discord_token = input("Please enter your discord token. Leave empty if the config already has an discord token: ")
+    if discord_token or reset:
+        bot_config.general_config.discord_token = discord_token
+    
+    riot_api = is_Y(input("Do you want to enable the riot api? You need a riot api key to do so. [Y/N] "))
+    if riot_api:
+        riot_token = input("Please enter your riot api key. Leave empty to not change the key: ")
+        if not riot_token and not bot_config.general_config.riot_token:
+            print("No riot api key. Disable riot api")
+            riot_api = False
+        else:
+            bot_config.general_config.riot_api = True
+            bot_config.general_config.riot_token = riot_token
 
-#     bot_config.get_guild_config(new_guild_id).channel_ids.bot.append(None)
+    while True:
+        new_guild_id_str = input("Please enter a guild id. Enter nothing to stop: ")
+        if not new_guild_id_str:
+            break
+        new_guild_id = int(new_guild_id_str)
+        if not bot_config.check_if_guild_exists(new_guild_id):
+            bot_config.add_new_guild_config(new_guild_id)
+        else:
+            reset = bool(input("Guild does already exist! Do you want to reset the settings of this guild?"))
+            if reset:
+                bot_config.remove_guild_config(new_guild_id)
+                bot_config.add_new_guild_config(new_guild_id)
+            else:
+                continue
+        
+        guild_config = bot_config.get_guild_config(new_guild_id)
+        
+        while True:
+            game_name_short = input("Please enter a short name for a game (Example: 'LoL' for 'League of Legends'). Enter nothing to stop: ")
+            if not game_name_short:
+                break
+            elif guild_config.game_exists(game_name_short):
+                print("That game already exists!")
+                continue
+            else:
+                long_name = input("\tPlease enter the full name for the game: ")
+                role_id = int(input("\tPlease enter the id of the discord role that belongs to the game: "))
+                emoji_id = int(input("\tPlease enter the id of the discord emoji that belongs to the game: "))
+                category_id = int(input("\tPlease enter the id of a channel (category) of this game. "))
+                cog_path = input("\tPlease enter the path to a cog of this game. Leave empty if there is no cog: ")
+                cog_path = cog_path if cog_path else None
+                guild_config.add_game(
+                    game=game_name_short,
+                    long_name=long_name,
+                    role_id=role_id,
+                    emoji=emoji_id,
+                    category_id=category_id,
+                    cog=cog_path
+                )
+                print(long_name, "was added to the guild config")
+        print("")
+        while True:
+            command = input("Please enter a command that should be configured. ")
+            print("Warning: Not implemented yet!!! This does nothing!")
+            if not command:
+                break
+        
+        print("Finished with guild config\n")
 
-#     bot_config.write_config_to_file("./configuration.json")
+    bot_config.write_config_to_file(nice_format=True)
+
+    print("Config was written to.", bot_config.general_config.config_file, "In the file you can configure the bot even more.")
