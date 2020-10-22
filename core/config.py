@@ -457,7 +457,7 @@ class GeneralConfig:
     discord_token: str = ''
     riot_token: str = ''
 
-    riot_api: bool = True
+    riot_api: bool = False
 
     directory_temp_files: str = "./temp"
 
