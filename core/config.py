@@ -386,15 +386,6 @@ class GuildConfig():
             if game_cog is not None:
                 yield game_cog
     
-    def add_command_config(self, command_name: str, **kwargs):
-        """Adds a new command config
-
-        Args:
-            command_name (str): The name of the command
-            kwargs: The command options. Must be a class variable of Command
-        """
-        self.__commands[command_name] = dataclasses.asdict(Command(**kwargs))
-    
     def command_has_config(self, command_name: str) -> bool:
         """Checks if the command has a config
 
@@ -405,6 +396,24 @@ class GuildConfig():
             bool: True if the command has a config
         """
         return command_name in self.__commands
+
+    def add_command_config(self, command_name: str, **kwargs):
+        """Adds a new command config
+
+        Args:
+            command_name (str): The name of the command
+            kwargs: The command options. Must be a class variable of Command
+        """
+        if self.command_has_config(command_name):
+            raise LookupError("Command already has a config!")
+        else:
+            self.__commands[command_name] = dataclasses.asdict(Command(**kwargs))
+        
+    def remove_command_config(self, command_name: str):
+        if self.command_has_config(command_name):
+            del self.__commands[command_name]
+        else:
+            raise LookupError("Command has no config!")
 
     def get_command(self, command_name: str) -> Command:
         """Return the config for a command
@@ -610,18 +619,42 @@ if __name__ == "__main__":
         if not new_guild_id_str:
             break
         new_guild_id = int(new_guild_id_str)
-        if not bot_config.check_if_guild_exists(new_guild_id):
-            bot_config.add_new_guild_config(new_guild_id)
-        else:
-            reset = bool(input("Guild does already exist! Do you want to reset the settings of this guild?"))
-            if reset:
+        if bot_config.check_if_guild_exists(new_guild_id):
+            if is_Y(input("Guild does already exist! Do you want to reset the settings of this guild?")):
                 bot_config.remove_guild_config(new_guild_id)
-                bot_config.add_new_guild_config(new_guild_id)
             else:
                 continue
-        
+
+        bot_config.add_new_guild_config(new_guild_id)
         guild_config = bot_config.get_guild_config(new_guild_id)
+
+        while True:
+            command_prefix = str(input("Please insert a command string to call a command. Leave empty to leave unchanged: "))
+            if command_prefix == "<":
+                print("Sorry this is forbidden by Discord...")
+            else:
+                break
+        if command_prefix:
+            guild_config.unsorted_config.command_prefix = command_prefix
         
+        if bot_config.general_config.riot_api:
+            guild_config.unsorted_config.riot_region = str(input("Please insert your riot region. Example for Europe west: 'euw1': "))
+
+        everyone_id =  int(input("Please insert the id of the role that belongs to everyone. Leave empty to leave unchanged: "))
+        guest_id =  int(input("Please insert the id of the role that belongs to guests of the server. Leave empty to leave unchanged: "))
+        member_id =  int(input("Please insert the id of the role that belongs to members of the server. Leave empty to leave unchanged: "))
+        admin_id =  int(input("Please insert the id of the role that can configure the bot. Leave empty to leave unchanged: "))
+        
+        if everyone_id:
+            guild_config.unsorted_config.everyone_id
+        if guest_id:
+            guild_config.unsorted_config.guest_id
+        if member_id:
+            guild_config.unsorted_config.member_id
+        if admin_id:
+            guild_config.unsorted_config.admin_id
+        
+
         while True:
             game_name_short = input("Please enter a short name for a game (Example: 'LoL' for 'League of Legends'). Enter nothing to stop: ")
             if not game_name_short:
@@ -646,14 +679,56 @@ if __name__ == "__main__":
                 )
                 print(long_name, "was added to the guild config")
         print("")
+
+        if not guild_config.command_has_config("purge"):
+            guild_config.add_command_config(command_name="purge", enabled=True, allowed_from_roles=("admin_id",))
+
         while True:
-            command = input("Please enter a command that should be configured. ")
-            print("Warning: Not implemented yet!!! This does nothing!")
+            command = input("Please enter a command that should be configured: ")
             if not command:
                 break
+            elif guild_config.command_has_config(command):
+                if is_Y(input("The command already has a config. Do you want to delete the config and create a new one? [Y/N] ")):
+                    guild_config.remove_command_config(command)
+                else:
+                    continue
+            game_config = {}
+            
+            disabled = is_Y(input("Do you want to disable this command? [Y/N] "))
+            if disabled:
+                game_config["enabled"] = False
+            else:
+                game_config["enabled"] = True
+
+                print("For the next options, you can leave the option empty to not use the option.")
+
+                valid_channel_names = [field.name for field in dataclasses.fields(Channel_Ids)]
+                channel_names = input(
+                        f"The config groups some channels. Enter the names for the channel groups in that the command should be allowed. Seperate names by a space character. Valid names are {', '.join(valid_channel_names)}. Invalid names are ignored without a warning: "
+                    ).split(" ")
+                allowed_in_channels = [
+                    str(channel) for channel in channel_names if str(channel) in valid_channel_names
+                ]
+                if allowed_in_channels:
+                    game_config["allowed_in_channels"] = allowed_in_channels
+
+                allowed_in_channel_ids = [int(id) for id in input("Enter additional ids of the channels in that the command is allowed: ")]
+                if allowed_in_channel_ids:
+                    game_config["allowed_in_channel_ids"] = allowed_in_channel_ids
+                
+                allowed_from_roles = [str(role) for role in input(f"The config also groups some roles. Enter the names for the channel groups in that the command should be allowed. Valid names are admin_id, member_id, guest_id, everyone_id and the short name of a game: ")]
+                if allowed_from_roles:
+                    game_config["allowed_from_roles"] = allowed_from_roles
+
+                allowed_from_role_ids = [int(id) for id in input("Enter ids of the roles that the command can use: ")]
+                if allowed_from_role_ids:
+                    game_config["allowed_from_role_ids"] = allowed_from_role_ids
         
-        print("Finished with guild config\n")
+            guild_config.add_command_config(command_name=command, **game_config)
+            print("Command added!")
+        
+        print("\nFinished with guild config\n")
 
     bot_config.write_config_to_file(nice_format=True)
 
-    print("Config was written to.", bot_config.general_config.config_file, "In the file you can configure the bot even more.")
+    print(f"Config was written to:'{bot_config.general_config.config_file}'. You can configure the bot even more  in this file.")
