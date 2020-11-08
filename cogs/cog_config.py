@@ -20,9 +20,10 @@ class ConfigCog(commands.Cog, name='Configuration commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
     
+    async def cog_check(self, ctx: commands.Context):
+        return await checks.command_is_allowed(ctx)
+    
     @commands.group(name='config')
-    @checks.is_in_channels()
-    @checks.has_any_role("admin_id")
     async def config(self, ctx: commands.Context):
         """ Commands to set the config of the bot """
         if ctx.invoked_subcommand is None:
@@ -123,8 +124,6 @@ class ConfigCog(commands.Cog, name='Configuration commands'):
     
     @commands.check(checks.is_super_user)
     @config.command(name='write')
-    @checks.is_in_channels()
-    @checks.has_any_role("admin_id")
     async def config_write(self, ctx):
         """ Writes the bot config to the config file.
 

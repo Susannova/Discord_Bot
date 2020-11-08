@@ -19,9 +19,11 @@ MIN_INFINITE_EXPLOSION_CHAIN_DICE_FACES = 4
 class RoleplayCog(commands.Cog, name='Roleplay Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
+    
+    async def cog_check(self, ctx: commands.Context):
+        return await checks.command_is_allowed(ctx)
 
     @commands.command(name='r')
-    @checks.has_any_role("admin_id", "member_id")
     async def dice(self, ctx: commands.Context, dice_string: str):
         logger.debug('!r command called')
         match = self.parse_regex(dice_string)

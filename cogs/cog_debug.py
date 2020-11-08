@@ -18,15 +18,15 @@ class DebugCog(commands.Cog):
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
 
+    async def cog_check(self, ctx: commands.Context):
+        return await checks.command_in_bot_channel_and_used_by_admin(ctx)
+
     @commands.command(name='version')
-    @checks.is_in_channels()
-    @checks.has_any_role("admin_id")
     async def version_(self, ctx):
         logger.debug('!version called')
         await ctx.send(self.bot.state.version)
 
     @commands.command(name='reload-ext')
-    @checks.is_in_channels()
     @commands.check(checks.is_super_user)
     async def reload_ext_(self, ctx, ext):
         logger.info('!reload-ext called')
@@ -49,15 +49,11 @@ class DebugCog(commands.Cog):
         await ctx.send(log_str)
 
     @commands.command(name='status')
-    @checks.is_in_channels()
-    @checks.has_any_role("admin_id")
     async def status_(self, ctx):
         logger.debug('!status called')
         await ctx.send("Bot is alive.")
     
     @commands.command(name='get_emoji_id')
-    @checks.is_in_channels()
-    @checks.has_any_role("admin_id")
     async def get_emoji_id_(self, ctx, emoji_name):
         logger.debug('!get_emoji_id called')
 
@@ -83,8 +79,6 @@ class DebugCog(commands.Cog):
     #     logger.info(str_debug_deactivated)
 
     @commands.command(name='print')
-    @checks.is_in_channels()
-    @checks.is_debug_enabled
     @commands.check(checks.is_super_user)
     async def print_(self, ctx, arg):
         logger.debug('!print %s called', arg)
@@ -95,7 +89,6 @@ class DebugCog(commands.Cog):
         print(return_string)
 
     @commands.command(name='end')
-    @checks.is_in_channels()
     @commands.check(checks.is_super_user)
     async def end_(self, ctx, *arg):
         if len(list(arg)) == 0:
@@ -113,14 +106,10 @@ class DebugCog(commands.Cog):
 
 
     @commands.command(name='dict')
-    @checks.is_in_channels()
-    @checks.has_any_role("admin_id")
     async def dict_(self, ctx, *, dictonary: converters.ArgsToDict):
         await ctx.send(str(dictonary))
     
     @commands.command()
-    @checks.is_in_channels()
-    @checks.has_any_role("admin_id")
     async def send_to_channel(self, ctx: commands.Context, text_channel: discord.TextChannel, pin: typing.Optional[bool] = True, *, text: str):
         """ Send a message to a text channel and pins it per default
 

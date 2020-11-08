@@ -41,3 +41,11 @@ class LimitReachedException(Exception):
 
     def __str__(self):
         return self.message
+
+class FalseChannel(discord.ext.commands.CheckFailure):
+    def __init__(self, *valid_channels):
+        self.valid_channels = valid_channels
+
+    def __str__(self) -> str:
+        return 'This command can\'t be used here.'
+

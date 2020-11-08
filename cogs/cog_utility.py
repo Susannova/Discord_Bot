@@ -1,5 +1,6 @@
 import logging
 import typing
+import random
 
 import asyncio, time
 
@@ -46,10 +47,11 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         self.bot = bot
         self.team1 = []
         self.team2 = []
+    
+    async def cog_check(self, ctx: commands.Context):
+        return await checks.command_is_allowed(ctx)
 
     @commands.group(name='team')
-    @checks.is_in_channels("commands", "kraut-commands")
-    @checks.has_any_role("admin_id", "member_id")
     async def team(self, ctx: commands.Context):
         """ Creates random teams
         
@@ -104,7 +106,6 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
     @commands.command(name='link', help = help_text.link_HelpText.text, brief = help_text.link_HelpText.brief, usage = help_text.link_HelpText.usage)
     @commands.check(checks.is_riot_enabled)
-    @checks.is_in_channels("commands", "commands_member")
     async def link_(self, ctx, summoner_name):
         try:
             riot_commands.link_account(ctx.message.author.name, summoner_name, self.bot.config.get_guild_config(ctx.guild.id), general_config=self.bot.config.general_config, guild_id=ctx.guild.id)
@@ -118,7 +119,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             logger.info("%s was linked.", summoner_name)
 
     @commands.command(name='unlink', help = help_text.unlink_HelpText.text, brief = help_text.unlink_HelpText.brief, usage = help_text.unlink_HelpText.usage)
-    @checks.is_in_channels("commands", "commands_member")
+    @commands.check(checks.is_riot_enabled)
     async def unlink_(self, ctx, *summoner_names):
         logger.debug("!unlink called")
         
@@ -130,16 +131,6 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         await ctx.message.author.send(
             'Dein Lol-Account wurde erfolgreich von deinem Discord Account getrennt!')
         logger.info("%s was unlinked", ctx.message.author.name)
-
-    @commands.command(name='purge', hidden=True)
-    @checks.has_any_role("admin_id")
-    async def purge_(self, ctx, count: int):
-        logger.info("!purge %s called in channel %s", count, ctx.message.channel.name)
-        last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
-
-        for message_ in last_count_messages:
-            if not message_.pinned:
-                await message_.delete()
 
     # @commands.command(name='leaderboard', help = help_text.leaderboard_HelpText.text, brief = help_text.leaderboard_HelpText.brief, usage = help_text.leaderboard_HelpText.usage)
     # @checks.has_any_role("admin_id")
@@ -159,19 +150,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     #         await ctx.send("Not available right now. Use ``!plot`` instead.")
         
 
-    # dont use this
-    @commands.command(name='game-selector', hidden=True)
-    @checks.has_any_role("admin_id")
-    async def game_selector(self, ctx: commands.Context):
-        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
-        message = await ctx.send(self.bot.config.get_guild_config(ctx.guild.id).messages.game_selector)
-        for emoji_id in guild_config.get_all_game_emojis():
-            emoji = self.bot.get_emoji(emoji_id)
-            await message.add_reaction(emoji)
-        guild_config.unsorted_config.game_selector_id = message.id
-
     @commands.command(name='create-channel', help = help_text.create_channel_HelpText.text, brief = help_text.create_channel_HelpText.brief, usage = help_text.create_channel_HelpText.usage)
-    @checks.is_in_channels("commands", "commands_member")
     @discord.ext.commands.cooldown(rate=3, per=30)
     async def create_channel(self, ctx, kind, channel_name, *user_limit):
         logger.debug("!create-channel %s %s called by %s", kind, channel_name, ctx.message.author.name)
@@ -205,8 +184,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             "name": channel_name
         }
         logger.info("Temporary %s-channel %s with id %s created", kind, channel_name, tmp_channel.id)
-    
-    @checks.is_in_channels("commands", "commands_member")
+
     @checks.is_activated("highlights")
     @commands.command()
     async def highlights(self, ctx: commands.Context):
