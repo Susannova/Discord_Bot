@@ -92,6 +92,8 @@ class EventCog(commands.Cog):
             await ctx.send("This command is currently disabled.")
         elif isinstance(error, commands.MissingAnyRole):
             await ctx.send("Sorry, you are not allowed to use this command.")
+        else:
+            await ctx.send("Sorry, an unknown error has occurred...")
         await ctx.send(f"Try ``{self.bot.get_command_prefix(ctx.guild.id)}help`` for avaible commands.")
         raise error
 
