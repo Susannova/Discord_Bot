@@ -28,8 +28,10 @@ logger = logging.getLogger(__name__)
 class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
+    
+    async def cog_check(self, ctx: commands.Context):
+        return await checks.command_is_allowed(ctx)
 
-    @checks.is_in_channels("play_request")
     @commands.group()
     async def play(self, ctx: commands.Context, games: commands.Greedy[converters.StrToGame], play_time: typing.Optional[converters.StrToTime], *, should_be_empty: typing.Optional[str]):
         """ Create a play request
@@ -80,16 +82,27 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                 for game in games[1:-1]:
                     game_names += f", {game.name_long}"
                 game_names += f" oder  {games[-1].name_long}"
+            
+            date_str = ""
+            if not play_time.date() == datetime.datetime.now().date():
+                date = guild_config.messages.date_format.format(
+                    day=play_time.strftime("%d"),
+                    month=play_time.strftime("%m")
+                )
+                date_str = guild_config.messages.play_at_date.format(date=date)
+
             message = message_unformated.format(
                     role_mention=" ".join((ctx.guild.get_role(game.role_id).mention for game in games)),
                     creator=ctx.message.author.mention,
                     player=ctx.message.author.mention,
                     game=game_names,
-                    time=play_time.strftime("%H:%M")
+                    time=play_time.strftime("%H:%M"),
+                    date_str=date_str
                 )
-            
-            play_request_message = await ctx.send(message, delete_after=guild_config.unsorted_config.auto_delete_after_seconds)
-            
+
+            play_request_channel = self.bot.get_channel(guild_config.channel_ids.play_request)
+            play_request_message = await play_request_channel.send(message, delete_after=guild_config.unsorted_config.auto_delete_after_seconds)
+
             _category = [game.name_short for game in games]
             play_request = PlayRequest(play_request_message.id, ctx.message.author.id, category=_category, play_time=play_time)
 
@@ -109,7 +122,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         guild_id = message.guild.id
         guild_config = self.bot.config.get_guild_config(guild_id)
         
-        if message.channel.id in guild_config.channel_ids.play_request:
+        if message.channel.id == guild_config.channel_ids.play_request:
             if message.author == self.bot.user:
                 seconds_slept = 0
                 while self.bot.sending_message:

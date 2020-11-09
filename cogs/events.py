@@ -4,11 +4,11 @@ import discord
 from discord.ext import commands
 
 from core import (
-    bot_utility as utility,
     timers,
     play_requests,
     DiscordBot,
-    config
+    config,
+    exceptions
 )
 
 from riot import riot_utility
@@ -80,9 +80,22 @@ class EventCog(commands.Cog):
         if isinstance(error, commands.CommandNotFound):
             await ctx.send("The command was not found. Avaible commands are:")
             await ctx.send_help()
-        
+        elif isinstance(error, exceptions.FalseChannel):
+            text = "This command is not allowed here."
+            if error.valid_channels is not None:
+                text += " The command is allowed in "
+                text += ", ".join(
+                    (self.bot.get_channel(channel_id).mention for channel_id in error.valid_channels if ctx.author in self.bot.get_channel(channel_id).members)
+                )
+            await ctx.send(text)
+        elif isinstance(error, commands.DisabledCommand):
+            await ctx.send("This command is currently disabled.")
+        elif isinstance(error, commands.MissingAnyRole):
+            await ctx.send("Sorry, you are not allowed to use this command.")
+        else:
+            await ctx.send("Sorry, an unknown error has occurred...")
+        await ctx.send(f"Try ``{self.bot.get_command_prefix(ctx.guild.id)}help`` for avaible commands.")
         raise error
-
 
     
     @commands.Cog.listener()
@@ -101,12 +114,15 @@ class EventCog(commands.Cog):
         self.bot.state.remove_guild_state(guild.id)
 
     @commands.Cog.listener()
-    async def on_member_join(self, member):
+    async def on_member_join(self, member: discord.Member):
         """Automatically assigns lowest role to
         anyone that joins the server.
         """
+
         logger.info('New member joined: %s', member.name)
-        await member.edit(roles=utility.get_auto_role_list(member, self.bot.config.get_guild_config(member.guild.id)))
+        guild_config = self.bot.config.get_guild_config(member.guild.id)
+
+        await member.add_roles(member.guild.get_role(guild_config.unsorted_config.guest_id), reason="Assing lowest role")
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):

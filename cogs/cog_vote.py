@@ -45,6 +45,9 @@ class VoteCog(commands.Cog, name='Vote Commands'):
         self.emoji_number = dict(
             ((value, key) for key, value in self.number_emoji.items())
         )
+
+    async def cog_check(self, ctx: commands.Context):
+        return await checks.command_is_allowed(ctx)
     
     def get_vote(self, message_id: int) -> Vote:
         return self.votes[message_id]

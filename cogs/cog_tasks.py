@@ -21,7 +21,6 @@ from riot import (
 )
 
 from core import (
-    bot_utility as utility,
     timers,
     DiscordBot,
     config,
@@ -116,6 +115,9 @@ class LoopCog(commands.Cog):
             self.print_leaderboard_loop.start()
             self.check_LoL_patch.start()
         self.auto_delete_tmp_channels.start()
+    
+    async def cog_check(self, ctx: commands.Context):
+        return await checks.command_is_allowed(ctx)
 
     async def print_leaderboard(self, guild_id: int, channel_to_print=None, update=True, enable_xkcd=False):
         summoners_data = self.get_summoners_data(guild_id, update)
@@ -130,7 +132,7 @@ class LoopCog(commands.Cog):
     @commands.check(checks.is_riot_enabled)
     @commands.command(name='plot')
     async def print_leaderboard_command(self, ctx, enable_xkcd: typing.Optional[bool]):
-        if utility.get_guild_config(self.bot, ctx.guild.id).toggles.summoner_rank_history:
+        if self.bot.config.get_guild_config(ctx.guild.id).toggles.summoner_rank_history:
             logger.debug('!plot command called')
             await self.print_leaderboard(ctx.guild.id, ctx.channel, False, enable_xkcd=enable_xkcd)
         else:
@@ -140,7 +142,7 @@ class LoopCog(commands.Cog):
     async def update_summoners(self):
         logger.info("Update the summoners")
         for guild in self.bot.guilds:
-            if utility.get_guild_config(self.bot, guild.id).toggles.summoner_rank_history:
+            if self.bot.config.get_guild_config(guild.id).toggles.summoner_rank_history:
                 self.get_summoners_data(guild.id, True)
 
     @update_summoners.before_loop
@@ -200,6 +202,8 @@ class LoopCog(commands.Cog):
                     )
                     
                     await annoucement_channel.send(text_to_send)
+        
+        riot_utility.download_champ_icons(self.bot.state.lol_patch, self.bot.config.general_config)
 
     @check_LoL_patch.before_loop
     async def check_LoL_patch_before_loop(self):

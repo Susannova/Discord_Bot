@@ -7,11 +7,11 @@ REGEX_TIME = r"([0-2])?[0-9]:[0-5][0-9]"
 
 
 def start_timer(secs=0, mins=0, hrs=0):
-    return datetime.now() + timedelta(seconds=secs) + timedelta(minutes=mins) + timedelta(hours=hrs)
+    return datetime.now() + timedelta(seconds=secs, minutes=mins, hours=hrs)
 
 
 def is_timer_done(timer):
-    _time = datetime.fromtimestamp(time.time())
+    _time = datetime.datetime.now()
     return _time > timer
 
 
