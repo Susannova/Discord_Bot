@@ -27,7 +27,7 @@ class RiotCog(commands.Cog, name='Riot Commands'):
             riot_utility.download_champ_icons(self.bot.state.lol_patch, self.bot.config.general_config)
     
     async def cog_check(self, ctx: commands.Context):
-        return all(checks.is_riot_enabled(ctx), await checks.command_is_allowed(ctx))
+        return checks.is_riot_enabled(ctx) and await checks.command_is_allowed(ctx)
 
     @commands.command(name='player', help = help_text.player_HelpText.text, brief = help_text.player_HelpText.brief, usage = help_text.player_HelpText.usage)
     async def player_(self, ctx, *summoner_name):
