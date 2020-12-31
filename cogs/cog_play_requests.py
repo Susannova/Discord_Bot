@@ -194,8 +194,6 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
             play_request.remove_subscriber_id(user.id)
             
 
-
-
     async def send_auto_dm(self, guild_config: config.GuildConfig, play_request: PlayRequest, user: discord.Member, reaction: discord.Reaction):
         author = self.bot.get_user(play_request.author_id)
         logger.info("Send auto dms to play_request subscribers")

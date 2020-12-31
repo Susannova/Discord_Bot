@@ -146,7 +146,7 @@ class Messages_Config:
                 {command_prefix}bans {team}'
     )
 
-    team_header: str = '\n**__===Teams===__**\n'
+    team_header: str = '\n**__Teams:__**\n'
     team_1: str = 'Team 1:\n'
     team_2: str = '\nTeam 2:\n'
 
@@ -525,7 +525,7 @@ class BotConfig:
 
         with open(filename, 'w') as json_file:
             intent = "\t" if nice_format else None
-            json.dump(self.asdict(), json_file, indent=intent)
+            json.dump(self.asdict(), json_file, indent=4)
         logger.info("Saved the config to %s",
                     filename)
 

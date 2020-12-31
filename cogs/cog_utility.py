@@ -1,6 +1,7 @@
 import logging
 import typing
 import random
+import math
 
 import asyncio, time
 
@@ -21,26 +22,39 @@ from riot import riot_commands
 logger = logging.getLogger(__name__)
 
 def create_team(players: typing.List[typing.Union[discord.Member, str]], guild_config: config.GuildConfig):
-    """ Creates two teams and returns a string, and the two teams as lists. """
+    """ Creates two teams and returns an embed, which includes the given teams and two the two teams as lists. """
     num_players = len(players)
-    team1 = random.sample(players, int(num_players / 2))
+    team1 = random.sample(players, math.ceil(num_players / 2))
     team2 = players.copy()
 
     for player in team1:
         team2.remove(player)
+    
+    team1_message = [player.mention if isinstance(player, discord.Member) else player for player in team1] if len(team1) > 0 else ['-']
+    team2_message = [player.mention if isinstance(player, discord.Member) else player for player in team2] if len(team2) > 0 else ['-']
 
-    teams_message = guild_config.messages.team_header
-    teams_message += guild_config.messages.team_1
-    for player in team1:
-        name = player.mention if isinstance(player, discord.Member) else player
-        teams_message += name + "\n"
+    embed = get_create_team_embed(team1_message, team2_message, guild_config)
 
-    teams_message += guild_config.messages.team_2
-    for player in team2:
-        name = player.mention if isinstance(player, discord.Member) else player
-        teams_message += name + "\n"
+    return embed, team1, team2
 
-    return teams_message, team1, team2
+
+def get_create_team_embed(team1_message, team2_message, guild_config: config.GuildConfig):
+    embed_title = guild_config.messages.team_header
+    team1_title = guild_config.messages.team_1
+    team2_title = guild_config.messages.team_2
+    command_prefix = guild_config.unsorted_config.command_prefix
+
+    embed = discord.Embed(
+            title=embed_title,
+            colour=discord.Color.from_rgb(62, 221, 22)
+        )
+
+    embed.add_field(name=team1_title, value="\n".join(member for member in team1_message), inline=True)
+    embed.add_field(name=team2_title, value="\n".join(member for member in team2_message), inline=True)
+
+    embed.set_footer(text=f"Move teams into their respective channels and back with: '{command_prefix}team move'")
+    return embed
+
 
 class UtilityCog(commands.Cog, name='Utility Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
@@ -69,15 +83,18 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
         The player of the team are all the members of your current voice channel and every given player. The bot tries to find a discord user for the given names and will mentions all discord users.
         """
+        
+        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
+
         if ctx.author.voice is not None:
             current_voice_channel = ctx.author.voice.channel
             players_list += current_voice_channel.members
+            self.bot.state.get_guild_state(ctx.guild.id).last_channel = current_voice_channel
 
-        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
-
-        message, self.team1, self.team2 = create_team(players_list, guild_config)
-        await ctx.send(message)
+        embed, self.team1, self.team2 = create_team(players_list, guild_config)
+        await ctx.send(embed=embed)
         self.bot.state.get_guild_state(ctx.guild.id).last_team = players_list
+        self.bot.state.get_guild_state(ctx.guild.id).has_moved = False
 
 
     @team.command(name='move')
@@ -91,18 +108,50 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         channel_team2 = self.bot.get_channel(guild_config.channel_ids.team_2)
 
         last_team = self.bot.state.get_guild_state(ctx.guild.id).last_team
+        has_moved = self.bot.state.get_guild_state(ctx.guild.id).has_moved
+        last_channel = self.bot.state.get_guild_state(ctx.guild.id).last_channel
 
         if not last_team:
             await ctx.send(f"Team is empty. Please use ``{self.bot.get_command_prefix(ctx.guild.id)}team create`` first.")
             return
+        
+        if not has_moved:
+            for member in last_team:
+                if isinstance(member, discord.Member) and member.voice is not None:
+                    if member in self.team1:
+                        await member.move_to(channel_team1)
+                    elif member in self.team2:
+                        await member.move_to(channel_team2)
+            self.bot.state.get_guild_state(ctx.guild.id).has_moved = True
+        else:
+            if not last_channel or len(last_team) == 0:
+                await ctx.send(f"Could not find channel or members to move.")
+                self.bot.state.get_guild_state(ctx.guild.id).last_channel = None
+                self.bot.state.get_guild_state(ctx.guild.id).last_team = []
+                return
+            for member in last_team:
+                if isinstance(member, discord.Member) and member.voice is not None:
+                    await member.move_to(last_channel)
+            self.bot.state.get_guild_state(ctx.guild.id).has_moved = False
+            self.bot.state.get_guild_state(ctx.guild.id).last_channel = None
+            self.bot.state.get_guild_state(ctx.guild.id).last_team = []
 
-        for member in last_team:
-            if isinstance(member, discord.Member) and member.voice is not None:
-                if member in self.team1:
-                    await member.move_to(channel_team1)
-                elif member in self.team2:
-                    await member.move_to(channel_team2)
-        self.bot.state.get_guild_state(ctx.guild.id).last_team = []
+
+    @team.command(name='leave')
+    async def leave_team(self, ctx: commands.Context):
+        user = ctx.message.author
+        last_team = self.bot.state.get_guild_state(ctx.guild.id).last_team
+        if user in self.team1 and user in last_team:
+            self.bot.state.get_guild_state(ctx.guild.id).last_team.remove(user)
+            self.team1.remove(user)
+            await ctx.send(f'{user.mention} left Team 1.')
+            return
+        if user in self.team2:
+            self.bot.state.get_guild_state(ctx.guild.id).last_team.remove(user)
+            self.team2.remove(user)
+            await ctx.send(f'{user.mention} left Team 2.')
+            return
+        await ctx.send(f'{user.mention} was not in any team.')
 
     @commands.command(name='link', help = help_text.link_HelpText.text, brief = help_text.link_HelpText.brief, usage = help_text.link_HelpText.usage)
     @commands.check(checks.is_riot_enabled)
