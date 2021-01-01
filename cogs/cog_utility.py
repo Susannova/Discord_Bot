@@ -92,7 +92,6 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
         embed = create_team(players_list, guild_config, self.bot.state.get_guild_state)
         await ctx.send(embed=embed)
-        self.bot.state.get_guild_state(ctx.guild.id).last_team = players_list
         self.bot.state.get_guild_state(ctx.guild.id).has_moved = False
         await self.bot.state.get_guild_state(ctx.guild.id).timer_remove_teams()
 
@@ -108,7 +107,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         channel_team1 = self.bot.get_channel(guild_config.channel_ids.team_1)
         channel_team2 = self.bot.get_channel(guild_config.channel_ids.team_2)
 
-        last_team = guild_state.last_team
+        last_team = guild_state.team1 + guild_state.team2
         has_moved = guild_state.has_moved
         last_channel = guild_state.last_channel
 
@@ -128,7 +127,6 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             if not last_channel or len(last_team) == 0:
                 await ctx.send(f"Could not find channel or members to move.")
                 guild_state.last_channel = None
-                guild_state.last_team = []
                 return
             for member in last_team:
                 if isinstance(member, discord.Member) and member.voice is not None:
@@ -137,23 +135,20 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
         await self.bot.state.get_guild_state(ctx.guild.id).timer_remove_teams()
 
+
     @team.command(name='leave')
     async def leave_team(self, ctx: commands.Context):
         guild_state =  self.bot.state.get_guild_state(ctx.guild.id)
         user = ctx.message.author
-        last_team = guild_state.last_team
-        
-        if user in guild_state.team1 and user in last_team:
-            guild_state.last_team.remove(user)
+
+        if user in guild_state.team1:
             guild_state.team1.remove(user)
             await ctx.send(f'{user.mention} left Team 1.')
-            return
-        if user in guild_state.team2:
-            guild_state.last_team.remove(user)
+        elif user in guild_state.team2:
             guild_state.team2.remove(user)
             await ctx.send(f'{user.mention} left Team 2.')
-            return
-        await ctx.send(f'{user.mention} was not in any team.')
+        else:
+            await ctx.send(f'{user.mention} was not in any team.')
 
     @commands.command(name='link', help = help_text.link_HelpText.text, brief = help_text.link_HelpText.brief, usage = help_text.link_HelpText.usage)
     @commands.check(checks.is_riot_enabled)

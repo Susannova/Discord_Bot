@@ -18,7 +18,6 @@ class GuildState:
         self.__play_requests = {}
         self.tmp_channel_ids = {}
         self.clash_date: str = None
-        self.last_team = []
         self.team1 = []
         self.team2 = []
         self.__remove_teams_task = None
