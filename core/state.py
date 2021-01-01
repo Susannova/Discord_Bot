@@ -17,6 +17,8 @@ class GuildState:
         self.tmp_channel_ids = {}
         self.clash_date: str = None
         self.last_team = []
+        self.team1 = []
+        self.team2 = []
     
     def is_play_request(self, message_id: int) -> bool:
         return True if message_id in self.__play_requests else False
