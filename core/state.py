@@ -1,5 +1,7 @@
-import pickle
 import logging
+import pickle
+import asyncio
+
 from core.config import BotConfig
 from core.play_requests import PlayRequest
 
@@ -19,6 +21,46 @@ class GuildState:
         self.last_team = []
         self.team1 = []
         self.team2 = []
+        self.__remove_teams_task = None
+    
+    async def __remove_teams_after(self, seconds: int):
+        logger.info("Wait %d until teams are removed", seconds)
+        await asyncio.sleep(seconds)
+        
+        self.team1 = []
+        self.team2 = []
+    
+    async def timer_remove_teams(self, seconds: int = 2*60*60):
+        """ Waits and then deletes the teams.
+
+        Checks first if the bot already waits to remove the teams.
+        If so, the function cancels the waiting first.
+
+        Args:
+            seconds (int, optional): Seconds to wait before the teams are deleted. Defaults to 2*60*60.
+
+        Raises:
+            RuntimeError: Raised, if the bot already waits to delete the teams and can't cancel that
+        """
+
+        if self.__remove_teams_task is not None:
+            logger.info("Try to cancel remove teams task.")
+            self.__remove_teams_task.cancel()
+            if not self.__remove_teams_task.cancelled():
+                logger.error("Can't cancel the remove team coroutine!")
+                self.__remove_teams_task = None
+                raise RuntimeError("Can't cancel the remove team coroutine!")
+        
+        self.__remove_teams_task = asyncio.create_task(self.__remove_teams_after(seconds))
+        
+        try:
+            await asyncio.wait(self.__remove_teams_task)
+        except asyncio.CancelledError:
+            logger.info("Remove teams task was cancelled.")
+            return
+        
+        self.__remove_teams_task = None
+        
     
     def is_play_request(self, message_id: int) -> bool:
         return True if message_id in self.__play_requests else False

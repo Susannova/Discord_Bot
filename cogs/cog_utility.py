@@ -94,6 +94,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
         await ctx.send(embed=embed)
         self.bot.state.get_guild_state(ctx.guild.id).last_team = players_list
         self.bot.state.get_guild_state(ctx.guild.id).has_moved = False
+        await self.bot.state.get_guild_state(ctx.guild.id).timer_remove_teams()
 
 
     @team.command(name='move')
@@ -133,9 +134,8 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
                 if isinstance(member, discord.Member) and member.voice is not None:
                     await member.move_to(last_channel)
             guild_state.has_moved = False
-            guild_state.last_channel = None
-            guild_state.last_team = []
 
+        await self.bot.state.get_guild_state(ctx.guild.id).timer_remove_teams()
 
     @team.command(name='leave')
     async def leave_team(self, ctx: commands.Context):
