@@ -21,6 +21,8 @@ class GuildState:
         self.team1 = []
         self.team2 = []
         self.__remove_teams_task = None
+        self.last_team = []
+        self.has_moved = False
     
     async def __remove_teams_after(self, seconds: int):
         logger.info("Wait %d until teams are removed", seconds)
