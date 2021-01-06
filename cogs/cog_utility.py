@@ -90,10 +90,10 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             players_list += current_voice_channel.members
             self.bot.state.get_guild_state(ctx.guild.id).last_channel = current_voice_channel
 
-        embed = create_team(players_list, guild_config, self.bot.state.get_guild_state)
+        embed = create_team(players_list, guild_config, self.bot.state.get_guild_state(ctx.guild.id))
         await ctx.send(embed=embed)
         self.bot.state.get_guild_state(ctx.guild.id).has_moved = False
-        await self.bot.state.get_guild_state(ctx.guild.id).timer_remove_teams()
+        #await self.bot.state.get_guild_state(ctx.guild.id).timer_remove_teams()
 
 
     @team.command(name='move')
