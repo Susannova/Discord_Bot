@@ -137,9 +137,11 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
         await self.bot.state.get_guild_state(ctx.guild.id).timer_remove_teams()
 
-
     @team.command(name='leave')
     async def leave_team(self, ctx: commands.Context):
+        """Invoking user leaves current teams.
+        """
+
         guild_state =  self.bot.state.get_guild_state(ctx.guild.id)
         user = ctx.message.author
 
@@ -198,7 +200,16 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     #         await ctx.send("Not available right now. Use ``!plot`` instead.")
         
 
-    @commands.command(name='create-channel', help = help_text.create_channel_HelpText.text, brief = help_text.create_channel_HelpText.brief, usage = help_text.create_channel_HelpText.usage)
+    @commands.group(name='channel')
+    async def channel(self, ctx: commands.Context):
+        """ Manages temporary channels.
+        """
+
+        logger.debug('!channel command called')
+        if ctx.invoked_subcommand is None:
+            await ctx.send_help(self.channel)
+
+    @channel.command(name='create', help = help_text.create_channel_HelpText.text, brief = help_text.create_channel_HelpText.brief, usage = help_text.create_channel_HelpText.usage)
     @discord.ext.commands.cooldown(rate=3, per=30)
     async def create_channel(self, ctx, kind, channel_name, *user_limit):
         logger.debug("!create-channel %s %s called by %s", kind, channel_name, ctx.message.author.name)
