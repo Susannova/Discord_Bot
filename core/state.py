@@ -21,7 +21,7 @@ class GuildState:
         self.team1 = []
         self.team2 = []
         self.__remove_teams_task = None
-        self.last_team = []
+        self.last_channel = None
         self.has_moved = False
     
     async def __remove_teams_after(self, seconds: int):
@@ -47,15 +47,18 @@ class GuildState:
         if self.__remove_teams_task is not None:
             logger.info("Try to cancel remove teams task.")
             self.__remove_teams_task.cancel()
-            if not self.__remove_teams_task.cancelled():
-                logger.error("Can't cancel the remove team coroutine!")
+            try:
+                await self.__remove_teams_task
+            except asyncio.CancelledError as ce:
+                logger.error(f"{ce}: Can't cancel the remove team coroutine!")
+            finally:
                 self.__remove_teams_task = None
-                raise RuntimeError("Can't cancel the remove team coroutine!")
+
         
         self.__remove_teams_task = asyncio.create_task(self.__remove_teams_after(seconds))
         
         try:
-            await asyncio.wait(self.__remove_teams_task)
+            await asyncio.wait([self.__remove_teams_task])
         except asyncio.CancelledError:
             logger.info("Remove teams task was cancelled.")
             return
