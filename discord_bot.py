@@ -51,9 +51,10 @@ if __name__ == '__main__':
         logger.exception('Failed to login due to improper Token.')
         bot.exit_status = 2
 
-    print('Global state saved to file.')
-    logger.info('Global state saved to file.')
+
     bot.state.write_state_to_file()
     bot.config.write_config_to_file()
-    
+    print('Global state and Config saved to file.')
+    logger.info('Global state and Config saved to file.')  
+
     sys.exit(bot.exit_status)
