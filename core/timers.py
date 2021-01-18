@@ -11,7 +11,7 @@ def start_timer(secs=0, mins=0, hrs=0):
 
 
 def is_timer_done(timer):
-    _time = datetime.datetime.now()
+    _time = datetime.now()
     return _time > timer
 
 
