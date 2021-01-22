@@ -135,10 +135,13 @@ class Messages_Config:
     auto_dm_subscriber: str = '{player} hat auch auf das Play-Request von {creator} reagiert: {reaction} '
     play_now: str = '{role_mention}\n{creator} spielt **__jetzt gerade__** **{game}** und sucht noch nach weiteren Spielern!'
     play_at: str = '{role_mention}\n{player} will **{game}** spielen. Kommt {date_str} um **__{time}__** Uhr online!'
+    players_needed: str = 'Es werden noch {player_needed_num} weitere Spieler benötigt.'
     play_at_date: str = 'am **__{date}__**'
+    
     play_request_reminder: str = 'REMINDER: Der abonnierte Play-Request geht in {minutes} Minuten los!'
     clash_create = '{role_mention}\n{player} sucht nach Mitspielern für den LoL Clash am {date}.'
     clash_full: str = 'Das Clash Team von {creator} für den {time} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{team}'
+
 
     bans: str = (
         'If you want to receive the best bans \

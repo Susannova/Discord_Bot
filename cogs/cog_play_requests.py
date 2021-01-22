@@ -33,7 +33,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         return await checks.command_is_allowed(ctx)
 
     @commands.group()
-    async def play(self, ctx: commands.Context, games: commands.Greedy[converters.StrToGame], play_time: typing.Optional[converters.StrToTime], *, should_be_empty: typing.Optional[str]):
+    async def play(self, ctx: commands.Context, games: commands.Greedy[converters.StrToGame], play_time: typing.Optional[converters.StrToTime], player_needed_num: typing.Optional[int], should_be_empty: typing.Optional[str]):
         """ Create a play request
 
         Other players can react to the play request which will notify the other players.
@@ -75,6 +75,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                 play_time = datetime.datetime.now()
 
             message_unformated = guild_config.messages.play_now if is_now else guild_config.messages.play_at
+  
             
             game_names = games[0].name_long
             if len(games) > 1:
@@ -99,6 +100,9 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                     time=play_time.strftime("%H:%M"),
                     date_str=date_str
                 )
+
+            if player_needed_num > 0 and player_needed_num < 20 and type(player_needed_num) == int:
+                message = f'{message} {guild_config.messages.players_needed.format(player_needed_num=player_needed_num)}'
 
             play_request_channel = self.bot.get_channel(guild_config.channel_ids.play_request)
             play_request_message = await play_request_channel.send(message, delete_after=guild_config.unsorted_config.auto_delete_after_seconds)
