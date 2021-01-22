@@ -12,3 +12,5 @@ test-sequence
 /.VSCodeCounter/
 /.env/
 configuration.json
+/config/configuration.json
+/config/configuration_working.json

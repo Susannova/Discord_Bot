@@ -25,6 +25,8 @@ class RoleplayCog(commands.Cog, name='Roleplay Commands'):
 
     @commands.command(name='r')
     async def dice(self, ctx: commands.Context, dice_string: str):
+        """Allows the user to roll a dice.
+        """
         logger.debug('!r command called')
         match = self.parse_regex(dice_string)
         if match is None:

@@ -27,6 +27,7 @@ logger = logging.getLogger(__name__)
 
 class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
+        
         self.bot = bot
     
     async def cog_check(self, ctx: commands.Context):
@@ -42,6 +43,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         Args:
             games: The games to play
             play_time: The time to play. Either a time in the format hh:mm or +xm where x are the minutes relative to now
+            player_needed_num: The amount of players still needed to fill the play-request.
             should_be_empty: A string to check if everything worked. Leave this always empty please.
         """
         if ctx.invoked_subcommand is None:
