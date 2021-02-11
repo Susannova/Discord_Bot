@@ -67,7 +67,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
             is_now = True if play_time is None else False
 
             if not is_now:
-                if ((play_time - datetime.datetime.now()).total_seconds() / 60 > guild_config.unsorted_config.play_now_time_add_limit:
+                if (play_time - datetime.datetime.now()).total_seconds() / 60 > guild_config.unsorted_config.play_now_time_add_limit:
                     logger.warning("Play request denied because of time")
                     await ctx.send(f"Play requests that are going more than {guild_config.unsorted_config.play_now_time_add_limit} minutes in the future are not allowed.")
                     return
