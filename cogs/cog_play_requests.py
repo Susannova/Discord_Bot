@@ -4,7 +4,6 @@ import logging
 import asyncio
 import datetime
 import typing
-import pytz
 
 import discord
 from discord.ext import commands
@@ -23,7 +22,6 @@ from core.play_requests import PlayRequest
 
 logger = logging.getLogger(__name__)
 
-timezone = pytz.timezone("Europe/Berlin")
 
 class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
@@ -69,12 +67,12 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
             is_now = True if play_time is None else False
 
             if not is_now:
-                if (timezone.localize(play_time) - timezone.localize(datetime.datetime.now())).total_seconds() / 60 > guild_config.unsorted_config.play_now_time_add_limit:
+                if ((play_time - datetime.datetime.now()).total_seconds() / 60 > guild_config.unsorted_config.play_now_time_add_limit:
                     logger.warning("Play request denied because of time")
                     await ctx.send(f"Play requests that are going more than {guild_config.unsorted_config.play_now_time_add_limit} minutes in the future are not allowed.")
                     return
             else:
-                play_time = timezone.localize(datetime.datetime.now())
+                play_time = datetime.datetime.now()
 
             message_unformated = guild_config.messages.play_now if is_now else guild_config.messages.play_at
   
@@ -143,7 +141,7 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                 
                 if guild_state.is_play_request(message.id):
                     play_request = guild_state.get_play_request(message.id)
-                    delay += (play_request.play_time - timezone.localize(datetime.datetime.now())).total_seconds()
+                    delay += (play_request.play_time - datetime.datetime.now()).total_seconds()
                 
                 await message.delete(delay=delay)
 

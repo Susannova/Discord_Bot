@@ -1,6 +1,7 @@
 """Main module. Stars and defines the Discord Bot (KrautBot).
 """
 import logging
+import os
 
 logging.basicConfig(
     filename="log/log",
@@ -9,6 +10,8 @@ logging.basicConfig(
     level=logging.INFO
 )
 logger = logging.getLogger('main')
+
+os.environ['TZ'] = 'Europe/Berlin'
 
 import sys
 import pickle
