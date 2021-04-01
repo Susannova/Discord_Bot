@@ -125,8 +125,16 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
             game_names += f" oder  {games[-1].name_long}"
         return game_names
 
+    async def add_auto_reaction(self, play_request_message: discord.Message, games: List[config.Game]):
+        for game in games:
+            await play_request_message.add_reaction(self.bot.get_emoji(game.emoji))
+
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
+        """
+        Event Listener used to automatically delete
+        all messages send after certain delay.
+        """
         if isinstance(message.channel, discord.DMChannel):
             return
         
@@ -148,14 +156,13 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                 if not guild_state.is_play_request(message.id):
                     await message.delete(delay=delay)
 
-
-    async def add_auto_reaction(self, play_request_message: discord.Message, games: List[config.Game]):
-        for game in games:
-            await play_request_message.add_reaction(self.bot.get_emoji(game.emoji))
-
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
-
+        """
+        Event Listener used to automatically add
+        subscribers to a play-request and manage
+        which reactions are allowed on play-request.
+        """
         guild_id = reaction.message.guild.id
         guild_config = self.bot.config.get_guild_config(guild_id)
         guild_state = self.bot.state.get_guild_state(guild_id)
@@ -164,14 +171,13 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
             return
 
         play_request = guild_state.get_play_request(reaction.message.id)
-        user_id = user.id
         emoji_id = None if isinstance(reaction.emoji, str) else reaction.emoji.id
 
-        if play_request.is_play_request_author(user_id):
+        if play_request.is_play_request_author(user.id):
             logger.info("Remove reaction from a play_request_author")
             await reaction.remove(user)
         elif emoji_id in guild_config.get_all_game_emojis() and guild_config.emoji_to_game(emoji_id).name_short in play_request.category:
-            play_request.add_subscriber_id(user_id)
+            play_request.add_subscriber_id(user.id)
             await self.send_auto_dm(guild_config, play_request, user, reaction)
         else:
             await reaction.remove(user)
