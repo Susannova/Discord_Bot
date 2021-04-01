@@ -1,7 +1,7 @@
 import logging
-import typing
 import random
 import math
+from typing import List, Optional, Union
 
 import discord
 from discord.ext import commands
@@ -35,8 +35,8 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
     async def create_team(
         self,
         ctx: commands.Context,
-        has_roles: typing.Optional[bool],
-        players_list: commands.Greedy[typing.Union[discord.Member, str]],
+        has_roles: Optional[bool],
+        players_list: commands.Greedy[Union[discord.Member, str]],
     ):
         """Creates two random teams
 
@@ -56,7 +56,7 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         self.bot.state.get_guild_state(ctx.guild.id).has_moved = False
         await self.bot.state.get_guild_state(ctx.guild.id).timer_remove_teams()
 
-    def __get_team_messages(self, ctx, players: typing.List[typing.Union[discord.Member, str]]):
+    def __get_team_messages(self, ctx, players: List[Union[discord.Member, str]]):
         """Creates two teams and saves them in the guild state. Returns an embed, which includes the given teams."""
         guild_state = self.bot.state.get_guild_state(ctx.guild.id)
 
