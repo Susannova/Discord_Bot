@@ -21,7 +21,7 @@ class ConfigCog(commands.Cog, name='Configuration commands'):
         self.bot = bot
     
     async def cog_check(self, ctx: commands.Context):
-        return await checks.command_is_allowed(ctx)
+        return await checks.command_in_bot_channel_and_used_by_admin(ctx)
     
     @commands.group(name='config')
     async def config(self, ctx: commands.Context):
