@@ -2,6 +2,8 @@ import logging
 import typing
 import random
 import math
+import typing
+import random
 
 import asyncio, time
 
@@ -22,40 +24,6 @@ from riot import riot_commands
 
 logger = logging.getLogger(__name__)
 
-def create_team(players: typing.List[typing.Union[discord.Member, str]], guild_config: config.GuildConfig, guild_state: state.GuildState):
-    """ Creates two teams and saves them in the guild state. Returns an embed, which includes the given teams. """
-    num_players = len(players)
-    guild_state.team1 = random.sample(players, math.ceil(num_players / 2))
-    guild_state.team2 = players.copy()
-
-    for player in guild_state.team1:
-        guild_state.team2.remove(player)
-    
-    team1_message = [player.mention if isinstance(player, discord.Member) else player for player in guild_state.team1] if len(guild_state.team1) > 0 else ['-']
-    team2_message = [player.mention if isinstance(player, discord.Member) else player for player in guild_state.team2] if len(guild_state.team2) > 0 else ['-']
-
-    embed = get_create_team_embed(team1_message, team2_message, guild_config)
-
-    return embed
-
-
-def get_create_team_embed(team1_message, team2_message, guild_config: config.GuildConfig):
-    embed_title = guild_config.messages.team_header
-    team1_title = guild_config.messages.team_1
-    team2_title = guild_config.messages.team_2
-    command_prefix = guild_config.unsorted_config.command_prefix
-
-    embed = discord.Embed(
-            title=embed_title,
-            colour=discord.Color.from_rgb(62, 221, 22)
-        )
-
-    embed.add_field(name=team1_title, value="\n".join(member for member in team1_message), inline=True)
-    embed.add_field(name=team2_title, value="\n".join(member for member in team2_message), inline=True)
-
-    embed.set_footer(text=f"Move teams into their respective channels and back with: '{command_prefix}team move'")
-    return embed
-
 
 class UtilityCog(commands.Cog, name='Utility Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
@@ -63,7 +31,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
     
     async def cog_check(self, ctx: commands.Context):
         return await checks.command_is_allowed(ctx)
-
+    
     @commands.group(name='team')
     async def team(self, ctx: commands.Context):
         """ Creates random teams
@@ -71,30 +39,74 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
             The teams are created with the subcommand create and can be moved afterwards with move
         """
 
-
         logger.debug('!team command called')
         if ctx.invoked_subcommand is None:
             await ctx.send_help(self.team)
 
     @team.command(name='create')
-    async def create_team(self, ctx: commands.Context, players_list: commands.Greedy[typing.Union[discord.Member, str]]):
+    async def create_team(self, ctx: commands.Context, has_roles: typing.Optional[bool], players_list: commands.Greedy[typing.Union[discord.Member, str]]):
         """ Creates two random teams
 
         The player of the team are all the members of your current voice channel and every given player. The bot tries to find a discord user for the given names and will mentions all discord users.
         """
-        
-        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
 
+        if has_roles is None:
+            has_roles = False
         if ctx.author.voice is not None:
             current_voice_channel = ctx.author.voice.channel
             players_list += current_voice_channel.members
             self.bot.state.get_guild_state(ctx.guild.id).last_channel = current_voice_channel
 
-        embed = create_team(players_list, guild_config, self.bot.state.get_guild_state(ctx.guild.id))
+        team1_message, team2_message = self.__get_team_messages(ctx, players_list)
+        embed = self.__get_create_team_embed(ctx, team1_message, team2_message, has_roles=has_roles)
         await ctx.send(embed=embed)
         self.bot.state.get_guild_state(ctx.guild.id).has_moved = False
         await self.bot.state.get_guild_state(ctx.guild.id).timer_remove_teams()
 
+    def __get_team_messages(self, ctx, players: typing.List[typing.Union[discord.Member, str]]):
+        """ Creates two teams and saves them in the guild state. Returns an embed, which includes the given teams.
+        """
+        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
+        guild_state = self.bot.state.get_guild_state(ctx.guild.id)
+
+        num_players = len(players)
+        guild_state.team1 = random.sample(players, math.ceil(num_players / 2))
+        guild_state.team2 = players.copy()
+
+        for player in guild_state.team1:
+            guild_state.team2.remove(player)
+        
+        team1_message = [player.mention if isinstance(player, discord.Member) else player for player in guild_state.team1] if len(guild_state.team1) > 0 else ['-']
+        team2_message = [player.mention if isinstance(player, discord.Member) else player for player in guild_state.team2] if len(guild_state.team2) > 0 else ['-']
+
+        return team1_message, team2_message
+    
+    def __get_create_team_embed(self, ctx, team1_message, team2_message, has_roles=False):
+        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
+        embed_title = guild_config.messages.team_header
+        team1_title = guild_config.messages.team_1
+        team2_title = guild_config.messages.team_2
+        command_prefix = guild_config.unsorted_config.command_prefix
+
+        embed = discord.Embed(
+                title=embed_title,
+                colour=discord.Color.from_rgb(62, 221, 22)
+            )
+
+        emoji = [self.bot.get_emoji(id=644252873672359946), self.bot.get_emoji(id=644254018377482255), self.bot.get_emoji(id=644252861827514388), self.bot.get_emoji(id=644252853644296227) ,self.bot.get_emoji(id=644252146023530506)]
+        if has_roles and (len(team1_message) + len(team2_message)) <= 10:
+            team1_message = "\n".join(f'{member} [{emoji[idx]}]' for idx, member in enumerate(team1_message))
+            team2_message = "\n".join(f'{member} [{emoji[idx]}]' for idx, member in enumerate(team2_message))
+        else:
+            team1_message = "\n".join(member for member in team1_message)
+            team2_message = "\n".join(member for member in team2_message)
+
+        embed.add_field(name=team1_title, value=team1_message, inline=True)
+        embed.add_field(name=team2_title, value=team2_message, inline=True)
+        
+
+        embed.set_footer(text=f"Move teams into their respective channels and back with: '{command_prefix}team move'")
+        return embed
 
     @team.command(name='move')
     async def move_team_members(self, ctx: commands.Context):
@@ -275,6 +287,7 @@ class UtilityCog(commands.Cog, name='Utility Commands'):
 
         embed = discord.Embed(
             title="Highlights Leaderboard",
+            colour=discord.Color.from_rgb(62, 221, 22),
             type="rich",
             description=guild_config.messages.highlight_leaderboard_description.format(
                 highlight_channel_mention=", ".join(
