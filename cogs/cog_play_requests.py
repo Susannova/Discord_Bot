@@ -142,16 +142,11 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                     seconds_slept += 1
                     if seconds_slept > 10:
                         raise RuntimeError("Waited for at least 10 seconds for sending_message to become False")
-            # TODO Does this if make sense in a on_message listener?
             if not message.pinned:
                 delay = guild_config.unsorted_config.auto_delete_after_seconds
                 guild_state = self.bot.state.get_guild_state(message.guild.id)
-                
-                if guild_state.is_play_request(message.id):
-                    play_request = guild_state.get_play_request(message.id)
-                    delay += (play_request.play_time - datetime.datetime.now()).total_seconds()
-                
-                await message.delete(delay=delay)
+                if not guild_state.is_play_request(message.id):
+                    await message.delete(delay=delay)
 
 
     async def add_auto_reaction(self, play_request_message: discord.Message, games: List[config.Game]):
