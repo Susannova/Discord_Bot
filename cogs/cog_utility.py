@@ -2,15 +2,11 @@ import logging
 import typing
 import random
 import math
-import typing
-import random
-
-import asyncio, time
 
 import discord
 from discord.ext import commands
 
-from core import checks, exceptions, timers, help_text, DiscordBot, config, state
+from core import checks, exceptions, timers, help_text, DiscordBot
 
 from riot import riot_commands
 
@@ -44,7 +40,8 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
     ):
         """Creates two random teams
 
-        The player of the team are all the members of your current voice channel and every given player. The bot tries to find a discord user for the given names and will mentions all discord users.
+        The player of the team are all the members of your current voice channel and every given player.
+        The bot tries to find a discord user for the given names and will mentions all discord users.
         """
         if has_roles is None:
             has_roles = False
@@ -61,7 +58,6 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
 
     def __get_team_messages(self, ctx, players: typing.List[typing.Union[discord.Member, str]]):
         """Creates two teams and saves them in the guild state. Returns an embed, which includes the given teams."""
-        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
         guild_state = self.bot.state.get_guild_state(ctx.guild.id)
 
         num_players = len(players)
@@ -144,7 +140,7 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
             guild_state.has_moved = True
         else:
             if not last_channel or len(last_team) == 0:
-                await ctx.send(f"Could not find channel or members to move.")
+                await ctx.send("Could not find channel or members to move.")
                 guild_state.last_channel = None
                 return
             for member in last_team:
@@ -192,12 +188,15 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
             logger.error("Error linking %s: %s", summoner_name, error)
             # TODO Add a link to our accounts
             await ctx.message.author.send(
-                f"Dein Lol-Account konnte nicht mit deinem Discord Account verbunden werden. Richtiger Umgang mit ``!link`` ist unter ``{ctx.bot.command_prefix}help link`` zu finden. Falls das nicht weiterhilft, wende dich bitte an Jan oder Nick"
+                f"Dein Lol-Account konnte nicht mit deinem Discord Account verbunden werden. \
+                  Richtiger Umgang mit ``!link`` ist unter ``{ctx.bot.command_prefix}help link`` zu finden. \
+                  Falls das nicht weiterhilft, wende dich bitte an Jan oder Nick"
             )
             raise error
         else:
             await ctx.message.author.send(
-                f"Dein Lol-Account wurde erfolgreich mit deinem Discord Account verbunden!\nFalls du deinen Account wieder entfernen möchtest benutze das ``{ctx.bot.command_prefix}unlink`` Command."
+                f"Dein Lol-Account wurde erfolgreich mit deinem Discord Account verbunden!\n \
+                  Falls du deinen Account wieder entfernen möchtest benutze das ``{ctx.bot.command_prefix}unlink`` Command."
             )
             logger.info("%s was linked.", summoner_name)
 
