@@ -1,4 +1,3 @@
-import re
 import logging
 import asyncio
 from datetime import datetime
@@ -7,8 +6,8 @@ from typing import List, Optional
 import discord
 from discord.ext import commands
 
-from core import checks, exceptions, timers, help_text, DiscordBot, converters, config
-from core.config import Game
+from core import checks, DiscordBot, converters
+from core.config import Game, GuildConfig
 
 from core.play_requests import PlayRequest
 
@@ -28,8 +27,8 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         ctx: commands.Context,
         games: commands.Greedy[converters.StrToGame],
         play_time: Optional[converters.StrToTime],
-        player_needed_num: Optional[int],
-        should_be_empty: Optional[str],
+        player_needed_num: Optional[int] = 0,
+        should_be_empty: Optional[str] = None,
     ):
         """
         Creates a play request.
@@ -39,7 +38,8 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
 
         Args:
             games: The games to play
-            play_time: The time to play. Either a time in the format hh:mm or +xm where x are the minutes relative to now
+            play_time: The time to play.
+             Either a time in the format hh:mm or +xm where x are the minutes relative to now
             player_needed_num: The amount of players still needed to fill the play-request.
             should_be_empty: A string to check if everything worked. Leave this always empty please.
         """
@@ -50,7 +50,8 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         if should_be_empty is not None:
             logger.warning("Something went wrong. Was able to interpret the play request until: %s.", should_be_empty)
             await ctx.send(
-                f"Something went wrong. I was able to interpret the command until '{should_be_empty}'. Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`."
+                f"Something went wrong. I was able to interpret the command until '{should_be_empty}'. \
+                  Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`."
             )
             raise ValueError("Was not able to interpret the command")
 
@@ -71,7 +72,8 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             ).total_seconds() / 60 > guild_config.unsorted_config.play_now_time_add_limit:
                 logger.warning("Play request denied because of time")
                 await ctx.send(
-                    f"Play requests that are going more than {guild_config.unsorted_config.play_now_time_add_limit} minutes in the future are not allowed."
+                    f"Play requests that are going more than {guild_config.unsorted_config.play_now_time_add_limit} \
+                      minutes in the future are not allowed."
                 )
                 return
         else:
@@ -113,7 +115,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
     def __get_play_request_message(
         self,
         ctx: commands.Context,
-        guild_config: config.GuildConfig,
+        guild_config: GuildConfig,
         games: List[Game],
         play_time: datetime,
         is_now: bool,
@@ -138,14 +140,13 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             time=play_time.strftime("%H:%M"),
             date_str=date_str,
         )
-        if isinstance(player_needed_num, int):
-            if player_needed_num > 0 and player_needed_num < 20:
-                message = (
-                    f"{message} {guild_config.messages.players_needed.format(player_needed_num=player_needed_num)}"
-                )
+        if player_needed_num > 0 and player_needed_num < 20:
+            message = (
+                f"{message} {guild_config.messages.players_needed.format(player_needed_num=player_needed_num)}"
+            )
         return message
 
-    async def add_auto_reaction(self, play_request_message: discord.Message, games: List[config.Game]):
+    async def add_auto_reaction(self, play_request_message: discord.Message, games: List[Game]):
         for game in games:
             await play_request_message.add_reaction(self.bot.get_emoji(game.emoji))
 
@@ -208,7 +209,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
 
     async def send_auto_dm(
         self,
-        guild_config: config.GuildConfig,
+        guild_config: GuildConfig,
         play_request: PlayRequest,
         user: discord.Member,
         reaction: discord.Reaction,

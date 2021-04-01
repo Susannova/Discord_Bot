@@ -22,11 +22,11 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
 
     @commands.group(name="team")
     async def team(self, ctx: commands.Context):
-        """Creates random teams
-
-        The teams are created with the subcommand create and can be moved afterwards with move
         """
+        Creates random teams.
 
+        The teams are created with the subcommand create and can be moved afterwards with move.
+        """
         logger.debug("!team command called")
         if ctx.invoked_subcommand is None:
             await ctx.send_help(self.team)
@@ -35,16 +35,15 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
     async def create_team(
         self,
         ctx: commands.Context,
-        has_roles: Optional[bool],
-        players_list: commands.Greedy[Union[discord.Member, str]],
+        has_roles: Optional[bool] = False,
+        players_list: commands.Greedy[Union[discord.Member, str]] = None
     ):
-        """Creates two random teams
+        """
+        Creates two random teams.
 
         The player of the team are all the members of your current voice channel and every given player.
         The bot tries to find a discord user for the given names and will mentions all discord users.
         """
-        if has_roles is None:
-            has_roles = False
         if ctx.author.voice is not None:
             current_voice_channel = ctx.author.voice.channel
             players_list += current_voice_channel.members
@@ -60,12 +59,8 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         """Creates two teams and saves them in the guild state. Returns an embed, which includes the given teams."""
         guild_state = self.bot.state.get_guild_state(ctx.guild.id)
 
-        num_players = len(players)
-        guild_state.team1 = random.sample(players, math.ceil(num_players / 2))
-        guild_state.team2 = players.copy()
-
-        for player in guild_state.team1:
-            guild_state.team2.remove(player)
+        guild_state.team1 = random.sample(players, math.ceil(len(players) / 2))
+        guild_state.team2 = [player for player in players if player not in guild_state.team1]
 
         team1_message = (
             [player.mention if isinstance(player, discord.Member) else player for player in guild_state.team1]
@@ -80,7 +75,7 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
 
         return team1_message, team2_message
 
-    def __get_create_team_embed(self, ctx, team1_message, team2_message, has_roles=False):
+    def __get_create_team_embed(self, ctx, team1_message, team2_message, has_roles):
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
         embed_title = guild_config.messages.team_header
         team1_title = guild_config.messages.team_1
@@ -111,9 +106,10 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
 
     @team.command(name="move")
     async def move_team_members(self, ctx: commands.Context):
-        """Moves the last created team
+        """
+        Moves the last created team.
 
-        First a team has to be created with the subcommand create otherwise an error message will be send
+        First a team has to be created with the subcommand create otherwise an error message will be send.
         """
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
         guild_state = self.bot.state.get_guild_state(ctx.guild.id)
@@ -175,7 +171,7 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         usage=help_text.link_HelpText.usage,
     )
     @commands.check(checks.is_riot_enabled)
-    async def link_(self, ctx, summoner_name):
+    async def link_(self, ctx: commands.Context, summoner_name: str):
         try:
             riot_commands.link_account(
                 ctx.message.author.name,
@@ -207,13 +203,8 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         usage=help_text.unlink_HelpText.usage,
     )
     @commands.check(checks.is_riot_enabled)
-    async def unlink_(self, ctx, *summoner_names):
+    async def unlink_(self, ctx: commands.Context):
         logger.debug("!unlink called")
-
-        # Todo Why???
-        if len(list(summoner_names)) != 0:
-            raise commands.CommandInvokeError
-
         riot_commands.unlink_account(
             ctx.message.author.name, self.bot.config.get_guild_config(ctx.guild.id), ctx.guild.id
         )
@@ -240,7 +231,6 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
     @commands.group(name="channel")
     async def channel(self, ctx: commands.Context):
         """Manages temporary channels."""
-
         logger.debug("!channel command called")
         if ctx.invoked_subcommand is None:
             await ctx.send_help(self.channel)
@@ -252,7 +242,7 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         usage=help_text.create_channel_HelpText.usage,
     )
     @discord.ext.commands.cooldown(rate=3, per=30)
-    async def create_channel(self, ctx, kind, channel_name, *user_limit):
+    async def create_channel(self, ctx: commands.Context, kind: str, channel_name: str, user_limit: int):
         logger.debug("!create-channel %s %s called by %s", kind, channel_name, ctx.message.author.name)
         guild_state = self.bot.state.get_guild_state(ctx.guild.id)
         for tmp_channels in guild_state.tmp_channel_ids:
@@ -285,7 +275,7 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         elif kind == "text":
             tmp_channel = await ctx.message.guild.create_text_channel(channel_name, category=tmp_channel_category)
         elif kind == "voice":
-            if len(user_limit) > 0 and int(user_limit[0]) > 0 and int(user_limit[0]) <= 99:
+            if user_limit > 0 and user_limit <= 99:
                 tmp_channel = await ctx.message.guild.create_voice_channel(
                     channel_name, category=tmp_channel_category, user_limit=int(user_limit[0])
                 )
