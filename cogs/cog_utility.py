@@ -194,7 +194,8 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         else:
             await ctx.message.author.send(
                 f"Dein Lol-Account wurde erfolgreich mit deinem Discord Account verbunden!\n \
-                  Falls du deinen Account wieder entfernen möchtest benutze das ``{ctx.bot.command_prefix}unlink`` Command."
+                Falls du deinen Account wieder entfernen möchtest \
+                benutze das ``{ctx.bot.command_prefix}unlink`` Command."
             )
             logger.info("%s was linked.", summoner_name)
 
@@ -212,23 +213,6 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         )
         await ctx.message.author.send("Dein Lol-Account wurde erfolgreich von deinem Discord Account getrennt!")
         logger.info("%s was unlinked", ctx.message.author.name)
-
-    # @commands.command(name='leaderboard', help = help_text.leaderboard_HelpText.text, brief = help_text.leaderboard_HelpText.brief, usage = help_text.leaderboard_HelpText.usage)
-    # @checks.has_any_role("admin_id")
-    # async def leaderboard_(self, ctx):
-    #     logger.debug("!leaderboard called")
-    #     if False:
-    #         loading_message = await ctx.send("This will take a few seconds. Processing...")
-    #         _embed = riot_commands.create_leaderboard_embed(self.bot.config.get_guild_config(ctx.guild.id), self.bot.config.general_config, ctx.guild.id)
-    #         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
-    #         folder_name = guild_config.folders_and_files.folders_and_files.folder_champ_spliced.format(guild_id=ctx.guild.id)
-    #         message = await ctx.send(file=discord.File(f'{folder_name}/leaderboard.png'))
-    #         _embed = _embed.set_image(url=message.attachments[0].url)
-    #         await ctx.send(embed=_embed)
-    #         await loading_message.delete()
-    #         await message.delete()
-    #     else:
-    #         await ctx.send("Not available right now. Use ``!plot`` instead.")
 
     @commands.group(name="channel")
     async def channel(self, ctx: commands.Context):
