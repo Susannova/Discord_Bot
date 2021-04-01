@@ -145,14 +145,6 @@ def is_activated(*toggles):
     
     return commands.check(wrapper)
 
-
-# def is_debug_config_enabled():
-#     async def predicate(ctx):
-#         if not gstate.CONFIG['TOGGLE_DEBUG']:
-#             return False
-#         return True
-#     return commands.check(predicate)
-
 def is_debug_enabled(func):
     """ Checks if the debug toggle is enabled """
     async def inner(obj: DiscordBot.KrautBot, ctx: commands.Context, *args):
