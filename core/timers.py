@@ -28,18 +28,6 @@ def is_valid_time(time):
     return '-1'
 
 
-def get_time_difference(message_content):
-    time_now = datetime.now()
-    time = is_valid_time(message_content)
-    if len(time) == 4:
-        time = '0' + time
-    if time == '-1':
-        return -1
-    time_reminder = datetime(time_now.year, time_now.month, time_now.day, 00, 00, 00, 00) + timedelta(hours=int(time[:-3]), minutes=int(time[3:])-5)
-    time_difference = (time_reminder - time_now).total_seconds()
-    return time_difference if time_difference >= 0 else -1
-
-
 def convert_human_to_epoch_time(date: str) -> int:
     """ Input date formated as dd.mm.YYYY. Returns that
     date as epoch time.
