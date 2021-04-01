@@ -2,7 +2,7 @@
 import re
 import logging
 import asyncio
-import datetime
+from datetime import datetime
 from typing import List, Optional
 
 import discord
@@ -66,37 +66,14 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         is_now = True if play_time is None else False
 
         if not is_now:
-            if (play_time - datetime.datetime.now()).total_seconds() / 60 > guild_config.unsorted_config.play_now_time_add_limit:
+            if (play_time - datetime.now()).total_seconds() / 60 > guild_config.unsorted_config.play_now_time_add_limit:
                 logger.warning("Play request denied because of time")
                 await ctx.send(f"Play requests that are going more than {guild_config.unsorted_config.play_now_time_add_limit} minutes in the future are not allowed.")
                 return
         else:
-            play_time = datetime.datetime.now()
-
-        message_unformated = guild_config.messages.play_now if is_now else guild_config.messages.play_at
+            play_time = datetime.now()
         
-        game_names = self.__get_game_name_message(games)
-        
-        date_str = ""
-        if not play_time.date() == datetime.datetime.now().date():
-            date = guild_config.messages.date_format.format(
-                day=play_time.strftime("%d"),
-                month=play_time.strftime("%m")
-            )
-            date_str = guild_config.messages.play_at_date.format(date=date)
-
-        message = message_unformated.format(
-                role_mention=" ".join((ctx.guild.get_role(game.role_id).mention for game in games)),
-                creator=ctx.message.author.mention,
-                player=ctx.message.author.mention,
-                game=game_names,
-                time=play_time.strftime("%H:%M"),
-                date_str=date_str
-            )
-        if isinstance(player_needed_num, int):
-            if player_needed_num > 0 and player_needed_num < 20:
-                message = f'{message} {guild_config.messages.players_needed.format(player_needed_num=player_needed_num)}'
-
+        message = self.__get_play_request_message(guild_config, games, play_time, is_now, player_needed_num)
         play_request_channel = self.bot.get_channel(guild_config.channel_ids.play_request)
         play_request_message = await play_request_channel.send(message, delete_after=guild_config.unsorted_config.auto_delete_after_seconds)
 
@@ -124,6 +101,33 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
                 game_names += f", {game.name_long}"
             game_names += f" oder  {games[-1].name_long}"
         return game_names
+
+
+    def __get_play_request_message(self, ctx: commands.Context, guild_config, games: List[Game], play_time: datetime, is_now: bool, player_needed_num: int) -> str:
+        """Gets the formatted message string for the given play-request."""
+        message_unformated = guild_config.messages.play_now if is_now else guild_config.messages.play_at
+        game_names = self.__get_game_name_message(games)
+        
+        date_str = ""
+        if not play_time.date() == datetime.now().date():
+            date = guild_config.messages.date_format.format(
+                day=play_time.strftime("%d"),
+                month=play_time.strftime("%m")
+            )
+            date_str = guild_config.messages.play_at_date.format(date=date)
+
+        message = message_unformated.format(
+                role_mention=" ".join((ctx.guild.get_role(game.role_id).mention for game in games)),
+                creator=ctx.message.author.mention,
+                player=ctx.message.author.mention,
+                game=game_names,
+                time=play_time.strftime("%H:%M"),
+                date_str=date_str
+            )
+        if isinstance(player_needed_num, int):
+            if player_needed_num > 0 and player_needed_num < 20:
+                message = f'{message} {guild_config.messages.players_needed.format(player_needed_num=player_needed_num)}'
+        return message
 
     async def add_auto_reaction(self, play_request_message: discord.Message, games: List[config.Game]):
         for game in games:
@@ -182,10 +186,40 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         else:
             await reaction.remove(user)
             logger.info("Removed new reaction %s from %s", reaction.emoji, user.name)
+
+    async def send_auto_dm(self, guild_config: config.GuildConfig, play_request: PlayRequest, user: discord.Member, reaction: discord.Reaction):
+    """
+    Sends a message to all player involved in a play-request
+    to inform them about new subscribers.
+    """
+    author = self.bot.get_user(play_request.author_id)
+    logger.info("Send auto dms to play_request subscribers")
     
+    for player_id in play_request.generate_all_players():
+        if player_id == play_request.author_id and player_id != user.id:
+            await author.send(
+                guild_config.messages.auto_dm_creator.format(
+                    player=user.name,
+                    reaction=str(reaction.emoji)
+                    )
+                )
+        elif player_id != user.id:
+            player = self.bot.get_user(player_id)
+            game = guild_config.emoji_to_game(reaction.emoji.id)
+
+            if game.role_id in [role.id for role in user.roles]:
+                await player.send(
+                    guild_config.messages.auto_dm_subscriber.format(
+                        player=user.name,
+                        creator=author.name,
+                        reaction=str(reaction.emoji)))
+
     @commands.Cog.listener()
     async def on_reaction_remove(self, reaction: discord.Reaction, user: discord.Member):
-
+        """
+        Event Listener used to automatically
+        remove subscribers from play-requests.
+        """
         guild_id = reaction.message.guild.id
         guild_state = self.bot.state.get_guild_state(guild_id)
 
@@ -206,30 +240,6 @@ class PlayRequestsCog(commands.Cog, name='Play-Request Commands'):
         if remove_from_subscriber and play_request.is_already_subscriber(user.id):
             play_request.remove_subscriber_id(user.id)
             
-
-    async def send_auto_dm(self, guild_config: config.GuildConfig, play_request: PlayRequest, user: discord.Member, reaction: discord.Reaction):
-        author = self.bot.get_user(play_request.author_id)
-        logger.info("Send auto dms to play_request subscribers")
-        
-        for player_id in play_request.generate_all_players():
-            if player_id == play_request.author_id and player_id != user.id:
-                await author.send(
-                    guild_config.messages.auto_dm_creator.format(
-                        player=user.name,
-                        reaction=str(reaction.emoji)
-                        )
-                    )
-            elif player_id != user.id:
-                player = self.bot.get_user(player_id)
-                game = guild_config.emoji_to_game(reaction.emoji.id)
-
-                if game.role_id in [role.id for role in user.roles]:
-                    await player.send(
-                        guild_config.messages.auto_dm_subscriber.format(
-                            player=user.name,
-                            creator=author.name,
-                            reaction=str(reaction.emoji)))
-
 
     # async def create_clash(self, ctx, date):
     #     guild_config = self.bot.config.get_guild_config(ctx.guild.id)
