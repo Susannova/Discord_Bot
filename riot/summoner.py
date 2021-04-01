@@ -2,9 +2,6 @@ from datetime import datetime, timedelta
 import json
 import math
 
-from core import timers
-
-
 def load_json(file_name, folder='config'):
     with open(f'./{folder}/{file_name}.json', encoding="utf8") as all_data:
         return json.load(all_data)

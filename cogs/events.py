@@ -4,7 +4,6 @@ import discord
 from discord.ext import commands
 
 from core import (
-    timers,
     play_requests,
     DiscordBot,
     config,

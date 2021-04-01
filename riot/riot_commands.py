@@ -11,7 +11,6 @@ import discord
 
 import pandas as pd
 from core import (
-    timers,
     exceptions,
     config
 )
@@ -25,7 +24,6 @@ from . import (
 
 logger = logging.getLogger(__name__)
 
-_timers = []
 
 # FIXME: this is trash
 # === BAN CALCULATION === #
