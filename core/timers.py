@@ -1,7 +1,6 @@
 import time
 import re
 from datetime import datetime, timedelta
-import calendar
 
 REGEX_TIME = r"([0-2])?[0-9]:[0-5][0-9]"
 

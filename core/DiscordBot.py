@@ -14,8 +14,7 @@ from core.state import GeneralState
 
 
 class KrautBot(commands.Bot):
-    """The actual bot.
-    """
+    """The actual bot."""
 
     config = BotConfig()
     BOT_TOKEN = config.general_config.discord_token
@@ -77,8 +76,6 @@ class KrautBot(commands.Bot):
         admin_role = guild.get_role(guild_config.unsorted_config.admin_id)
         for member in admin_role.members:
             yield member.id
-
-
 
     async def check_channels_id_in_config(self, guild_id: int):
         """ Checks if the channels set in the config are part of the guild and removes it if not """

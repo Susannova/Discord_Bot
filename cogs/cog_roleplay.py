@@ -19,7 +19,7 @@ MIN_INFINITE_EXPLOSION_CHAIN_DICE_FACES = 4
 class RoleplayCog(commands.Cog, name='Roleplay Commands'):
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
-    
+
     async def cog_check(self, ctx: commands.Context):
         return await checks.command_is_allowed(ctx)
 

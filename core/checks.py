@@ -1,4 +1,6 @@
-""" Checks used as decorators for Commands.
+""" 
+Checks used as decorators for Commands.
+
 Note: Only works on Commands (needs a ctx parameter).
 """
 
