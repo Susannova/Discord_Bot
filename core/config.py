@@ -139,7 +139,7 @@ class Messages_Config:
     play_at_date: str = 'am **__{date}__**'
     
     play_request_reminder: str = 'REMINDER: Der abonnierte Play-Request geht in {minutes} Minuten los!'
-    clash_create = '{role_mention}\n{player} sucht nach Mitspielern für den LoL Clash am {date}.'
+    clash_create = '{role_mention}\nAm {date} ist wieder LoL Clash. Reagiert hier, zum dem Clash Team beizutreten.'
     clash_full: str = 'Das Clash Team von {creator} für den {time} ist jetzt voll. Das Team besteht aus folgenden Mitgliedern:\n{team}'
 
 
