@@ -36,7 +36,7 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         self,
         ctx: commands.Context,
         has_roles: Optional[bool] = False,
-        players_list: commands.Greedy[Union[discord.Member, str]] = None
+        players_list: commands.Greedy[Union[discord.Member, str]] = None,
     ):
         """
         Creates two random teams.
@@ -55,7 +55,7 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         self.bot.state.get_guild_state(ctx.guild.id).has_moved = False
         await self.bot.state.get_guild_state(ctx.guild.id).timer_remove_teams()
 
-    def __get_team_messages(self, ctx, players: List[Union[discord.Member, str]]):
+    def __get_team_messages(self, ctx: commands.Context, players: List[Union[discord.Member, str]]) -> (str, str):
         """Creates two teams and saves them in the guild state. Returns an embed, which includes the given teams."""
         guild_state = self.bot.state.get_guild_state(ctx.guild.id)
 
@@ -75,7 +75,9 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
 
         return team1_message, team2_message
 
-    def __get_create_team_embed(self, ctx, team1_message, team2_message, has_roles):
+    def __get_create_team_embed(
+        self, ctx: commands.Context, team1_message: str, team2_message: str, has_roles: bool
+    ) -> discord.Embed:
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
         embed_title = guild_config.messages.team_header
         team1_title = guild_config.messages.team_1
@@ -242,7 +244,9 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         usage=help_text.create_channel_HelpText.usage,
     )
     @discord.ext.commands.cooldown(rate=3, per=30)
-    async def create_channel(self, ctx: commands.Context, kind: str, channel_name: str, user_limit: int):
+    async def create_channel(
+        self, ctx: commands.Context, kind: str, channel_name: str, user_limit: Optional[int] = 99
+    ):
         logger.debug("!create-channel %s %s called by %s", kind, channel_name, ctx.message.author.name)
         guild_state = self.bot.state.get_guild_state(ctx.guild.id)
         for tmp_channels in guild_state.tmp_channel_ids:
