@@ -7,10 +7,10 @@ from core.config import BotConfig
 def get_files(champs: tuple, config: BotConfig):
     files = []
     for champ in champs:
-        if os.path.isfile(f'./{config.general_config.folder_champ_icon}/{champ}.png'):
-            files.append(f'./{config.general_config.folders_and_files.folder_champ_icon}/{champ}.png')
+        if os.path.isfile(f"./{config.general_config.folder_champ_icon}/{champ}.png"):
+            files.append(f"./{config.general_config.folders_and_files.folder_champ_icon}/{champ}.png")
         else:
-            files.append(f'./{config.general_config.folders_and_files.folder_champ_icon}/-1.png')
+            files.append(f"./{config.general_config.folders_and_files.folder_champ_icon}/-1.png")
     return files
 
 
@@ -25,15 +25,16 @@ def create_new_image(champs, config: BotConfig):
         y = index % 120
         w, h = img.size
         result.paste(img, (x, y, x + w, y + h))
-    result.save(os.path.expanduser(f'./{config.general_config.folder_champ_spliced}/image.jpg'))
+    result.save(os.path.expanduser(f"./{config.general_config.folder_champ_spliced}/image.jpg"))
     return 0
+
 
 # === TEST === #
 def testModule():
     config = BotConfig()
-    assert(len(get_files(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Nautilus'], config)) == 5)
-    assert(create_new_image(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Nunu'], config) == 0)
-    assert(create_new_image(['Pyke', 'Blitzcrank', 'Annie', 'Ahri', 'Pingu'], config) == 0)
+    assert len(get_files(["Pyke", "Blitzcrank", "Annie", "Ahri", "Nautilus"], config)) == 5
+    assert create_new_image(["Pyke", "Blitzcrank", "Annie", "Ahri", "Nunu"], config) == 0
+    assert create_new_image(["Pyke", "Blitzcrank", "Annie", "Ahri", "Pingu"], config) == 0
     return "Tests succeded."
 
 

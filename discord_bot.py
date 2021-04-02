@@ -2,43 +2,38 @@
 """
 import logging
 import os
+import sys
 
 logging.basicConfig(
     filename="log/log",
-    filemode='a',
-    format='%(asctime)s,%(msecs)d %(levelname)s %(name)s %(message)s',
-    level=logging.INFO
+    filemode="a",
+    format="%(asctime)s,%(msecs)d %(levelname)s %(name)s %(message)s",
+    level=logging.INFO,
 )
-logger = logging.getLogger('main')
+logger = logging.getLogger("main")
 
-os.environ['TZ'] = 'Europe/Berlin'
-
-import sys
-import pickle
+os.environ["TZ"] = "Europe/Berlin"
 
 import discord
 from discord.ext import commands
 
-from core import (
-    state,
-    DiscordBot
-)
+from core import DiscordBot
 
 discord.voice_client.VoiceClient.warn_nacl = False
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     bot = DiscordBot.KrautBot()
     try:
         logger.info("Start Bot")
-    
-        bot.load_extension('cogs.cog_config')
-        bot.load_extension('cogs.cog_debug')
-        bot.load_extension('cogs.cog_play_requests')
-        bot.load_extension('cogs.cog_vote')
-        bot.load_extension('cogs.cog_utility')
-        bot.load_extension('cogs.events')
-        bot.load_extension('cogs.cog_tasks')
-        
+
+        bot.load_extension("cogs.cog_config")
+        bot.load_extension("cogs.cog_debug")
+        bot.load_extension("cogs.cog_play_requests")
+        bot.load_extension("cogs.cog_vote")
+        bot.load_extension("cogs.cog_utility")
+        bot.load_extension("cogs.events")
+        bot.load_extension("cogs.cog_tasks")
+
         for guild_id in bot.config.get_all_guild_ids():
             for cog in bot.config.get_guild_config(guild_id=guild_id).yield_game_cogs():
                 try:
@@ -46,18 +41,17 @@ if __name__ == '__main__':
                 except commands.ExtensionAlreadyLoaded:
                     pass
 
-        bot.load_extension('cogs.cog_roleplay')
+        bot.load_extension("cogs.cog_roleplay")
 
         bot.run()
         logger.info("End")
     except discord.LoginFailure:
-        logger.exception('Failed to login due to improper Token.')
+        logger.exception("Failed to login due to improper Token.")
         bot.exit_status = 2
-
 
     bot.state.write_state_to_file()
     bot.config.write_config_to_file()
-    print('Global state and Config saved to file.')
-    logger.info('Global state and Config saved to file.')  
+    print("Global state and Config saved to file.")
+    logger.info("Global state and Config saved to file.")
 
     sys.exit(bot.exit_status)
