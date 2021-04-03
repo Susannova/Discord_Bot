@@ -1,22 +1,16 @@
 import json
-import urllib.request
-import shelve
-from concurrent.futures import ThreadPoolExecutor
-from urllib.error import HTTPError
 import logging
-import requests
+import shelve
 import time
-
-from riotwatcher import LolWatcher as RiotWatcher
+import requests
+import urllib.request
+from urllib.error import HTTPError
 
 from core import exceptions, timers
-
+from core.config import GeneralConfig, GuildConfig
 from core.state import GeneralState
 
-from core.config import GeneralConfig, GuildConfig
-
-
-from .summoner import Summoner
+logger = logging.getLogger(__name__)
 
 
 def load_json(file_name, folder="config"):
@@ -24,17 +18,25 @@ def load_json(file_name, folder="config"):
         return json.load(all_data)
 
 
-logger = logging.getLogger(__name__)
-data_champ = load_json("champion")
+def update_champion_json():
+    patch = get_current_patch()
+    with urllib.request.urlopen(f"https://ddragon.leagueoflegends.com/cdn/{patch}/data/en_US/champion.json") as url:
+        data = json.loads(url.read().decode())
+        with open("./config/champion.json", "w", encoding="utf-8") as f:
+            json.dump(data, f, ensure_ascii=False, indent=4)
 
 
 def get_champion_name_by_id(champ_id):
+    update_champion_json()
+    data_champ = load_json("champion")
     for value in data_champ["data"].values():
         if int(value["key"]) == champ_id:
             return value["id"]
 
 
 def get_champion_id_by_name(name):
+    update_champion_json()
+    data_champ = load_json("champion")
     for value in data_champ["data"].values():
         if value["id"] == name:
             return int(value["key"])
@@ -84,14 +86,6 @@ def update_current_patch(state: GeneralState) -> bool:
         return True
 
 
-def update_champion_json():
-    patch = get_current_patch()
-    with urllib.request.urlopen(f"https://ddragon.leagueoflegends.com/cdn/{patch}/data/en_US/champion.json") as url:
-        data = json.loads(url.read().decode())
-        with open("./config/champion.json", "w", encoding="utf-8") as f:
-            json.dump(data, f, ensure_ascii=False, indent=4)
-
-
 def get_average_rank(ranks):
     tmp = 0
     for rank in ranks:
@@ -114,25 +108,6 @@ def read_all_accounts(general_config: GeneralConfig, guild_id: int):
     with shelve.open(f"{folder_name}/{general_config.database_name_summoners}", "r") as database:
         for key in database.keys():
             yield database[key]
-
-
-def create_summoners(summoner_names: list, config: GeneralConfig):
-    riot_token = str(config.riot_token)
-    watcher = RiotWatcher(riot_token)
-    for player in summoner_names:
-        with ThreadPoolExecutor() as executor:
-            future = executor.submit(fetch_summoner, player, watcher)
-            data = future.result()
-            yield Summoner(player, data_summoner=data[0], data_mastery=data[1], data_league=data[2])
-
-
-def create_summoner(summoner_name: str, config: GeneralConfig, guild_config: GuildConfig):
-    riot_token = config.riot_token
-    watcher = RiotWatcher(riot_token)
-    with ThreadPoolExecutor() as executor:
-        future = executor.submit(fetch_summoner, summoner_name, watcher, guild_config)
-        data = future.result()
-        return Summoner(summoner_name, data_summoner=data[0], data_mastery=data[1], data_league=data[2])
 
 
 def fetch_summoner(player, watcher, config: GuildConfig):

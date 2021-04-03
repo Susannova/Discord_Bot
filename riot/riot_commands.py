@@ -3,25 +3,24 @@ Module that interacts with the Riot API
 and transforms the received data in
 a user readable way.
 """
-import shelve
-import matplotlib.pyplot as plt
 import logging
+import shelve
+from concurrent.futures import ThreadPoolExecutor
 
-from discord.ext import commands
 import discord
-
+import matplotlib.pyplot as plt
 import pandas as pd
-from core import exceptions, config
+from discord.ext import commands
+from riotwatcher import LolWatcher as RiotWatcher
+
+from core import config, exceptions
+from core.config import GeneralConfig, GuildConfig
 from core.state import GeneralState
-
-from . import image_transformation, riot_utility as utility
-
+from.image_transformation import create_new_image
+from .summoner import Summoner
+from . import riot_utility as utility
 
 logger = logging.getLogger(__name__)
-
-
-# FIXME: this is trash
-# === BAN CALCULATION === #
 
 
 def get_best_ban(summoner):
@@ -55,9 +54,6 @@ def get_best_bans_for_team(team) -> list:
         while len(ban_list) > 5:
             del ban_list[-1]
     return ban_list
-
-
-# === INTERFACE === #
 
 
 def get_player_stats(
@@ -96,7 +92,7 @@ def calculate_bans_for_team(bot_config: config.BotConfig, *names) -> str:
         raise commands.CheckFailure()
     team = list(utility.create_summoners(list(names[0]), bot_config.general_config))
     output = get_best_bans_for_team(team)
-    image_transformation.create_new_image(output, bot_config)
+    create_new_image(output, bot_config)
     op_url = f"https://euw.op.gg/multi/query= \
              {team[0].name}%2C{team[1].name}%2C{team[2].name}%2C{team[3].name}%2C{team[4].name}"
     return f"Team OP.GG: {op_url}\nBest Bans for Team:\n{utility.pretty_print_list(output)}"
@@ -255,4 +251,20 @@ def update_state_clash_dates(state: GeneralState, general_config: config.General
     return
 
 
-# === INTERFACE END === #
+def create_summoners(summoner_names: list, config: GeneralConfig):
+    riot_token = str(config.riot_token)
+    watcher = RiotWatcher(riot_token)
+    for player in summoner_names:
+        with ThreadPoolExecutor() as executor:
+            future = executor.submit(utility.fetch_summoner, player, watcher)
+            data = future.result()
+            yield Summoner(player, data_summoner=data[0], data_mastery=data[1], data_league=data[2])
+
+
+def create_summoner(summoner_name: str, config: GeneralConfig, guild_config: GuildConfig):
+    riot_token = config.riot_token
+    watcher = RiotWatcher(riot_token)
+    with ThreadPoolExecutor() as executor:
+        future = executor.submit(utility.fetch_summoner, summoner_name, watcher, guild_config)
+        data = future.result()
+        return Summoner(summoner_name, data_summoner=data[0], data_mastery=data[1], data_league=data[2])

@@ -1,6 +1,8 @@
-from datetime import datetime, timedelta
 import json
 import math
+from datetime import datetime, timedelta
+
+from .riot_utility import get_champion_id_by_name, get_champion_name_by_id
 
 
 def load_json(file_name, folder="config"):
@@ -9,7 +11,6 @@ def load_json(file_name, folder="config"):
 
 
 dict_rank = load_json("rank")
-data_champ = load_json("champion")
 
 
 class Summoner:
@@ -115,7 +116,7 @@ class Summoner:
     def get_most_played_champs(self, count):
         i = 0
         while i < count:
-            yield self.get_champion_name_by_id(self.data_mastery[i]["championId"])
+            yield get_champion_name_by_id(self.data_mastery[i]["championId"])
             i += 1
 
     def get_last_time_played_by_id(self, id):
@@ -125,7 +126,7 @@ class Summoner:
                 return datetime.fromtimestamp(timestamp)
 
     def get_last_time_played_by_name(self, name):
-        id = int(self.get_champion_id_by_name(name))
+        id = int(get_champion_id_by_name(name))
         for value in self.data_mastery:
             if value["championId"] == id:
                 timestamp = int(str(value["lastPlayTime"])[:-3])
@@ -134,12 +135,3 @@ class Summoner:
     def has_played_champ_by_name_in_last_n_days(self, name, n):
         return self.get_last_time_played_by_name(name) > datetime.now() - timedelta(days=n)
 
-    def get_champion_name_by_id(self, id):
-        for value in data_champ["data"].values():
-            if int(value["key"]) == id:
-                return value["id"]
-
-    def get_champion_id_by_name(self, name):
-        for value in data_champ["data"].values():
-            if value["id"] == name:
-                return int(value["key"])
