@@ -16,7 +16,7 @@ from riotwatcher import LolWatcher as RiotWatcher
 from core import config, exceptions
 from core.config import GeneralConfig, GuildConfig
 from core.state import GeneralState
-from.image_transformation import create_new_image
+from .image_transformation import create_new_image
 from .summoner import Summoner
 from . import riot_utility as utility
 

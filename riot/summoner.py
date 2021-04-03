@@ -134,4 +134,3 @@ class Summoner:
 
     def has_played_champ_by_name_in_last_n_days(self, name, n):
         return self.get_last_time_played_by_name(name) > datetime.now() - timedelta(days=n)
-
