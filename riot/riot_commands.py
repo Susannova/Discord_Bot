@@ -90,7 +90,7 @@ def calculate_bans_for_team(bot_config: config.BotConfig, *names) -> str:
     if len(names[0]) != 5:
         logger.exception("Check Failure")
         raise commands.CheckFailure()
-    team = list(utility.create_summoners(list(names[0]), bot_config.general_config))
+    team = list(create_summoners(list(names[0]), bot_config.general_config))
     output = get_best_bans_for_team(team)
     create_new_image(output, bot_config)
     op_url = f"https://euw.op.gg/multi/query= \
@@ -105,7 +105,7 @@ def link_account(
     general_config: config.GeneralConfig,
     guild_id: int,
 ):
-    summoner = utility.create_summoner(summoner_name, general_config, guild_config=guild_config)
+    summoner = create_summoner(summoner_name, general_config, guild_config=guild_config)
     summoner.discord_user_name = discord_user_name
     folder_name = guild_config.folders_and_files.database_directory_summoners.format(guild_id=guild_id)
     with shelve.open(f"{folder_name}/{guild_config.folders_and_files.database_name_summoners}", "rc") as database:
@@ -125,7 +125,7 @@ def link_account(
 def update_linked_account_data_by_discord_user_name(
     discord_user_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id: int
 ):
-    summoner = utility.create_summoner(
+    summoner = create_summoner(
         utility.read_account(discord_user_name, general_config, guild_id).name,
         general_config,
         guild_config=guild_config,
@@ -159,7 +159,7 @@ def get_or_create_summoner(
             update_linked_account_data_by_discord_user_name(discord_user_name, guild_config, general_config, guild_id)
         return summoner
     else:
-        return utility.create_summoner(summoner_name, general_config, guild_config=guild_config)
+        return create_summoner(summoner_name, general_config, guild_config=guild_config)
 
 
 def unlink_account(discord_user_name, guild_config: config.GuildConfig, guild_id: int):

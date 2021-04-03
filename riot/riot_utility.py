@@ -103,9 +103,9 @@ def read_account(discord_user_name, general_config: GeneralConfig, guild_id: int
 
 
 def read_all_accounts(general_config: GeneralConfig, guild_id: int):
-    folder_name = general_config.database_directory_summoners.format(guild_id=guild_id)
+    dir_name = general_config.database_directory_summoners.format(guild_id=guild_id)
     # TODO I think my database in cogs.task is better. And this fails, if the file does not exists
-    with shelve.open(f"{folder_name}/{general_config.database_name_summoners}", "r") as database:
+    with shelve.open(f"{dir_name}/{general_config.database_name_summoners}", "r") as database:
         for key in database.keys():
             yield database[key]
 
