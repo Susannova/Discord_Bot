@@ -9,7 +9,7 @@ from core import checks, DiscordBot, converters
 logger = logging.getLogger(__name__)
 
 
-class DebugCog(commands.Cog):
+class DebugCog(commands.Cog, name="Debug commands"):
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
 
