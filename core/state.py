@@ -118,8 +118,10 @@ class GeneralState:
 
     def write_state_to_file(self):
         """Pickle the state to a file."""
-        filename = f"{self.config.general_config.database_directory_global_state}/ \
-            {self.config.general_config.database_name_global_state}"
+        filename = (
+            f"{self.config.general_config.database_directory_global_state}/"
+            f"{self.config.general_config.database_name_global_state}"
+        )
         try:
             with open(filename, "wb") as file:
                 tmp_values = self.__set_futures_and_store_values(["__remove_teams_task"])

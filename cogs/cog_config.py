@@ -48,8 +48,8 @@ class ConfigCog(commands.Cog, name="Configuration commands"):
         if len(ctx.message.attachments) != 1:
             logger.error("Guild %i: config read called without a file!")
             await ctx.send(
-                f"Please attach a json config file to the command. \
-                You can get the current file by calling ``{self.bot.get_command_prefix(ctx.guild.id)}config print``."
+                f"""Please attach a json config file to the command.
+                You can get the current file by calling ``{self.bot.get_command_prefix(ctx.guild.id)}config print``."""
             )
             raise commands.CommandError("Config read called without a file")
 

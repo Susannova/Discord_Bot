@@ -9,8 +9,8 @@ class HelpText(object):
 
 
 create_team_HelpText = HelpText(
-    "Erstellt zwei zufällige Teams aus den Mitgliedern des Voice Channels und  \
-    gegebenfalls weiteren, angegebene Spielern.",
+    "Erstellt zwei zufällige Teams aus den Mitgliedern des Voice Channels und"
+    "gegebenfalls weiteren, angegebene Spielern.",
     "Erstellt zwei zufällige Teams",
     "[names]",
 )
@@ -38,8 +38,8 @@ leaderboard_HelpText = HelpText(
 )
 
 create_channel_HelpText = HelpText(
-    "Benutze dieses Command um einen Channel zu erstellen der für 12h aktiv ist und danach gelöscht wird. \
-    Der Channel ist in der Kategorie TEMPORARY CHANNELS zu finden.",
+    "Benutze dieses Command um einen Channel zu erstellen der für 12h aktiv ist und danach gelöscht wird."
+    "Der Channel ist in der Kategorie TEMPORARY CHANNELS zu finden.",
     "Creates a temporary channel",
     "( text | voice ) name [voice_chat_user_limit]",
 )

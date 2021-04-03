@@ -36,8 +36,8 @@ class KrautBot(commands.Bot):
         self.help_command = help_command_
         try:
             with open(
-                f"{self.config.general_config.database_directory_global_state}/ \
-                    {self.config.general_config.database_name_global_state}",
+                f"{self.config.general_config.database_directory_global_state}/"
+                f"{self.config.general_config.database_name_global_state}",
                 "rb",
             ) as file:
                 self.state = pickle.load(file)
@@ -70,10 +70,11 @@ class KrautBot(commands.Bot):
         self.config.get_guild_config(guild.id).channel_ids.bot.append(channel.id)
 
         await channel.send(
-            f"{owner.mention} I have automatically created this channel because \
-            this channel did not exist or was not found in the config. \
-            The channel is invisible for everyone except you. \
-            In this channel you can use ``{self.get_command_prefix(guild.id)}config`` to configure {guild.me.mention}."
+            f"{owner.mention} I have automatically created this channel because"
+            "this channel did not exist or was not found in the config."
+            "The channel is invisible for everyone except you."
+            f"In this channel you can use ``{self.get_command_prefix(guild.id)}config``"
+            f"to configure {guild.me.mention}."
         )
 
         return channel
@@ -93,8 +94,8 @@ class KrautBot(commands.Bot):
         for bot_channel_id in guild_config.channel_ids.bot:
             for deleted_channel in deleted_channels:
                 await self.get_channel(bot_channel_id).send(
-                    f"The channel id {deleted_channel[1]} which is a {deleted_channel[0]} channel \
-                    was removed from the config because the channel does not exist."
+                    f"The channel id {deleted_channel[1]} which is a {deleted_channel[0]} channel"
+                    "was removed from the config because the channel does not exist."
                 )
 
     def run(self):

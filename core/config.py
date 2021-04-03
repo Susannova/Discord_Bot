@@ -1,8 +1,8 @@
 """
-Used for the bot configarution.
+Used for the bot configuration.
 
 If not imported, this can also be used to generate a config file.
-Therefore, you need to modify the code at the bottom of the file 
+Therefore, you need to modify the code at the bottom of the file
 and run this file.
 """
 
@@ -81,15 +81,6 @@ class Command:
     )  # Must be the name of a role in unsorted config or a game role
     enabled: bool = True
 
-    # TODO Does not work!!!
-    # def __post_init__(self):
-    #     """ Checks if the types are valid and tries to convert the fields if not
-
-    #     Raises an TypeError if conversion fails """
-
-    #     for field in dataclasses.fields(self):
-    #         auto_conversion(self, field)
-
 
 @dataclasses.dataclass
 class Game:
@@ -148,10 +139,12 @@ class Messages_Config:
     """Configuration data of the messages from the bot."""
 
     date_format: str = "{day}.{month}."
-    create_internal_play_request: str = "@everyone Das Play-Request von {creator} hat 6 oder mehr Mitspieler. \
-                                        Ein **__internes Match__** wird aufgebaut!\n \
-                                        Es sind noch **__{free_places}__** Plätze frei.\n \
-                                        Uhrzeit: {time} Uhr \nSpieler:\n"
+    create_internal_play_request: str = (
+        "@everyone Das Play-Request von {creator} hat 6 oder mehr Mitspieler."
+        "Ein **__internes Match__** wird aufgebaut!\n"
+        "Es sind noch **__{free_places}__** Plätze frei.\n"
+        "Uhrzeit: {time} Uhr \nSpieler:\n"
+    )
     auto_dm_creator: str = "{player} hat auf dein Play-Request reagiert: {reaction} "
     auto_dm_subscriber: str = "{player} hat auch auf das Play-Request von {creator} reagiert: {reaction} "
     play_now: str = (
@@ -163,12 +156,16 @@ class Messages_Config:
 
     play_request_reminder: str = "REMINDER: Der abonnierte Play-Request geht in {minutes} Minuten los!"
     clash_create = "{role_mention}\nAm {date} ist wieder LoL Clash. Reagiert hier, zum dem Clash Team beizutreten."
-    clash_full: str = "Das Clash Team von {creator} für den {time} ist jetzt voll. \
-                        Das Team besteht aus folgenden Mitgliedern:\n{team}"
+    clash_full: str = (
+        "Das Clash Team von {creator} für den {time} ist jetzt voll."
+        "Das Team besteht aus folgenden Mitgliedern:\n{team}"
+    )
 
-    bans: str = "If you want to receive the best bans \
-                for the scouted team copy the following Command: \n \
-                {command_prefix}bans {team}"
+    bans: str = (
+        "If you want to receive the best bans"
+        "for the scouted team copy the following Command: \n"
+        "{command_prefix}bans {team}"
+    )
 
     team_header: str = "\n**__Teams:__**\n"
     team_1: str = "Team 1:\n"
@@ -177,8 +174,10 @@ class Messages_Config:
     patch_notes_formatted: str = "{role_mention}\nEin neuer Patch ist da: {patch_note}"
     patch_notes: str = "https://euw.leagueoflegends.com/en-us/news/game-updates/patch-{0}-{1}-notes/"
 
-    game_selector: str = "@everyone\nWähle hier durch das Klicken auf eine Reaktion aus \
-                         zu welchen Spielen du Benachrichtungen erhalten willst!"
+    game_selector: str = (
+        "@everyone\nWähle hier durch das Klicken auf eine Reaktion aus"
+        "zu welchen Spielen du Benachrichtungen erhalten willst!"
+    )
 
     highlight_leaderboard_description: str = "Vote for the best highlights in {highlight_channel_mention}."
     highlight_leaderboard_footer: str = "Only the last {limit} highlights can be taken in account."

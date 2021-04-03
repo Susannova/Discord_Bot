@@ -81,8 +81,10 @@ def get_smurf(
     is_smurf_word = "kein"
     if summoner.is_smurf():
         is_smurf_word = "ein"
-    return f"Der Spieler **{utility.format_summoner_name(summoner.name)}** ist \
-            sehr wahrscheinlich **{is_smurf_word}** Smurf."
+    return (
+        f"Der Spieler **{utility.format_summoner_name(summoner.name)}** ist"
+        f"sehr wahrscheinlich **{is_smurf_word}** Smurf."
+    )
 
 
 def calculate_bans_for_team(bot_config: config.BotConfig, *names) -> str:
@@ -93,8 +95,10 @@ def calculate_bans_for_team(bot_config: config.BotConfig, *names) -> str:
     team = list(create_summoners(list(names[0]), bot_config.general_config))
     output = get_best_bans_for_team(team)
     create_new_image(output, bot_config)
-    op_url = f"https://euw.op.gg/multi/query= \
-             {team[0].name}%2C{team[1].name}%2C{team[2].name}%2C{team[3].name}%2C{team[4].name}"
+    op_url = (
+        f"https://euw.op.gg/multi/query="
+        f"{team[0].name}%2C{team[1].name}%2C{team[2].name}%2C{team[3].name}%2C{team[4].name}"
+    )
     return f"Team OP.GG: {op_url}\nBest Bans for Team:\n{utility.pretty_print_list(output)}"
 
 

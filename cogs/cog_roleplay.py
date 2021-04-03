@@ -29,8 +29,10 @@ class RoleplayCog(commands.Cog, name="Roleplay Commands"):
             await ctx.send("You did use the right command. The correct command syntax is: !r xdy")
             return
         results, dice_string_summed_value = self.__get_dice_rolls(dice_string)
-        output = f"{ctx.message.author.mention} I rolled {dice_string} for you \
-                 which resulted in {dice_string_summed_value}."
+        output = (
+            f"{ctx.message.author.mention} I rolled {dice_string} for you"
+            f"which resulted in {dice_string_summed_value}."
+        )
         output = self.__format_output(output, results)
         await ctx.send(output)
 

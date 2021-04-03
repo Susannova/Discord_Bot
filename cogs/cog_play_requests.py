@@ -46,8 +46,8 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         if should_be_empty is not None:
             logger.warning("Something went wrong. Was able to interpret the play request until: %s.", should_be_empty)
             await ctx.send(
-                f"Something went wrong. I was able to interpret the command until '{should_be_empty}'. \
-                  Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`."
+                f"Something went wrong. I was able to interpret the command until '{should_be_empty}'."
+                f"Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`."
             )
             raise ValueError("Was not able to interpret the command")
 
@@ -68,8 +68,8 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             ).total_seconds() / 60 > guild_config.unsorted_config.play_now_time_add_limit:
                 logger.warning("Play request denied because of time")
                 await ctx.send(
-                    f"Play requests that are going more than {guild_config.unsorted_config.play_now_time_add_limit} \
-                      minutes in the future are not allowed."
+                    f"Play requests that are going more than {guild_config.unsorted_config.play_now_time_add_limit}"
+                    f"minutes in the future are not allowed."
                 )
                 return
         else:
@@ -168,12 +168,12 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         Handle messages sent by the bot to avoid race conditions.
 
         This is necessary, as the `send_to_channel` command creates a
-        pinned message, that could potentially be deleted if the control flow 
+        pinned message, that could potentially be deleted if the control flow
         after this function gets reached before the message is pinned.
         Only has meaning in combination with `DebugCog` or if
         the `self.bot.sending_message` attribute is changed.
         `ttl` determines how many seconds the bot has to send and pin a message.
-        Raises `RuntimeError` if the bot is not able send and pin a message in the 
+        Raises `RuntimeError` if the bot is not able send and pin a message in the
         given timeframe.
         """
         if message.author == self.bot.user:
@@ -183,7 +183,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
                 seconds_slept += 1
                 if seconds_slept > ttl:
                     raise RuntimeError("Waited for at least 10 seconds for sending_message to become False.")
-              
+
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
         """

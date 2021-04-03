@@ -41,8 +41,10 @@ class Summoner:
             self.rank_values[queue_type] = self.get_rank_value(queue_type)
 
     def __str__(self):
-        return f"Summoner: {self.name}, Level: {self.get_level()}, Rank: {self.get_rank_string()}, \
-                Winrate: {self.get_winrate()}"
+        return (
+            f"Summoner: {self.name}, Level: {self.get_level()}, Rank: {self.get_rank_string()},"
+            f"Winrate: {self.get_winrate()}"
+        )
 
     def __repr__(self):
         return self.name
