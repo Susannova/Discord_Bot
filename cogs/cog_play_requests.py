@@ -1,6 +1,6 @@
 import logging
-import asyncio
 from datetime import datetime
+import asyncio
 from typing import List, Optional
 
 import discord
@@ -155,22 +155,35 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
 
         guild_id = message.guild.id
         guild_config = self.bot.config.get_guild_config(guild_id)
-
         if message.channel.id == guild_config.channel_ids.play_request:
-            if message.author == self.bot.user:
-                seconds_slept = 0
-                # FIXME: Do we need this? Where does sending message even get changed?
-                while self.bot.sending_message:
-                    await asyncio.sleep(1)
-                    seconds_slept += 1
-                    if seconds_slept > 10:
-                        raise RuntimeError("Waited for at least 10 seconds for sending_message to become False")
+            self.__handle_bot_sent_message(message)
             if not message.pinned:
                 delay = guild_config.unsorted_config.auto_delete_after_seconds
                 guild_state = self.bot.state.get_guild_state(message.guild.id)
                 if not guild_state.is_play_request(message.id):
                     await message.delete(delay=delay)
 
+    def __handle_bot_sent_message(self, message: discord.Message, ttl: int = 10):
+        """
+        Handle messages sent by the bot to avoid race conditions.
+
+        This is necessary, as the `send_to_channel` command creates a
+        pinned message, that could potentially be deleted if the control flow 
+        after this function gets reached before the message is pinned.
+        Only has meaning in combination with `DebugCog` or if
+        the `self.bot.sending_message` attribute is changed.
+        `ttl` determines how many seconds the bot has to send and pin a message.
+        Raises `RuntimeError` if the bot is not able send and pin a message in the 
+        given timeframe.
+        """
+        if message.author == self.bot.user:
+            seconds_slept = 0
+            while self.bot.sending_message:
+                await asyncio.sleep(1)
+                seconds_slept += 1
+                if seconds_slept > ttl:
+                    raise RuntimeError("Waited for at least 10 seconds for sending_message to become False.")
+              
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
         """

@@ -1,7 +1,6 @@
 import logging
 import random
 import re
-from typing import List
 
 from discord.ext import commands
 
