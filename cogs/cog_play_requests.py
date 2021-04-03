@@ -163,7 +163,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
                 if not guild_state.is_play_request(message.id):
                     await message.delete(delay=delay)
 
-    def __handle_bot_sent_message(self, message: discord.Message, ttl: int = 10):
+    async def __handle_bot_sent_message(self, message: discord.Message, ttl: int = 10):
         """
         Handle messages sent by the bot to avoid race conditions.
 
