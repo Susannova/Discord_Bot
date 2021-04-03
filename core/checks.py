@@ -113,8 +113,7 @@ async def command_is_allowed(ctx: commands.Context) -> bool:
 
 def is_play_request(ctx: commands.Context):
     """Check if the message is a play request."""
-    bot = ctx.bot
-    guild_state = bot.state.get_guild_state(ctx.guild.id)
+    guild_state = ctx.bot.state.get_guild_state(ctx.guild.id)
     return guild_state.is_play_request(ctx.message.id)
 
 
@@ -125,14 +124,12 @@ def is_not_the_bot(ctx: commands.Context):
 
 def is_super_user(ctx: commands.Context):
     """Check if the user is a super user."""
-    bot = ctx.bot
-    return ctx.message.author.id in bot.config.general_config.super_user
+    return ctx.message.author.id in ctx.bot.config.general_config.super_user
 
 
 def is_riot_enabled(ctx: commands.Context):
     """Check if the riot API is enabled."""
-    bot = ctx.bot
-    return bot.config.general_config.riot_api
+    return ctx.bot.config.general_config.riot_api
 
 
 def is_activated(*toggles):
