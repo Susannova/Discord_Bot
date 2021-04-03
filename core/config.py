@@ -41,7 +41,7 @@ def auto_conversion(obj, field: dataclasses.Field):
 def error_handling_auto_conversion(obj, field: dataclasses.Field, error: Exception):
     """
     Log an error during the conversion of a field.
-    
+
     Raises a `TypeError` with an explanation.
     """
     error_message = (
@@ -97,7 +97,7 @@ class Game:
     Representation of a game.
 
     A game has a long and a short name,
-    belongs to a discord role and category and an emoji. 
+    belongs to a discord role and category and an emoji.
     It can also have its own cog.
     """
 
@@ -295,7 +295,7 @@ class Folders_and_Files:
     # TODO Can be replaced with a class 'message_ids' because this is not needed anymore
     """
     Global folder and files for the guild.
-    
+
     Some needs to be formated with the guild_id.
     """
     pass
@@ -330,7 +330,7 @@ class GuildConfig:
     def fromdict(self, config_dict, update: bool = False):
         """
         Set the settings given by a dict.
-        
+
         The format of the dictionary must be like in `self.asdict()`.
         If `update` is `False`, settings not given in the dict are set to default.
         `update` defaults to `False`.
@@ -528,7 +528,7 @@ class BotConfig:
     def fromdict(self, config_dict: dict):
         """
         Set the settings given by a `dict`.
-        
+
         The format of the dictionary must be like in `self.asdict()`,
         but the keys can be strings or integers.
         Settings not given in the `dict` are set to default.
@@ -584,7 +584,7 @@ class BotConfig:
     def get_guild_config(self, guild_id: int) -> GuildConfig:
         """
         Get the guild that belongs to the id.
-        
+
         Raises a `KeyError` if guild does not exists.
         """
         try:

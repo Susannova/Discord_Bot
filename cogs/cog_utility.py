@@ -25,7 +25,7 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         """
         Creates random teams.
 
-        The teams are created with the subcommand create 
+        The teams are created with the subcommand create
         and can be moved afterwards with move.
         """
         logger.debug("!team command called")
@@ -42,7 +42,7 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         """
         Create two random teams.
 
-        The player of the team are all the members of 
+        The player of the team are all the members of
         your current voice channel and every given player.
         The bot tries to find a discord user for the given names
         and will mentions all discord users.

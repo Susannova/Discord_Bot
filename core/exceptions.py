@@ -40,7 +40,7 @@ class BadArgumentFormat(Exception):
 class LimitReachedException(Exception):
     """
     Exception that gets raised if a limit is reached.
-    
+
     For example gets used when a user already created one temporary channel, that still exists.
     """
 

@@ -46,7 +46,7 @@ class StrToTime(commands.Converter):
 
         `time_str` has to be a time in the format hh:mm
         or +x followed optionally (default m) by "m", "h" or "d" without spaces.
-        
+
         Raises a `RuntimeError` if format of time_str is wrong.
         """
 

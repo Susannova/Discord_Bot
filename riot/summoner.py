@@ -23,7 +23,7 @@ class Summoner:
     def __init__(self, name, data_summoner={}, data_mastery=[], data_league={}):
         """
         Set the initial values of a `Summoner` object.
-        
+
         `data_summoner` is a json of all basic summononer data from Riot API.
         `data_mastery` is basic mastery data from Riot API.
         `data_league` is formatted basic league data from Riot API

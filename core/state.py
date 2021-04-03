@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class GuildState:
     """
     State class for one guild.
-    
+
     Saves all variables that need to have a global state
     at runtime that potentially has to change during runtime.
     """
@@ -98,8 +98,8 @@ class GuildState:
 class GeneralState:
     """
     General state class for the bot.
-    
-    Saves all variables that need to have a global state 
+
+    Saves all variables that need to have a global state
     at runtime that potentially has to change during runtime.
     """
 
@@ -132,7 +132,7 @@ class GeneralState:
     def add_guild_state(self, guild_id: int):
         """
         Add the guild state.
-        
+
         Raises a `KeyError` if guild already exists.
         """
         if self.check_if_guild_exists(guild_id):
@@ -143,7 +143,7 @@ class GeneralState:
     def get_guild_state(self, guild_id: int) -> GuildState:
         """
         Return the guild state.
-        
+
         Raises a `KeyError` if guild does not exist.
         """
         if not self.check_if_guild_exists(guild_id):

@@ -137,6 +137,7 @@ def is_riot_enabled(ctx: commands.Context):
 
 def is_activated(*toggles):
     """Check if the toggles are activated."""
+
     async def wrapper(ctx: commands.Context):
         bot = ctx.bot
         guild_toggles = bot.config.get_guild_config(ctx.guild.id).toggles
@@ -147,6 +148,7 @@ def is_activated(*toggles):
 
 def is_debug_enabled(func):
     """Check if the debug toggle is enabled."""
+
     async def inner(obj: DiscordBot.KrautBot, ctx: commands.Context, *args):
         if obj.config.get_guild_config(ctx.guild.id).toggles.debug:
             return await func(obj, ctx, *args)
