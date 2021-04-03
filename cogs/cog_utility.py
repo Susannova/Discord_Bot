@@ -360,6 +360,15 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
                 "There were too many highlights so some older highlights were not taken in account.", delete_after=10
             )
 
+    @commands.command(name='purge', hidden=True)
+    @commands.check(checks.is_super_user)
+    async def purge_(self, ctx, count: int):
+        logger.info("!purge %s called in channel %s", count, ctx.message.channel.name)
+        last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
+        for message_ in last_count_messages:
+            if not message_.pinned:
+                await message_.delete()
+
 
 def setup(bot: DiscordBot.KrautBot):
     bot.add_cog(UtilityCog(bot))
