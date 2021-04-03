@@ -1,6 +1,7 @@
 import logging
 import pickle
 import asyncio
+from typing import List, Dict
 
 from core.config import BotConfig
 from core.play_requests import PlayRequest
@@ -121,13 +122,34 @@ class GeneralState:
             {self.config.general_config.database_name_global_state}"
         try:
             with open(filename, "wb") as file:
+                tmp_values = self.__set_futures_and_store_values(["__remove_teams_task"])
                 pickle.dump(self, file)
+                self.__restore_futures_values(tmp_values)
             logger.info("Global state saved")
         except pickle.PicklingError:
             filename_failed = filename + "_failed_content"
             with open(filename_failed, "w") as file_failed:
                 file_failed.write(self)
             logger.error("Global state was not pickable. Content was written to %s", filename_failed)
+
+    def __set_futures_and_store_values(self, attrs: List[str]) -> Dict[GuildState, Dict[str, asyncio.Task]]:
+        """
+        Set the futures in the all guild_states to `None` to make the state pickleable
+        and return a `dict` with the current values.
+        """
+        current_values = {}
+        for guild_state in self.__guilds_state.values():
+            current_values[guild_state] = dict
+            for attr in attrs:
+                current_values[guild_state][attr] = getattr(guild_state, attr, None)
+                setattr(guild_state, attr, None)
+        return current_values
+
+    def __restore_futures_values(self, values: Dict[GuildState, Dict[str, asyncio.Task]]) -> None:
+        """Restores the values of the futures of all guild states."""
+        for guild_state, attr_dict in values:
+            for attr, value in attr_dict:
+                setattr(guild_state, attr, value)
 
     def add_guild_state(self, guild_id: int):
         """
