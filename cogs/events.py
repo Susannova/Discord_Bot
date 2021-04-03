@@ -93,6 +93,8 @@ class EventCog(commands.Cog):
             await ctx.send("This command is currently disabled.")
         elif isinstance(error, commands.MissingAnyRole):
             await ctx.send("Sorry, you are not allowed to use this command.")
+        elif isinstance(error, commands.errors.CommandOnCooldown):
+            await ctx.send(error)
         else:
             await ctx.send("Sorry, an unknown error has occurred...")
         await ctx.send(f"Try ``{self.bot.get_command_prefix(ctx.guild.id)}help`` for avaible commands.")
@@ -183,11 +185,7 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_guild_channel_delete(self, channel):
-        tmp_channel_ids = self.bot.state.get_guild_state(channel.guild.id).tmp_channel_ids
-        if channel.id in tmp_channel_ids:
-            logger.info("Temporary channel was deleted manually.")
-            tmp_channel_ids[channel.id]["deleted"] = True
-        elif channel.id in self.bot.config.get_guild_config(channel.guild.id).channel_ids.bot:
+        if channel.id in self.bot.config.get_guild_config(channel.guild.id).channel_ids.bot:
             guild_config = self.bot.config.get_guild_config(channel.guild.id)
             guild_config.channel_ids.bot.remove(channel.id)
             if not guild_config.channel_ids.bot:

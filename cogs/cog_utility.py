@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import random
 import math
@@ -6,7 +7,7 @@ from typing import List, Optional, Union
 import discord
 from discord.ext import commands
 
-from core import checks, exceptions, timers, help_text, DiscordBot
+from core import checks, help_text, DiscordBot
 
 from riot import riot_commands
 
@@ -193,16 +194,16 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
             logger.error("Error linking %s: %s", summoner_name, error)
             # TODO Add a link to our accounts
             await ctx.message.author.send(
-                f"Dein Lol-Account konnte nicht mit deinem Discord Account verbunden werden. \
-                  Richtiger Umgang mit ``!link`` ist unter ``{ctx.bot.command_prefix}help link`` zu finden. \
-                  Falls das nicht weiterhilft, wende dich bitte an Jan oder Nick"
+                f"Dein Lol-Account konnte nicht mit deinem Discord Account verbunden werden."
+                f"Richtiger Umgang mit ``!link`` ist unter ``{ctx.bot.command_prefix}help link`` zu finden."
+                f"Falls das nicht weiterhilft, wende dich bitte an Jan oder Nick."
             )
             raise error
         else:
             await ctx.message.author.send(
-                f"Dein Lol-Account wurde erfolgreich mit deinem Discord Account verbunden!\n \
-                Falls du deinen Account wieder entfernen möchtest \
-                benutze das ``{ctx.bot.command_prefix}unlink`` Command."
+                f"Dein Lol-Account wurde erfolgreich mit deinem Discord Account verbunden!\n"
+                f"Falls du deinen Account wieder entfernen möchtest"
+                f"benutze das ``{ctx.bot.command_prefix}unlink`` Command."
             )
             logger.info("%s was linked.", summoner_name)
 
@@ -234,58 +235,54 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         brief=help_text.create_channel_HelpText.brief,
         usage=help_text.create_channel_HelpText.usage,
     )
-    @discord.ext.commands.cooldown(rate=3, per=30)
+    @discord.ext.commands.cooldown(rate=3, per=(12 * 60 * 60), type=commands.BucketType.user)
+    @discord.ext.commands.cooldown(rate=12, per=(12 * 60 * 60), type=commands.BucketType.guild)
     async def create_channel(
         self, ctx: commands.Context, kind: str, channel_name: str, user_limit: Optional[int] = 99
     ):
-        logger.debug("!create-channel %s %s called by %s", kind, channel_name, ctx.message.author.name)
-        guild_state = self.bot.state.get_guild_state(ctx.guild.id)
-        for tmp_channels in guild_state.tmp_channel_ids:
-            logger.debug(
-                "Check if channel %s with id %s is already created by user %s.",
-                guild_state.tmp_channel_ids[tmp_channels]["name"],
-                tmp_channels,
-                ctx.message.author.name,
-            )
-            if (
-                not guild_state.tmp_channel_ids[tmp_channels]["deleted"]
-                and guild_state.tmp_channel_ids[tmp_channels]["author"] == ctx.message.author.id
-            ):
-                logger.info(
-                    "%s wanted to create a new temporary channel but already has created channel %s with id %s.",
-                    ctx.message.author.name,
-                    guild_state.tmp_channel_ids[tmp_channels]["name"],
-                    tmp_channels,
-                )
-                raise exceptions.LimitReachedException("Der Autor hat schon einen temprorären Channel erstellt.")
+        """
+        Create a temporary channel that automatically gets deleted after 12 hours.
 
+        `kind` determines the type of channel with "text" and "voice" being valid options.
+        Can only be called thrice per 12 hours per user to avoid spam
+        but to allow for syntax errors to be corrected.
+        Also limited to 12 times per 12 hours per guild to avoid spam.
+        """
+        logger.debug("!channel create %s %s called by %s", kind, channel_name, ctx.message.author.name)
         tmp_channel_category = self.bot.get_channel(
             self.bot.config.get_guild_config(ctx.guild.id).channel_ids.category_temporary
         )
+        if channel_name is None or kind is None:
+            logger.error(
+                "!channel create is called by user %s without a name or without a valid kind.", ctx.message.author.name
+            )
+            return
 
-        tmp_channel = None
-        if channel_name is None:
-            logger.error("!create-channel is called by user %s without a name.", ctx.message.author.name)
-            return
-        elif kind == "text":
-            tmp_channel = await ctx.message.guild.create_text_channel(channel_name, category=tmp_channel_category)
-        elif kind == "voice":
-            if user_limit > 0 and user_limit <= 99:
-                tmp_channel = await ctx.message.guild.create_voice_channel(
-                    channel_name, category=tmp_channel_category, user_limit=int(user_limit[0])
-                )
-            else:
-                tmp_channel = await ctx.message.guild.create_voice_channel(channel_name, category=tmp_channel_category)
+        if kind == "voice":
+            channel = await ctx.message.guild.create_voice_channel(
+                channel_name, category=tmp_channel_category, user_limit=user_limit
+            )
         else:
-            logger.error("!create-channel is called by user %s with invalid type %s.", ctx.message.author.name, kind)
-            return
-        guild_state.tmp_channel_ids[tmp_channel.id] = {
-            "timer": timers.start_timer(hrs=12),
-            "author": ctx.message.author.id,
-            "deleted": False,
-            "name": channel_name,
-        }
-        logger.info("Temporary %s-channel %s with id %s created", kind, channel_name, tmp_channel.id)
+            channel = await ctx.message.guild.create_text_channel(channel_name, category=tmp_channel_category)
+
+        await self.__delete_channel_after(channel, 12 * 60 * 60)
+        logger.info("Temporary %s-channel %s created.", kind, channel_name)
+
+    async def __delete_channel_after(self, channel: discord.CategoryChannel, delete_after: float):
+        """
+        Delete the given `channel` after `delete_after` seconds.
+
+        `delete_after` works the same as the `delete_after` parameter for `discord.Message`.
+        """
+
+        async def delete():
+            await asyncio.sleep(delete_after)
+            try:
+                await channel.delete()
+            except asyncio.exceptions.CancelledError:
+                pass
+
+        asyncio.ensure_future(delete(), loop=self.bot.loop)
 
     @checks.is_activated("highlights")
     @commands.command()

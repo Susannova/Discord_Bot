@@ -16,7 +16,7 @@ from itertools import cycle
 
 from riot import riot_commands, riot_utility
 
-from core import timers, DiscordBot, checks
+from core import DiscordBot, checks
 
 logger = logging.getLogger(__name__)
 
@@ -104,7 +104,6 @@ class LoopCog(commands.Cog, name="Plot Commands:"):
             self.update_summoners.start()
             self.print_leaderboard_loop.start()
             self.check_LoL_patch.start()
-        self.auto_delete_tmp_channels.start()
 
     async def cog_check(self, ctx: commands.Context):
         return await checks.command_is_allowed(ctx)
@@ -196,40 +195,6 @@ class LoopCog(commands.Cog, name="Plot Commands:"):
     @check_LoL_patch.before_loop
     async def check_LoL_patch_before_loop(self):
         await self.bot.wait_until_ready()
-
-    @tasks.loop(hours=1)
-    async def auto_delete_tmp_channels(self):
-        """Delete all tmp_channels automatically."""
-        logger.info("Look for expired temp channels")
-
-        for guild in self.bot.guilds:
-            guild_state = self.bot.state.get_guild_state(guild.id)
-
-            deleted_channels = []
-            for temp_channel_id in guild_state.tmp_channel_ids:
-                if timers.is_timer_done(guild_state.tmp_channel_ids[temp_channel_id]["timer"]):
-                    temp_channel = self.bot.get_channel(temp_channel_id)
-                    temp_channel_name = guild_state.tmp_channel_ids[temp_channel_id]["name"]
-
-                    if guild_state.tmp_channel_ids[temp_channel_id]["deleted"]:
-                        logger.debug(
-                            "Temporary channel %s with id %s already deleted.", temp_channel_name, temp_channel_id
-                        )
-                    elif temp_channel is None:
-                        logger.error(
-                            "Temporary channel %s with id %s not found and can't be deleted.",
-                            temp_channel_name,
-                            temp_channel_id,
-                        )
-                    else:
-                        await temp_channel.delete(reason="Delete expired temporary channel")
-                        logger.info("Temp channel %s is deleted", temp_channel_name)
-
-                    deleted_channels.append(temp_channel_id)
-
-            for channel in deleted_channels:
-                logger.debug("Remove temp channel %s from gstate", temp_channel_name)
-                del guild_state.tmp_channel_ids[channel]
 
     # TODO how often? at what time should this trigger
     @tasks.loop(hours=12)
