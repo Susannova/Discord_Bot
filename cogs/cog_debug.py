@@ -59,22 +59,6 @@ class DebugCog(commands.Cog):
                 await ctx.send(f"Emoji id is {emoji.id}.")
                 break
 
-    # @commands.command(name='enable-debug')
-    # @checks.is_in_channels()
-    # @checks.is_debug_config_enabled()
-    # @checks.has_any_role("admin_id")
-    # async def enable_debug(self, ctx):
-    #     gstate.debug = True
-    #     str_debug_activated="Debugging is activated for one hour."
-    #     await ctx.send(str_debug_activated)
-    #     logger.info(str_debug_activated)
-    #     await asyncio.sleep(3600)
-    #     gstate.debug = False
-    #     self.bot.config.get_guild_config(ctx.guild.id).toggles.debug = False
-    #     str_debug_deactivated="Debugging is deactivated."
-    #     await ctx.send(str_debug_deactivated)
-    #     logger.info(str_debug_deactivated)
-
     @commands.command(name="print")
     @commands.check(checks.is_super_user)
     async def print_(self, ctx: commands.Context, arg: str):
