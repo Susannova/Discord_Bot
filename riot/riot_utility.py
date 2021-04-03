@@ -74,6 +74,7 @@ def update_current_patch(state: GeneralState) -> bool:
 
     If not, return `True` and sets `state.lol_patch` to current patch.
     If `state.lol_patch` is `None`, sets `state.lol_patch` to current patch and return `False`.
+    Also save the `GeneralState` to a file if an update was needed.
     """
     current_patch = get_current_patch()
     if state.lol_patch is None:
@@ -83,6 +84,7 @@ def update_current_patch(state: GeneralState) -> bool:
         return False
     else:
         state.lol_patch = current_patch
+        state.write_state_to_file()
         return True
 
 
