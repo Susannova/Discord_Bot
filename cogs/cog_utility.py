@@ -25,7 +25,8 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         """
         Creates random teams.
 
-        The teams are created with the subcommand create and can be moved afterwards with move.
+        The teams are created with the subcommand create 
+        and can be moved afterwards with move.
         """
         logger.debug("!team command called")
         if ctx.invoked_subcommand is None:
@@ -39,10 +40,12 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         players_list: commands.Greedy[Union[discord.Member, str]] = None,
     ):
         """
-        Creates two random teams.
+        Create two random teams.
 
-        The player of the team are all the members of your current voice channel and every given player.
-        The bot tries to find a discord user for the given names and will mentions all discord users.
+        The player of the team are all the members of 
+        your current voice channel and every given player.
+        The bot tries to find a discord user for the given names
+        and will mentions all discord users.
         """
         if ctx.author.voice is not None:
             current_voice_channel = ctx.author.voice.channel
@@ -56,7 +59,11 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         await self.bot.state.get_guild_state(ctx.guild.id).timer_remove_teams()
 
     def __get_team_messages(self, ctx: commands.Context, players: List[Union[discord.Member, str]]) -> (str, str):
-        """Creates two teams and saves them in the guild state. Returns an embed, which includes the given teams."""
+        """
+        Create two teams and saves them in the guild state.
+
+        Return an embed, which includes the given teams.
+        """
         guild_state = self.bot.state.get_guild_state(ctx.guild.id)
 
         guild_state.team1 = random.sample(players, math.ceil(len(players) / 2))
@@ -109,9 +116,10 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
     @team.command(name="move")
     async def move_team_members(self, ctx: commands.Context):
         """
-        Moves the last created team.
+        Move the last created team.
 
-        First a team has to be created with the subcommand create otherwise an error message will be send.
+        First a team has to be created with the subcommand create,
+        otherwise an error message is send.
         """
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
         guild_state = self.bot.state.get_guild_state(ctx.guild.id)
@@ -153,7 +161,6 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
     @team.command(name="leave")
     async def leave_team(self, ctx: commands.Context):
         """Invoking user leaves current teams."""
-
         guild_state = self.bot.state.get_guild_state(ctx.guild.id)
         user = ctx.message.author
 
@@ -285,7 +292,8 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
     async def highlights(self, ctx: commands.Context):
         """Prints the best highlights.
 
-        Vote for your favorite highlight with adding a reaction to the highlight.
+        Vote for your favorite highlight with
+        adding a reaction to the highlight.
         """
         ranking = {}
         limit = 300

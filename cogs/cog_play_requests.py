@@ -31,17 +31,13 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         should_be_empty: Optional[str] = None,
     ):
         """
-        Creates a play request.
+        Create a play request.
 
         Other players can react to the play request which will notify the other players.
         Five Minutes before the play time, all players will be notified too.
-
-        Args:
-            games: The games to play
-            play_time: The time to play.
-             Either a time in the format hh:mm or +xm where x are the minutes relative to now
-            player_needed_num: The amount of players still needed to fill the play-request.
-            should_be_empty: A string to check if everything worked. Leave this always empty please.
+        `play_time` is either a time in the format hh:mm or +xm where x are the minutes relative to now.
+        `player_needed_num` is the amount of players still needed to fill the play-request.
+        `should_be_empty` is a string to check if everything worked. Leave this always empty please.
         """
         logger.info("Trying to create a play request")
         if ctx.invoked_subcommand is not None:
@@ -98,13 +94,13 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             await play_request.auto_reminder(guild_config=guild_config, bot=self.bot)
 
     def __get_assinged_games(self, ctx: commands.Context, guild_config) -> List[Game]:
-        """Gets all games that are assinged to the command creator."""
+        """Get all games that are assinged to the command creator."""
         user_role_ids = [role.id for role in ctx.author.roles]
         games = [game for game in guild_config.yield_all_games() if game.role_id in user_role_ids]
         return games
 
     def __get_game_name_message(self, games: List[Game]) -> List[str]:
-        """Gets the formatted game name string needed for the play-request message."""
+        """Get the formatted game name string needed for the play-request message."""
         game_names = games[0].name_long
         if len(games) > 1:
             for game in games[1:-1]:
@@ -121,7 +117,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         is_now: bool,
         player_needed_num: int,
     ) -> str:
-        """Gets the formatted message string for the given play-request."""
+        """Get the formatted message string for the given play-request."""
         message_unformated = guild_config.messages.play_now if is_now else guild_config.messages.play_at
         game_names = self.__get_game_name_message(games)
 
@@ -151,7 +147,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
         """
-        Event Listener used to automatically delete
+        Event Listener that automatically deletes
         all messages send after certain delay.
         """
         if isinstance(message.channel, discord.DMChannel):
@@ -178,8 +174,8 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction: discord.Reaction, user: discord.Member):
         """
-        Event Listener used to automatically add
-        subscribers to a play-request and manage
+        Event Listener that automatically adds
+        subscribers to a play-request and manages
         which reactions are allowed on play-request.
         """
         guild_id = reaction.message.guild.id
@@ -213,7 +209,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         reaction: discord.Reaction,
     ):
         """
-        Sends a message to all player involved in a play-request
+        Send a message to all player involved in a play-request
         to inform them about new subscribers.
         """
         author = self.bot.get_user(play_request.author_id)
@@ -238,8 +234,8 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
     @commands.Cog.listener()
     async def on_reaction_remove(self, reaction: discord.Reaction, user: discord.Member):
         """
-        Event Listener used to automatically
-        remove subscribers from play-requests.
+        Event Listener that automatically
+        removes subscribers from play-requests.
         """
         guild_id = reaction.message.guild.id
         guild_state = self.bot.state.get_guild_state(guild_id)

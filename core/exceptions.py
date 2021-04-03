@@ -2,9 +2,7 @@ import discord
 
 
 class NotInstantiatedException(Exception):
-    """Exception raised if something is not yet
-    instantiated.
-    """
+    """Exception raised if something is not yet instantiated."""
 
     def __init__(self):
         pass
@@ -14,7 +12,8 @@ class NotInstantiatedException(Exception):
 
 
 class DataBaseException(Exception):
-    """Exception raised if something goes wrong
+    """
+    Exception raised if something goes wrong
     while working with the shelve database.
     """
 
@@ -26,7 +25,8 @@ class DataBaseException(Exception):
 
 
 class BadArgumentFormat(Exception):
-    """Exception that gets raised if an argument for a command
+    """
+    Exception that gets raised if an argument for a command
     is not well formated.
     """
 
@@ -38,8 +38,10 @@ class BadArgumentFormat(Exception):
 
 
 class LimitReachedException(Exception):
-    """Exception that gets raised if a limit is reached. For example gets
-    used when a user already created one temporary channel, that still exists.
+    """
+    Exception that gets raised if a limit is reached.
+    
+    For example gets used when a user already created one temporary channel, that still exists.
     """
 
     def __init__(self, message="Ein Limit wurde erreicht!"):

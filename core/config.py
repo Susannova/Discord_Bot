@@ -1,6 +1,10 @@
-""" Used for the bot configarution. If not imported, this can also be used to generate
-a config file. Therefore you need to modify the code at the bottom of the file and run
-this file"""
+"""
+Used for the bot configarution.
+
+If not imported, this can also be used to generate a config file.
+Therefore, you need to modify the code at the bottom of the file 
+and run this file.
+"""
 
 import logging
 import dataclasses
@@ -12,11 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def update_recursive(old_dict: dict, update_dict: dict):
-    """Updates old_dict with update_dict
-
-    old_dict -- The dict that will be updated
-    update_dict -- The dict to update from
-    """
+    """Update old_dict with update_dict."""
     for key in update_dict:
         if key in old_dict and isinstance(update_dict[key], dict):
             update_recursive(old_dict[key], update_dict[key])
@@ -25,12 +25,10 @@ def update_recursive(old_dict: dict, update_dict: dict):
 
 
 def auto_conversion(obj, field: dataclasses.Field):
-    """Tries to convert the field to the right type
+    """
+    Try to convert the field to the right type.
 
-    Raises a TypeError if conversion fails.
-
-    obj -- The obj the field belongs to
-    field -- The field to check
+    Raise a `TypeError` if conversion fails.
     """
     field_val = getattr(obj, field.name)
     if field_val is not None and not isinstance(field_val, field.type):
@@ -41,7 +39,11 @@ def auto_conversion(obj, field: dataclasses.Field):
 
 
 def error_handling_auto_conversion(obj, field: dataclasses.Field, error: Exception):
-    """ Logs a error during the conversion of a field and raises a TypeError with an explaination """
+    """
+    Log an error during the conversion of a field.
+    
+    Raises a `TypeError` with an explanation.
+    """
     error_message = (
         f"{field.name} is a {type(getattr(obj, field.name))} but should be a {field.type}. Not all settings are set."
     )
@@ -50,11 +52,11 @@ def error_handling_auto_conversion(obj, field: dataclasses.Field, error: Excepti
 
 
 def check_if_channel_id_valid(channel_id: int, valid_ids: List) -> bool:
-    """Checks if a channel_id is valid
-
-    Returns True if channel_id is valid and false otherwise.
     """
+    Check if a channel_id is valid.
 
+    Return True if channel_id is valid and false otherwise.
+    """
     if channel_id is not None and channel_id not in valid_ids:
         return False
     else:
@@ -63,9 +65,10 @@ def check_if_channel_id_valid(channel_id: int, valid_ids: List) -> bool:
 
 @dataclasses.dataclass
 class Command:
-    """Represent a command
+    """
+    Representation of a command.
 
-    Used for command specific options like the channel that the command is allowed in
+    Used for command specific options like the channel that the command is allowed in.
     """
 
     allowed_in_channel_ids: Tuple[int] = dataclasses.field(default_factory=tuple)
@@ -90,10 +93,13 @@ class Command:
 
 @dataclasses.dataclass
 class Game:
-    """Represents a game.
+    """
+    Representation of a game.
 
     A game has a long and a short name,
-    belongs to a discord role and category and an emoji. It also can have its own cog!"""
+    belongs to a discord role and category and an emoji. 
+    It can also have its own cog.
+    """
 
     name_short: str
     name_long: str
@@ -103,20 +109,18 @@ class Game:
     cog: str = None
 
     def __post_init__(self):
-        """Checks if the types are valid and tries to convert the fields if not
+        """
+        Check if the types are valid and tries to convert the fields if not.
 
-        Raises an TypeError if conversion fails"""
-
+        Raises a `TypeError` if conversion fails.
+        """
         for field in dataclasses.fields(self):
             auto_conversion(self, field)
 
 
 @dataclasses.dataclass
 class Toggles:
-    """A class for toggles
-
-    A post init function checks if the toggles are booleans or not
-    """
+    """A class for toggles."""
 
     auto_delete: bool = False
     command_only: bool = False
@@ -130,16 +134,18 @@ class Toggles:
     highlights: bool = False
 
     def __post_init__(self):
-        """Checks if the type of the fields are valid and converts them if not.
+        """
+        Check if the type of the fields are valid and converts them if not.
 
-        Raises a TypeError if conversion fails"""
+        Raises a `TypeError` if conversion fails.
+        """
         for field in dataclasses.fields(self):
             auto_conversion(self, field)
 
 
 @dataclasses.dataclass
 class Messages_Config:
-    """ Configuration data of the messages from the bot """
+    """Configuration data of the messages from the bot."""
 
     date_format: str = "{day}.{month}."
     create_internal_play_request: str = "@everyone Das Play-Request von {creator} hat 6 oder mehr Mitspieler. \
@@ -181,10 +187,7 @@ class Messages_Config:
 
 @dataclasses.dataclass
 class UnsortedConfig:
-    """Some basic config
-
-    A post init function checks the types of the fields and tries to convert them.
-    """
+    """Some basic config."""
 
     admin_id: int = None
     member_id: int = None
@@ -206,19 +209,21 @@ class UnsortedConfig:
     game_selector_id: int = None
 
     def __post_init__(self):
-        """Tries to convert false types to the right type
+        """
+        Try to convert false types to the right type.
 
-        Raises an TypeError if conversion fails"""
-
+        Raises a `TypeError` if conversion fails.
+        """
         for field in dataclasses.fields(self):
             auto_conversion(self, field)
 
 
 @dataclasses.dataclass
 class Channel_Ids:
-    """Channel id lists
+    """
+    A list of channel ids.
 
-    All attributes have to be ints or list of ints
+    All attributes have to be ints or list of ints.
     """
 
     category_temporary: int = None
@@ -237,13 +242,13 @@ class Channel_Ids:
     highlights: List[int] = dataclasses.field(default_factory=list)
 
     def __post_init__(self):
-        """Checks if the types are valid and tries to convert them if not
+        """
+        Check if the types are valid and tries to convert them if not.
 
         At first all str or list of str are casted to ints or list of ints.
         After that the atttribute is casted to the right type.
         Raises a TypeError if casting fails.
         """
-
         for field in dataclasses.fields(self):
             field_val = getattr(self, field.name)
 
@@ -276,7 +281,7 @@ class Channel_Ids:
         logger.debug("Post_init finished")
 
     def yield_all_channel_ids(self):
-        """ Yields all channel ids """
+        """Yield all channel ids."""
         for elem in dataclasses.astuple(self):
             if isinstance(elem, list):
                 for channel_id in elem:
@@ -288,12 +293,16 @@ class Channel_Ids:
 @dataclasses.dataclass
 class Folders_and_Files:
     # TODO Can be replaced with a class 'message_ids' because this is not needed anymore
-    """ Global folder and files for the guild. Some needs to be formated with the guild_id! """
+    """
+    Global folder and files for the guild.
+    
+    Some needs to be formated with the guild_id.
+    """
     pass
 
 
 class GuildConfig:
-    """Configuration for the guild """
+    """Configuration for the guild."""
 
     def __init__(self):
         self.unsorted_config = UnsortedConfig()
@@ -307,7 +316,7 @@ class GuildConfig:
         self.__commands = {}
 
     def asdict(self) -> dict:
-        """ Returns all settings as a dict """
+        """Return all settings as a dict."""
         return {
             "unsorted_config": dataclasses.asdict(self.unsorted_config),
             "messages": dataclasses.asdict(self.messages),
@@ -319,12 +328,13 @@ class GuildConfig:
         }
 
     def fromdict(self, config_dict, update: bool = False):
-        """Sets the settings given by a dict. The format of the dictionary must be like in self.asdict().
-
-        config_dict -- The dict to set the config from
-        update -- If false, settings not given in the dict are set to default (default)
         """
-
+        Set the settings given by a dict.
+        
+        The format of the dictionary must be like in `self.asdict()`.
+        If `update` is `False`, settings not given in the dict are set to default.
+        `update` defaults to `False`.
+        """
         new_config = self.asdict() if update else GuildConfig().asdict()
         update_recursive(new_config, config_dict)
 
@@ -337,8 +347,10 @@ class GuildConfig:
         self.__commands = new_config["commands"]
 
     def check_for_invalid_channel_ids(self, valid_ids: list):
-        """ Checks and deletes ids that are not in valid_ids and yields tuples of the deleted id and its category"""
-
+        """
+        Check and delete ids that are not in valid_ids
+        and yields tuples of the deleted id and its category.
+        """
         is_invalid = False
         channel_ids_dict = dataclasses.asdict(self.channel_ids)
 
@@ -362,7 +374,7 @@ class GuildConfig:
         return game_short_name in self.__games
 
     def get_game(self, game_short_name: str) -> Game:
-        """ Returns a Game class that belongs to the short name of a game """
+        """Returns a Game class that belongs to the short name of a game."""
         if self.game_exists(game_short_name):
             game_dict = self.__games[game_short_name]
             return Game(**game_dict)
@@ -374,7 +386,7 @@ class GuildConfig:
             yield Game(**self.__games[game]).role_id
 
     def add_game(self, game: str, long_name: str, role_id: int, emoji: int, category_id: int, cog: str = None):
-        """ Adds a new game to the bot """
+        """Add a new game to the bot."""
 
         # The asdict prevents one from create a dict that is invalid to Game
         self.__games[game] = dataclasses.asdict(
@@ -382,12 +394,12 @@ class GuildConfig:
         )
 
     def get_all_game_emojis(self):
-        """ Yields all game emojis """
+        """Yield all game emojis."""
         for game in self.__games:
             yield Game(**self.__games[game]).emoji
 
     def emoji_to_game(self, emoji: int) -> Game:
-        """ Returns the game that belongs to the emoji """
+        """Return the game that belongs to the emoji."""
         for game_name in self.__games:
             game = Game(**self.__games[game_name])
             if game.emoji == emoji:
@@ -396,12 +408,12 @@ class GuildConfig:
         raise LookupError("Game not found")
 
     def yield_all_games(self) -> Game:
-        """ Yields all games """
+        """Yield all games."""
         for game in self.__games:
             yield self.get_game(game)
 
     def yield_game_cogs(self):
-        """ Yields all game_cogs """
+        """Yield all game_cogs."""
         for game_name in self.__games:
             game = Game(**self.__games[game_name])
             game_cog = game.cog
@@ -409,22 +421,15 @@ class GuildConfig:
                 yield game_cog
 
     def command_has_config(self, command_name: str) -> bool:
-        """Checks if the command has a config
-
-        Args:
-            command_name (str): The command name
-
-        Returns:
-            bool: True if the command has a config
-        """
+        """Check if the command has a config."""
         return command_name in self.__commands
 
     def add_command_config(self, command_name: str, **kwargs):
-        """Adds a new command config
+        """
+        Add a new command config.
 
-        Args:
-            command_name (str): The name of the command
-            kwargs: The command options. Must be a class variable of Command
+        `kwargs` are the command options.
+        Must be a class variable of `Command`.
         """
         if self.command_has_config(command_name):
             raise LookupError("Command already has a config!")
@@ -438,16 +443,10 @@ class GuildConfig:
             raise LookupError("Command has no config!")
 
     def get_command(self, command_name: str) -> Command:
-        """Return the config for a command
+        """
+        Return the config for a command.
 
-        Args:
-            command_name (str): The command name
-
-        Raises:
-            LookupError: If the command has no config
-
-        Returns:
-            Command: The config for the command
+        Raises `LookupError` if the command has no config.
         """
         if self.command_has_config(command_name):
             return Command(**self.__commands[command_name])
@@ -455,11 +454,11 @@ class GuildConfig:
             raise LookupError("Command has no config")
 
     def get_category_ids(self, *role_names) -> list:
-        """ Returns a list of all game channel category ids that matches role_names """
+        """Return a list of all game channel category ids that matches role_names."""
         return [self.__games[game]["category_id"] for game in self.__games if game in role_names]
 
     def get_all_category_ids(self):
-        """ Yields all game channel category ids """
+        """Yield all game channel category ids."""
         for game in self.__games:
             yield self.__games[game]["category_id"]
 
@@ -506,7 +505,7 @@ class GeneralConfig:
 
 
 class BotConfig:
-    """ Configuration of the bot """
+    """Configuration of the bot."""
 
     def __init__(self, general_config=GeneralConfig(), *, config_file: str = None, update_config: bool = True):
         self.general_config = general_config
@@ -518,7 +517,7 @@ class BotConfig:
             self.update_config_from_file()
 
     def asdict(self) -> dict:
-        """ Returns the general configs as a dict """
+        """Return the general configs as a dict."""
         config_dict = {"general_config": dataclasses.asdict(self.general_config), "guilds_config": {}}
 
         for guild in self.__guilds_config:
@@ -527,9 +526,13 @@ class BotConfig:
         return config_dict
 
     def fromdict(self, config_dict: dict):
-        """Sets the settings given by a dict. The format of the dictionary must be like in self.asdict()
+        """
+        Set the settings given by a `dict`.
+        
+        The format of the dictionary must be like in `self.asdict()`,
         but the keys can be strings or integers.
-        Settings not given in the dict are set to default"""
+        Settings not given in the `dict` are set to default.
+        """
         self.general_config = GeneralConfig(**config_dict["general_config"])
         for guild in config_dict["guilds_config"]:
             guild_int = int(guild)
@@ -538,7 +541,7 @@ class BotConfig:
             self.get_guild_config(guild_int).fromdict(config_dict["guilds_config"][guild])
 
     def write_config_to_file(self, filename: str = None):
-        """ Write the config to the config file """
+        """Write the config to the config file."""
         if filename is None:
             filename = self.general_config.config_file
 
@@ -547,7 +550,7 @@ class BotConfig:
         logger.info("Saved the config to %s", filename)
 
     def update_config_from_file(self, filename=None):
-        """ Updates the config from a file using fromdict """
+        """Update the config from a file using fromdict."""
         if filename is None:
             filename = self.general_config.config_file
 
@@ -560,7 +563,7 @@ class BotConfig:
         logger.info("Settings were updated from file %s", filename)
 
     def add_new_guild_config(self, guild_id: int) -> GuildConfig:
-        """ Adds a new guild config and returns the config"""
+        """Add a new guild config and return the config."""
 
         if guild_id in self.__guilds_config:
             raise LookupError("Guild already has a config!")
@@ -571,7 +574,7 @@ class BotConfig:
         return self.__guilds_config[guild_id]
 
     def remove_guild_config(self, guild_id: int):
-        """ Remove a guild config """
+        """Remove a guild config."""
         if guild_id not in self.__guilds_config:
             raise LookupError("Guild does not exists!")
         else:
@@ -579,7 +582,11 @@ class BotConfig:
             logger.info("We have removed the guild %s from the config!", guild_id)
 
     def get_guild_config(self, guild_id: int) -> GuildConfig:
-        """ Gets the guild that belongs to the id. Raises an key error if guild does not exists """
+        """
+        Get the guild that belongs to the id.
+        
+        Raises a `KeyError` if guild does not exists.
+        """
         try:
             return self.__guilds_config[guild_id]
         except KeyError:
@@ -587,11 +594,11 @@ class BotConfig:
             raise
 
     def check_if_guild_exists(self, guild_id: int) -> bool:
-        """ Checks if a guild exists in the config """
+        """Check if a guild exists in the config."""
         return True if guild_id in self.__guilds_config else False
 
     def get_all_guild_ids(self) -> list:
-        """ Returns a list with every guild id """
+        """Return a list with every guild id."""
         return [guild_id for guild_id in self.__guilds_config]
 
 

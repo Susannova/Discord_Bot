@@ -10,7 +10,8 @@ logger = logging.getLogger(__name__)
 
 
 class EventCog(commands.Cog):
-    """Cog that handles all events. Used for
+    """
+    Cog that handles all events. Is used for
     features like Auto-React, Auto-DM etc.
     """
 
@@ -113,7 +114,8 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member: discord.Member):
-        """Automatically assigns lowest role to
+        """
+        Automatically assign the lowest role to
         anyone that joins the server.
         """
 
@@ -126,7 +128,6 @@ class EventCog(commands.Cog):
 
     @commands.Cog.listener()
     async def on_message(self, message: discord.Message):
-
         if isinstance(message.channel, discord.DMChannel) and message.author != self.bot.user:
             message_info = "Got a message from: {user}. Content: {content}".format(
                 user=message.author, content=message.content.replace("\n", "\\n")

@@ -1,21 +1,8 @@
-""" Used for help texts """
-
-
 class HelpText(object):
-    """
-    text : str
-        long version of help text
-    brief : str
-        short version of help text
-    usage : str
-        usage of the command
-
-    This class contains the brief and long help textes for the commands
-    """
+    """This class contains the brief and long help textes for the commands."""
 
     def __init__(self, text, brief, usage=""):
-        """ init for class. Sets long and brief help text and usage"""
-
+        """Sets long and brief help text and usage."""
         self.text = text
         self.brief = brief
         self.usage = usage

@@ -1,4 +1,5 @@
-"""Module that interacts with the Riot API
+"""
+Module that interacts with the Riot API
 and transforms the received data in
 a user readable way.
 """

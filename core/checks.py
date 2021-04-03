@@ -1,7 +1,7 @@
 """
-Checks used as decorators for Commands.
+Decorator checks for Commands.
 
-Note: Only works on Commands (needs a ctx parameter).
+Needs a `ctx` parameter to work.
 """
 
 import dataclasses
@@ -12,13 +12,10 @@ from . import exceptions as _exceptions, DiscordBot
 
 
 async def command_in_bot_channel_and_used_by_admin(ctx: commands.Context) -> bool:
-    """Checks if the command is used in the bot channel and by an admin
+    """
+    Check if the command is used in the bot channel and by an admin.
 
-    Raises:
-        commands.DisabledCommand: Raised if command is disabled
-
-    Returns:
-        bool: True if the command is used in the bot channel and by an admin
+    Raises `commands.DisabledCommand` if command is disabled.
     """
     bot = ctx.bot
     command_name = ctx.command.name
@@ -39,15 +36,12 @@ async def command_in_bot_channel_and_used_by_admin(ctx: commands.Context) -> boo
 
 
 async def command_is_allowed(ctx: commands.Context) -> bool:
-    """Checks if the command is allowed
+    """
+    Check if the command is allowed.
 
-    Raises:
-        _exceptions.FalseChannel: Raised if the command is not allowed in this channel
-        commands.DisabledCommand: Raised if the command is disabled
-        commands.MissingAnyRole: Raised if the user is missing a role
-
-    Returns:
-        bool: True if the command is allowed
+    Raise `_exceptions.FalseChannel` if the command is not allowed in this channel.
+    Raise `commands.DisabledCommand` if the command is disabled.
+    Raise `commands.MissingAnyRole` if the user is missing a role.
     """
     bot = ctx.bot
     command_name = ctx.command.name
@@ -118,32 +112,31 @@ async def command_is_allowed(ctx: commands.Context) -> bool:
 
 
 def is_play_request(ctx: commands.Context):
-    """ Checks if the message is a play request """
+    """Check if the message is a play request."""
     bot = ctx.bot
     guild_state = bot.state.get_guild_state(ctx.guild.id)
     return guild_state.is_play_request(ctx.message.id)
 
 
 def is_not_the_bot(ctx: commands.Context):
-    """ Checks if the user is the bot """
+    """Check if the user is the bot."""
     return ctx.bot.user != ctx.author
 
 
 def is_super_user(ctx: commands.Context):
-    """ Checks if the user is a super user """
+    """Check if the user is a super user."""
     bot = ctx.bot
     return ctx.message.author.id in bot.config.general_config.super_user
 
 
 def is_riot_enabled(ctx: commands.Context):
-    """ Checks if the riot API is enabled """
+    """Check if the riot API is enabled."""
     bot = ctx.bot
     return bot.config.general_config.riot_api
 
 
 def is_activated(*toggles):
-    """ Checks if the toggles are activated """
-
+    """Check if the toggles are activated."""
     async def wrapper(ctx: commands.Context):
         bot = ctx.bot
         guild_toggles = bot.config.get_guild_config(ctx.guild.id).toggles
@@ -153,8 +146,7 @@ def is_activated(*toggles):
 
 
 def is_debug_enabled(func):
-    """ Checks if the debug toggle is enabled """
-
+    """Check if the debug toggle is enabled."""
     async def inner(obj: DiscordBot.KrautBot, ctx: commands.Context, *args):
         if obj.config.get_guild_config(ctx.guild.id).toggles.debug:
             return await func(obj, ctx, *args)

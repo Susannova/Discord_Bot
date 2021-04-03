@@ -1,4 +1,7 @@
-"""Main module. Stars and defines the Discord Bot (KrautBot).
+"""
+Main module.
+
+Start and define the Discord Bot (`KrautBot`).
 """
 import logging
 import os

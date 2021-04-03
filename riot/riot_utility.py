@@ -67,9 +67,11 @@ def get_current_patch() -> str:
 
 
 def update_current_patch(state: GeneralState) -> bool:
-    """Checks if the LoL version is equal to state.lol_patch.
-    If not, returns True and sets state.lol_patch to current patch.
-    If state.lol_patch is None, sets state.lol_patch to current patch and returns False.
+    """
+    Check if the LoL version is equal to `state.lol_patch`.
+
+    If not, return `True` and sets `state.lol_patch` to current patch.
+    If `state.lol_patch` is `None`, sets `state.lol_patch` to current patch and return `False`.
     """
     current_patch = get_current_patch()
     if state.lol_patch is None:

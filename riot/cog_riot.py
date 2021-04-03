@@ -117,12 +117,11 @@ class RiotCog(commands.Cog, name="Riot Commands"):
 
     @commands.command()
     async def leaderboard(self, ctx: commands.Context, queue_type: str = "RANKED_SOLO_5x5"):
-        """Prints the LoL leaderboard.
-
-        Args:
-            queue_type (str, optional): 'RANKED_SOLO_5x5' or 'flex'. Defaults to 'RANKED_SOLO_5x5'.
         """
+        Print the LoL leaderboard.
 
+        The `queue_type` is either 'RANKED_SOLO_5x5' or 'flex'. Defaults to 'RANKED_SOLO_5x5'.
+        """
         logger.info("Leaderboard called")
 
         message_wait = await ctx.send("This can take some time...")

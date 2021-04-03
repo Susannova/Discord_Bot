@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class ConfigCog(commands.Cog, name="Configuration commands"):
-    """A cog used to configure the bot"""
+    """A cog to configure the bot."""
 
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
@@ -22,14 +22,13 @@ class ConfigCog(commands.Cog, name="Configuration commands"):
 
     @commands.group(name="config")
     async def config(self, ctx: commands.Context):
-        """ Commands to set the config of the bot """
+        """Commands to set the config of the bot."""
         if ctx.invoked_subcommand is None:
             await ctx.send_help(self.config)
 
     @config.command(name="json")
     async def config_print(self, ctx: commands.Context):
-        """ Gets the bot config for this server as a json file """
-
+        """Get the bot config for this server as a json file."""
         guild_id = ctx.guild.id
 
         logger.debug("Print the guild config for %i", guild_id)
@@ -45,8 +44,7 @@ class ConfigCog(commands.Cog, name="Configuration commands"):
     @config.command(name="load")
     # @config.after_invoke(after_config)
     async def config_read(self, ctx: commands.Context):
-        """Set the bot config for this server using an attached json file"""
-
+        """Set the bot config for this server using an attached json file."""
         if len(ctx.message.attachments) != 1:
             logger.error("Guild %i: config read called without a file!")
             await ctx.send(
@@ -69,14 +67,12 @@ class ConfigCog(commands.Cog, name="Configuration commands"):
     @config.command(name="set")
     # @config.after_invoke(after_config)
     async def config_set(self, ctx: commands.Context, category: str, *, configs: converters.ArgsToDict):
-        """Set the bot config for this server.
+        """
+        Set the bot config for this server.
 
-        Keyword arguments:
-        category -- The config category
-        configs -- A string with the format "setting: value". Value can be a list.
+        `configs` is a string with the format `setting: value`. Value can be a list.
         Then the values have to be surrounded by parentheses and seperated by commatas"
         """
-
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
         try:
             guild_config.fromdict({category: configs}, update=True)
@@ -91,15 +87,11 @@ class ConfigCog(commands.Cog, name="Configuration commands"):
 
     @config.command(name="get")
     async def config_get(self, ctx: commands.Context, category: typing.Optional[str], config: typing.Optional[str]):
-        """Get the bot config for this server
-
-        If no category is given, the possible categories are printed.
-
-        Keyword arguments:
-        category -- The config category (optional)
-        config -- The config to get (optional)
         """
+        Get the bot config for this server.
 
+        If no `category` is given, the possible categories are printed.
+        """
         guild_config_as_dict = self.bot.config.get_guild_config(ctx.guild.id).asdict()
         if category is None or category not in guild_config_as_dict:
             categories = [cat for cat in guild_config_as_dict]
@@ -112,9 +104,10 @@ class ConfigCog(commands.Cog, name="Configuration commands"):
     @commands.check(checks.is_super_user)
     @config.command(name="reload")
     async def config_reload(self, ctx):
-        """Reloads the bot config from the config file.
+        """
+        Reload the bot config from the config file.
 
-        Only avaible for super users
+        Only available for super users.
         """
         logger.info("Try to reload the configuration.")
         await ctx.send("Reload configuration.json:")
@@ -126,9 +119,10 @@ class ConfigCog(commands.Cog, name="Configuration commands"):
     @commands.check(checks.is_super_user)
     @config.command(name="write")
     async def config_write(self, ctx):
-        """Writes the bot config to the config file.
+        """
+        Write the bot config to the config file.
 
-        Only avaible for super users
+        Only available for super users.
         """
         logger.info("Try to write the configuration.")
         self.bot.config.write_config_to_file()

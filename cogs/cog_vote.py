@@ -21,7 +21,7 @@ class Vote:
 
 
 class VoteCog(commands.Cog, name="Vote Commands"):
-    """Commands and events for the vote command"""
+    """Commands and events for the vote command."""
 
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
@@ -84,16 +84,12 @@ class VoteCog(commands.Cog, name="Vote Commands"):
     async def vote(
         self, ctx: commands.Context, time: converters.StrToTime, *, title_and_options: converters.LinesToList
     ):
-        """Start a vote
-
-        TODO Needs to be updated!
-        Options are seperated by lines. If no options are given a yes-no vote is started.
-
-        Args:
-            ctx (commands.Context): The context
-            options (typing.Optional[converters.LinesToList]): The vote options seperated by lines
         """
+        Start a vote.
 
+        Options are seperated by lines. If no options are given a yes-no vote is started.
+        `title_and_options` are the title and vote options seperated by lines.
+        """
         title = title_and_options[0]
         title_and_options.remove(title)
 

@@ -5,9 +5,9 @@ name: Code Style Check
 
 on:
   push:
-    branches: [ style-black ]
+    branches: [ master, Beta ]
   pull_request:
-    branches: [ style-black ]
+    branches: [ master, Beta ]
 
 jobs:
   build:

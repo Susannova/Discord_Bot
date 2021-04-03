@@ -13,21 +13,21 @@ data_champ = load_json("champion")
 
 
 class Summoner:
-    """Class representing a League of Legends summoner.
+    """
+    Class representing a League of Legends summoner.
+
     Contains data retrieved via the Riot API.
     Has several basic methods that make handling the data easier.
-
-    Attributes:
-    ---------------
-    data_summoner: dict
-        json of all basic summononer data from Riot API
-    data_mastery: list
-        basic mastery data from Riot API
-    data_league: dict
-        formatted basic league data from Riot API
     """
 
     def __init__(self, name, data_summoner={}, data_mastery=[], data_league={}):
+        """
+        Set the initial values of a `Summoner` object.
+        
+        `data_summoner` is a json of all basic summononer data from Riot API.
+        `data_mastery` is basic mastery data from Riot API.
+        `data_league` is formatted basic league data from Riot API
+        """
         self.name = name
         self.discord_user_name = "None"
 

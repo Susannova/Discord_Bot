@@ -95,7 +95,7 @@ def plot_all_summoners_data(summoners_data: dict, filename, enable_xkcd: bool = 
 
 
 class LoopCog(commands.Cog, name="Plot Commands:"):
-    """A class for background tasks"""
+    """A class for background tasks."""
 
     def __init__(self, bot: DiscordBot.KrautBot):
         self.bot = bot
@@ -199,7 +199,7 @@ class LoopCog(commands.Cog, name="Plot Commands:"):
 
     @tasks.loop(hours=1)
     async def auto_delete_tmp_channels(self):
-        """ auto deletes all tmp_channels """
+        """Delete all tmp_channels automatically."""
         logger.info("Look for expired temp channels")
 
         for guild in self.bot.guilds:
