@@ -11,7 +11,7 @@ from discord.ext import commands
 
 from . import exceptions as _exceptions, DiscordBot
 from core.DiscordBot import KrautBot
-from config import GuildConfig
+from core.config import GuildConfig
 
 
 async def command_in_bot_channel_and_used_by_admin(ctx: commands.Context) -> bool:
@@ -75,7 +75,7 @@ async def command_is_allowed(ctx: commands.Context) -> bool:
     if channel_names or channel_ids:
         channels_dict = dataclasses.asdict(guild_config.channel_ids)
         _add_temporary_channels(bot, channels_dict)
-        valid_channel_ids = _get_valid_channel_ids()
+        valid_channel_ids = _get_valid_channel_ids(channel_names, channel_ids, channels_dict, guild_config)
         if ctx.message.channel.id not in valid_channel_ids:
             raise _exceptions.FalseChannel(*valid_channel_ids)
 
