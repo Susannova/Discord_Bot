@@ -194,16 +194,16 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
             logger.error("Error linking %s: %s", summoner_name, error)
             # TODO Add a link to our accounts
             await ctx.message.author.send(
-                f"Dein Lol-Account konnte nicht mit deinem Discord Account verbunden werden. \
-                  Richtiger Umgang mit ``!link`` ist unter ``{ctx.bot.command_prefix}help link`` zu finden. \
-                  Falls das nicht weiterhilft, wende dich bitte an Jan oder Nick"
+                f"Dein Lol-Account konnte nicht mit deinem Discord Account verbunden werden."
+                f"Richtiger Umgang mit ``!link`` ist unter ``{ctx.bot.command_prefix}help link`` zu finden."
+                f"Falls das nicht weiterhilft, wende dich bitte an Jan oder Nick"
             )
             raise error
         else:
             await ctx.message.author.send(
-                f"Dein Lol-Account wurde erfolgreich mit deinem Discord Account verbunden!\n \
-                Falls du deinen Account wieder entfernen möchtest \
-                benutze das ``{ctx.bot.command_prefix}unlink`` Command."
+                f"Dein Lol-Account wurde erfolgreich mit deinem Discord Account verbunden!\n"
+                f"Falls du deinen Account wieder entfernen möchtest"
+                f"benutze das ``{ctx.bot.command_prefix}unlink`` Command."
             )
             logger.info("%s was linked.", summoner_name)
 
@@ -238,6 +238,7 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
 
         Benutze dieses Command, um einen Channel zu erstellen, der für 12h aktiv ist und danach gelöscht wird.
         Der Channel ist in der Kategorie TEMPORARY CHANNELS zu finden.
+        `kind` kann entweder "text" oder "voice" sein.
         """
         logger.debug("!create-channel %s %s called by %s", kind, channel_name, ctx.message.author.name)
         guild_state = self.bot.state.get_guild_state(ctx.guild.id)
