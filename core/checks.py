@@ -5,10 +5,13 @@ Needs a `ctx` parameter to work.
 """
 
 import dataclasses
+from typing import Dict, List
 
 from discord.ext import commands
 
 from . import exceptions as _exceptions, DiscordBot
+from core.DiscordBot import KrautBot
+from config import GuildConfig
 
 
 async def command_in_bot_channel_and_used_by_admin(ctx: commands.Context) -> bool:
@@ -58,57 +61,74 @@ async def command_is_allowed(ctx: commands.Context) -> bool:
             return True
         else:
             raise _exceptions.FalseChannel(*valid_channels)
-    else:
-        command_config = guild_config.get_command(command_name)
 
-        # Check the channel
-        channel_names = command_config.allowed_in_channels
-        channel_ids = command_config.allowed_in_channel_ids
-        if channel_names or channel_ids:
-            channels_dict = dataclasses.asdict(guild_config.channel_ids)
+    command_config = guild_config.get_command(command_name)
 
-            category_temp = bot.get_channel(channels_dict["category_temporary"])
+    # Check if the command is enabled
+    if not command_config.enabled:
+        raise commands.DisabledCommand()
 
-            channels_dict["temporary_channels"] = []
+    # Check the channel
+    channel_names = command_config.allowed_in_channels
+    channel_ids = command_config.allowed_in_channel_ids
 
-            if category_temp is not None:
-                for temp_channel in category_temp.channels:
-                    channels_dict["temporary_channels"].append(temp_channel.id)
+    if channel_names or channel_ids:
+        channels_dict = dataclasses.asdict(guild_config.channel_ids)
+        _add_temporary_channels(bot, channels_dict)
+        valid_channel_ids = _get_valid_channel_ids()
+        if ctx.message.channel.id not in valid_channel_ids:
+            raise _exceptions.FalseChannel(*valid_channel_ids)
 
-            channels_to_check = []
-            for channel_name in channel_names:
-                if channel_name in channels_dict:
-                    channel_to_append = channels_dict[channel_name]
-                    if isinstance(channel_to_append, list):
-                        channels_to_check += channel_to_append
-                    else:
-                        channels_to_check.append(channel_to_append)
-            channels_to_check += guild_config.get_category_ids(channel_names)
-            channels_to_check += channels_dict["bot"]
-            channels_to_check += channel_ids
-
-            if ctx.message.channel.id not in channels_to_check:
-                raise _exceptions.FalseChannel(*channels_to_check)
-
-        # Check the role
-        role_names = command_config.allowed_from_roles
-        role_ids = command_config.allowed_from_role_ids
-        if ctx.guild.owner == ctx.author and command_config.enabled:
-            return True
-        elif role_names or role_ids:
-            roles_to_check = list(guild_config.get_role_ids(*role_names).values())
-            roles_to_check += role_ids
-
-            role_ids_author = [role.id for role in ctx.message.author.roles]
-
-            if not [role_id for role_id in role_ids_author if role_id in roles_to_check]:
-                raise commands.MissingAnyRole(roles_to_check)
-
-        # Check if the command is enabled
-        if not command_config.enabled:
-            raise commands.DisabledCommand()
-
+    # Check the role
+    if ctx.guild.owner == ctx.author:
         return True
+
+    role_names = command_config.allowed_from_roles
+    role_ids = command_config.allowed_from_role_ids
+
+    if role_names or role_ids:
+        valid_roles = list(guild_config.get_role_ids(*role_names).values())
+        valid_roles.extend(role_ids)
+        role_ids_author = [role.id for role in ctx.message.author.roles]
+
+        if not [role_id for role_id in role_ids_author if role_id in valid_roles]:
+            raise commands.MissingAnyRole(valid_roles)
+
+    return True
+
+
+def _add_temporary_channels(bot: KrautBot, channels_dict: Dict[str, int]) -> None:
+    """
+    Adds all channel ids of channels that
+    are in the temporary category to `channels_dict`.
+    """
+    category_temp = bot.get_channel(channels_dict["category_temporary"])
+    channels_dict["temporary_channels"] = []
+
+    if category_temp is not None:
+        for temp_channel in category_temp.channels:
+            channels_dict["temporary_channels"].append(temp_channel.id)
+
+
+def _get_valid_channel_ids(
+    channel_names: List[str], channel_ids: List[int], channels_dict: Dict[str, int], guild_config: GuildConfig
+) -> List[int]:
+    """
+    Get a list with all channel ids that
+    are valid for the command based on the command configuration.
+    """
+    valid_channel_ids = []
+    for channel_name in channel_names:
+        if channel_name in channels_dict:
+            channel_to_append = channels_dict[channel_name]
+            if isinstance(channel_to_append, list):
+                valid_channel_ids.extend(channel_to_append)
+            else:
+                valid_channel_ids.append(channel_to_append)
+    valid_channel_ids.extend(guild_config.get_category_ids(channel_names))
+    valid_channel_ids.extend(channels_dict["bot"])
+    valid_channel_ids.extend(channel_ids)
+    return valid_channel_ids
 
 
 def is_play_request(ctx: commands.Context):
