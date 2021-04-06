@@ -6,6 +6,7 @@ a user readable way.
 import logging
 import shelve
 from concurrent.futures import ThreadPoolExecutor
+from typing import List
 
 import discord
 import matplotlib.pyplot as plt
@@ -87,12 +88,12 @@ def get_smurf(
     )
 
 
-def calculate_bans_for_team(bot_config: config.BotConfig, *names) -> str:
+def calculate_bans_for_team(bot_config: config.BotConfig, names: List[str]) -> str:
     utility.update_champion_json()
-    if len(names[0]) != 5:
+    if len(names) != 5:
         logger.exception("Check Failure")
         raise commands.CheckFailure()
-    team = list(create_summoners(list(names[0]), bot_config.general_config))
+    team = list(create_summoners(names, bot_config.general_config))
     output = get_best_bans_for_team(team)
     create_new_image(output, bot_config)
     op_url = (

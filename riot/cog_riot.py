@@ -1,5 +1,4 @@
 import logging
-from typing import List
 
 import discord
 from discord.ext import commands
@@ -61,7 +60,7 @@ class RiotCog(commands.Cog, name="Riot Commands"):
 
     @commands.command(name="bans")
     @discord.ext.commands.cooldown(rate=1, per=5)
-    async def bans_(self, ctx, team_names: List[str]):
+    async def bans_(self, ctx: commands.Context, team_names: commands.Greedy[str]):
         """
         Bestimmt Bans für LoL-Team.
 
