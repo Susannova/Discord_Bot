@@ -137,9 +137,9 @@ class RiotCog(commands.Cog, name="Riot Commands"):
         )
 
         for summoner in summoners:
-            if queue_type not in summoner.rank_values:
+            if queue_type not in summoner.rank_values.keys():
                 summoners.remove(summoner)
-
+        summoners = [summoner for summoner in summoners if summoner.rank_values]
         summoners.sort(key=lambda x: x.rank_values[queue_type], reverse=True)
 
         op_url = "https://euw.op.gg/multi/query="
