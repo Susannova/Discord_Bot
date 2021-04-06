@@ -136,7 +136,7 @@ def update_linked_account_data_by_discord_user_name(
     )
     summoner.discord_user_name = discord_user_name
     folder_name = general_config.database_directory_summoners.format(guild_id=guild_id)
-    with shelve.open(f"{folder_name}/{general_config.database_name_summoners}", "rc") as database:
+    with shelve.open(f"{folder_name}/{general_config.database_name_summoners}", "c") as database:
         database[str(discord_user_name)] = summoner
     return summoner
 
