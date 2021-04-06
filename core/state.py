@@ -141,7 +141,7 @@ class GeneralState:
         """
         current_values = {}
         for guild_state in self.__guilds_state.values():
-            current_values[guild_state] = {}
+            current_values[guild_state] = dict
             for attr in attrs:
                 current_values[guild_state][attr] = getattr(guild_state, attr, None)
                 setattr(guild_state, attr, None)
@@ -149,8 +149,8 @@ class GeneralState:
 
     def __restore_futures_values(self, values: Dict[GuildState, Dict[str, asyncio.Task]]) -> None:
         """Restores the values of the futures of all guild states."""
-        for guild_state, attr_dict in values.items():
-            for attr, value in attr_dict.items():
+        for guild_state, attr_dict in values:
+            for attr, value in attr_dict:
                 setattr(guild_state, attr, value)
 
     def add_guild_state(self, guild_id: int):
