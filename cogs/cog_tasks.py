@@ -121,7 +121,8 @@ class LoopCog(commands.Cog, name="Plot Commands:"):
 
     @commands.check(checks.is_riot_enabled)
     @commands.command(name="plot")
-    async def print_leaderboard_command(self, ctx, enable_xkcd: typing.Optional[bool]):
+    async def print_leaderboard_command(self, ctx: commands.Context, enable_xkcd: typing.Optional[bool]):
+        """Plots LoL data for accounts linked to the server."""
         if self.bot.config.get_guild_config(ctx.guild.id).toggles.summoner_rank_history:
             logger.debug("!plot command called")
             await self.print_leaderboard(ctx.guild.id, ctx.channel, False, enable_xkcd=enable_xkcd)
