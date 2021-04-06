@@ -1,9 +1,10 @@
 import logging
+from typing import List
 
 import discord
 from discord.ext import commands
 
-from core import checks, ocr, help_text
+from core import checks, ocr
 
 from riot import riot_utility, riot_commands
 
@@ -22,13 +23,13 @@ class RiotCog(commands.Cog, name="Riot Commands"):
     async def cog_check(self, ctx: commands.Context):
         return checks.is_riot_enabled(ctx) and await checks.command_is_allowed(ctx)
 
-    @commands.command(
-        name="player",
-        help=help_text.player_HelpText.text,
-        brief=help_text.player_HelpText.brief,
-        usage=help_text.player_HelpText.usage,
-    )
+    @commands.command(name="player")
     async def player_(self, ctx, *summoner_name):
+        """
+        Gibt Infos über LoL-Account aus.
+
+        Gibt den Rang und die Winrate eines LoL-Spielers in EUW aus.
+        """
         logger.debug("!player command called")
         if len(list(summoner_name)) == 0:
             arg = None
@@ -44,36 +45,28 @@ class RiotCog(commands.Cog, name="Riot Commands"):
             )
         )
 
-    @commands.command(
-        name="smurf",
-        help=help_text.smurf_HelpText.text,
-        brief=help_text.smurf_HelpText.brief,
-        usage=help_text.smurf_HelpText.usage,
-    )
-    async def smurf_(self, ctx, *summoner_name):
+    @commands.command(name="smurf")
+    async def smurf_(self, ctx, summoner_name: str):
+        """Überprüft ob ein Spieler ein Smurf ist."""
         logger.debug("!smurf command called")
-        if len(list(summoner_name)) == 0:
-            arg = None
-        else:
-            arg = summoner_name[0]
         await ctx.send(
             riot_commands.get_smurf(
                 ctx.message.author.name,
-                arg,
+                summoner_name,
                 self.bot.config.get_guild_config(ctx.guild.id),
                 self.bot.config.general_config,
                 guild_id=ctx.guild.id,
             )
         )
 
-    @commands.command(
-        name="bans",
-        help=help_text.bans_HelpText.text,
-        brief=help_text.bans_HelpText.brief,
-        usage=help_text.bans_HelpText.usage,
-    )
+    @commands.command(name="bans")
     @discord.ext.commands.cooldown(rate=1, per=5)
-    async def bans_(self, ctx, *team_names):
+    async def bans_(self, ctx, team_names: List[str]):
+        """
+        Bestimmt Bans für LoL-Team.
+
+        Bestimmt die besten Bans für ein 5er LoL-Team
+        """
         logger.debug("!bans command called")
         folder_name = self.bot.config.get_guild_config(ctx.guild.id).folders_and_files.folder_champ_spliced.format(
             guild_id=ctx.guild.id
@@ -83,13 +76,14 @@ class RiotCog(commands.Cog, name="Riot Commands"):
             file=discord.File(f"{folder_name}/image.jpg"),
         )
 
-    @commands.command(
-        name="clash",
-        help=help_text.clash_HelpText.text,
-        brief=help_text.clash_HelpText.brief,
-        usage=help_text.clash_HelpText.usage,
-    )
-    async def clash_(self, ctx):
+    @commands.command(name="clash")
+    async def clash_(self, ctx: commands.Context):
+        """
+        Gibt die op.gg Namen des Clashteams aus.
+
+        Liest aus einen Screenshot die Namen des Clashteams aus und gibt ihre op.gg-Links aus.
+        Der Screenshot muss sich im Anhang befinden.
+        """
         logger.debug("!clash command called")
 
         if len(ctx.message.attachments) == 0:

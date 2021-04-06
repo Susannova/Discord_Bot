@@ -6,7 +6,7 @@ from typing import List, Optional, Union
 import discord
 from discord.ext import commands
 
-from core import checks, exceptions, timers, help_text, DiscordBot
+from core import checks, exceptions, timers, DiscordBot
 
 from riot import riot_commands
 
@@ -173,14 +173,15 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         else:
             await ctx.send(f"{user.mention} was not in any team.")
 
-    @commands.command(
-        name="link",
-        help=help_text.link_HelpText.text,
-        brief=help_text.link_HelpText.brief,
-        usage=help_text.link_HelpText.usage,
-    )
+    @commands.command(name="link")
     @commands.check(checks.is_riot_enabled)
     async def link_(self, ctx: commands.Context, summoner_name: str):
+        """
+        Link Riot account.
+
+        Links your discord account with your Riot-Account on this server.
+        To unlink, use ``!unlink``.
+        """
         try:
             riot_commands.link_account(
                 ctx.message.author.name,
@@ -206,14 +207,15 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
             )
             logger.info("%s was linked.", summoner_name)
 
-    @commands.command(
-        name="unlink",
-        help=help_text.unlink_HelpText.text,
-        brief=help_text.unlink_HelpText.brief,
-        usage=help_text.unlink_HelpText.usage,
-    )
+    @commands.command(name="unlink")
     @commands.check(checks.is_riot_enabled)
     async def unlink_(self, ctx: commands.Context):
+        """
+        Unlink Riot account.
+
+        Unlinks your discord account from your Riot-Account on this server.
+        To link again, use ``!link summonername``.
+        """
         logger.debug("!unlink called")
         riot_commands.unlink_account(
             ctx.message.author.name, self.bot.config.get_guild_config(ctx.guild.id), ctx.guild.id
@@ -228,16 +230,15 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         if ctx.invoked_subcommand is None:
             await ctx.send_help(self.channel)
 
-    @channel.command(
-        name="create",
-        help=help_text.create_channel_HelpText.text,
-        brief=help_text.create_channel_HelpText.brief,
-        usage=help_text.create_channel_HelpText.usage,
-    )
+    @channel.command(name="create")
     @discord.ext.commands.cooldown(rate=3, per=30)
-    async def create_channel(
-        self, ctx: commands.Context, kind: str, channel_name: str, user_limit: Optional[int] = 99
-    ):
+    async def create_chnnel(self, ctx: commands.Context, kind: str, channel_name: str, user_limit: Optional[int] = 99):
+        """
+        Create a temporary channel.
+
+        Benutze dieses Command, um einen Channel zu erstellen, der für 12h aktiv ist und danach gelöscht wird.
+        Der Channel ist in der Kategorie TEMPORARY CHANNELS zu finden.
+        """
         logger.debug("!create-channel %s %s called by %s", kind, channel_name, ctx.message.author.name)
         guild_state = self.bot.state.get_guild_state(ctx.guild.id)
         for tmp_channels in guild_state.tmp_channel_ids:
