@@ -7,13 +7,13 @@ from core import checks, ocr, help_text
 
 from riot import riot_utility, riot_commands
 
-from core import DiscordBot
+from core.kraut_bot import KrautBot
 
 logger = logging.getLogger(__name__)
 
 
 class RiotCog(commands.Cog, name="Riot Commands"):
-    def __init__(self, bot: DiscordBot.KrautBot):
+    def __init__(self, bot: KrautBot):
         self.bot = bot
         if self.bot.state.lol_patch is None:
             riot_utility.update_current_patch(self.bot.state)
@@ -173,6 +173,6 @@ class RiotCog(commands.Cog, name="Riot Commands"):
         await message_wait.delete()
 
 
-def setup(bot: DiscordBot.KrautBot):
+def setup(bot: KrautBot):
     bot.add_cog(RiotCog(bot))
     logger.info("Riot cogs loaded")

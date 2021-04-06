@@ -6,7 +6,8 @@ from typing import List, Optional
 import discord
 from discord.ext import commands
 
-from core import checks, DiscordBot, converters
+from core import checks, converters
+from core.kraut_bot import KrautBot
 from core.config import Game, GuildConfig
 
 from core.play_requests import PlayRequest
@@ -15,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
-    def __init__(self, bot: DiscordBot.KrautBot):
+    def __init__(self, bot: KrautBot):
         self.bot = bot
 
     async def cog_check(self, ctx: commands.Context):
@@ -270,6 +271,6 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             play_request.remove_subscriber_id(user.id)
 
 
-def setup(bot: DiscordBot.KrautBot):
+def setup(bot: KrautBot):
     bot.add_cog(PlayRequestsCog(bot))
     logger.info("Play request cogs loaded")

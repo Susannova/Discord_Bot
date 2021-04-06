@@ -20,12 +20,12 @@ os.environ["TZ"] = "Europe/Berlin"
 import discord
 from discord.ext import commands
 
-from core import DiscordBot
+from core.kraut_bot import KrautBot
 
 discord.voice_client.VoiceClient.warn_nacl = False
 
 if __name__ == "__main__":
-    bot = DiscordBot.KrautBot()
+    bot = KrautBot()
     try:
         logger.info("Start Bot")
 

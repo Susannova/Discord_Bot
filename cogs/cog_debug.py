@@ -4,13 +4,14 @@ from typing import Optional
 import discord
 from discord.ext import commands
 
-from core import checks, DiscordBot, converters
+from core import checks, converters
+from core.kraut_bot import KrautBot
 
 logger = logging.getLogger(__name__)
 
 
 class DebugCog(commands.Cog, name="Debug commands"):
-    def __init__(self, bot: DiscordBot.KrautBot):
+    def __init__(self, bot: KrautBot):
         self.bot = bot
 
     async def cog_check(self, ctx: commands.Context):
@@ -108,6 +109,6 @@ class DebugCog(commands.Cog, name="Debug commands"):
             self.bot.sending_message = False
 
 
-def setup(bot: DiscordBot.KrautBot):
+def setup(bot: KrautBot):
     bot.add_cog(DebugCog(bot))
     logger.info("Debug cogs loaded")

@@ -8,7 +8,8 @@ import dataclasses
 
 from discord.ext import commands
 
-from . import exceptions as _exceptions, DiscordBot
+from . import exceptions as _exceptions
+from core.kraut_bot import KrautBot
 
 
 async def command_in_bot_channel_and_used_by_admin(ctx: commands.Context) -> bool:
@@ -38,6 +39,11 @@ async def command_in_bot_channel_and_used_by_admin(ctx: commands.Context) -> boo
 async def command_is_allowed(ctx: commands.Context) -> bool:
     """
     Check if the command is allowed.
+
+    If the command is used in a bot channel by an admin, it is always allowed.
+    If the command has no explicit configuration, it is allowed in all command channels
+    by all users.
+    If the command has an explicit configuration, its use is defined in it.
 
     Raise `_exceptions.FalseChannel` if the command is not allowed in this channel.
     Raise `commands.DisabledCommand` if the command is disabled.
@@ -146,7 +152,7 @@ def is_activated(*toggles):
 def is_debug_enabled(func):
     """Check if the debug toggle is enabled."""
 
-    async def inner(obj: DiscordBot.KrautBot, ctx: commands.Context, *args):
+    async def inner(obj: KrautBot, ctx: commands.Context, *args):
         if obj.config.get_guild_config(ctx.guild.id).toggles.debug:
             return await func(obj, ctx, *args)
         else:

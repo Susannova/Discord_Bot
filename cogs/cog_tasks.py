@@ -16,7 +16,8 @@ from itertools import cycle
 
 from riot import riot_commands, riot_utility
 
-from core import timers, DiscordBot, checks
+from core import timers, checks
+from core.kraut_bot import KrautBot
 
 logger = logging.getLogger(__name__)
 
@@ -97,7 +98,7 @@ def plot_all_summoners_data(summoners_data: dict, filename, enable_xkcd: bool = 
 class LoopCog(commands.Cog, name="Plot Commands:"):
     """A class for background tasks."""
 
-    def __init__(self, bot: DiscordBot.KrautBot):
+    def __init__(self, bot: KrautBot):
         self.bot = bot
 
         if self.bot.config.general_config.riot_api:
@@ -313,6 +314,6 @@ class LoopCog(commands.Cog, name="Plot Commands:"):
         return summoners_data
 
 
-def setup(bot: DiscordBot.KrautBot):
+def setup(bot: KrautBot):
     bot.add_cog(LoopCog(bot))
     logger.info("Loop cogs loaded")

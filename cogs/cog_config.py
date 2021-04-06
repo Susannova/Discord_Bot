@@ -6,15 +6,15 @@ import discord
 from discord.ext import commands
 import typing
 
-from core import checks, DiscordBot, converters
-
+from core import checks, converters
+from core.kraut_bot import KrautBot
 logger = logging.getLogger(__name__)
 
 
 class ConfigCog(commands.Cog, name="Configuration commands"):
     """A cog to configure the bot."""
 
-    def __init__(self, bot: DiscordBot.KrautBot):
+    def __init__(self, bot: KrautBot):
         self.bot = bot
 
     async def cog_check(self, ctx: commands.Context):
@@ -129,6 +129,6 @@ class ConfigCog(commands.Cog, name="Configuration commands"):
         await ctx.send("Done.")
 
 
-def setup(bot: DiscordBot.KrautBot):
+def setup(bot: KrautBot):
     bot.add_cog(ConfigCog(bot))
     logger.info("Config cog loaded")
