@@ -73,7 +73,12 @@ class RiotCog(commands.Cog, name="Riot Commands"):
         usage=help_text.bans_HelpText.usage,
     )
     @discord.ext.commands.cooldown(rate=1, per=5)
-    async def bans_(self, ctx, *team_names):
+    async def bans_(self, ctx, *team_names: str):
+        """
+        Bestimmt Bans für LoL-Team.
+
+        Bestimmt die besten Bans für ein 5er LoL-Team
+        """
         logger.debug("!bans command called")
         folder_name = self.bot.config.get_guild_config(ctx.guild.id).folders_and_files.folder_champ_spliced.format(
             guild_id=ctx.guild.id
