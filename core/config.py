@@ -332,8 +332,6 @@ class GuildConfig:
         self.__games = new_config["games"]
         self.__commands = new_config["commands"]
 
-        
-
     def check_for_invalid_channel_ids(self, valid_ids: list):
         """
         Check and delete ids that are not in valid_ids
