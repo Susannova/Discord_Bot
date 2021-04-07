@@ -235,7 +235,9 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         usage=help_text.create_channel_HelpText.usage,
     )
     @discord.ext.commands.cooldown(rate=3, per=30)
-    async def create_chnnel(self, ctx: commands.Context, kind: str, channel_name: str, user_limit: Optional[int] = 99):
+    async def create_channel(
+        self, ctx: commands.Context, kind: str, channel_name: str, user_limit: Optional[int] = 99
+    ):
         """
         Create a temporary channel.
 

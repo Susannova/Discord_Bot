@@ -51,18 +51,6 @@ def error_handling_auto_conversion(obj, field: dataclasses.Field, error: Excepti
     raise TypeError(error_message)
 
 
-def check_if_channel_id_valid(channel_id: int, valid_ids: List) -> bool:
-    """
-    Check if a channel_id is valid.
-
-    Return True if channel_id is valid and false otherwise.
-    """
-    if channel_id is not None and channel_id not in valid_ids:
-        return False
-    else:
-        return True
-
-
 @dataclasses.dataclass
 class Command:
     """
@@ -113,16 +101,13 @@ class Game:
 class Toggles:
     """A class for toggles."""
 
-    auto_delete: bool = False
-    command_only: bool = False
-    auto_react: bool = False
-    auto_dm: bool = False
     debug: bool = False
     game_selector: bool = False
     summoner_rank_history: bool = False
     leaderboard_loop: bool = False
     check_LoL_patch: bool = False
     highlights: bool = False
+    welcome_message: bool = False
 
     def __post_init__(self):
         """
@@ -139,12 +124,6 @@ class Messages_Config:
     """Configuration data of the messages from the bot."""
 
     date_format: str = "{day}.{month}."
-    create_internal_play_request: str = (
-        "@everyone Das Play-Request von {creator} hat 6 oder mehr Mitspieler."
-        "Ein **__internes Match__** wird aufgebaut!\n"
-        "Es sind noch **__{free_places}__** Plätze frei.\n"
-        "Uhrzeit: {time} Uhr \nSpieler:\n"
-    )
     auto_dm_creator: str = "{player} hat auf dein Play-Request reagiert: {reaction} "
     auto_dm_subscriber: str = "{player} hat auch auf das Play-Request von {creator} reagiert: {reaction} "
     play_now: str = (
@@ -155,11 +134,6 @@ class Messages_Config:
     play_at_date: str = "am **__{date}__**"
 
     play_request_reminder: str = "REMINDER: Der abonnierte Play-Request geht in {minutes} Minuten los!"
-    clash_create = "{role_mention}\nAm {date} ist wieder LoL Clash. Reagiert hier, zum dem Clash Team beizutreten."
-    clash_full: str = (
-        "Das Clash Team von {creator} für den {time} ist jetzt voll."
-        "Das Team besteht aus folgenden Mitgliedern:\n{team}"
-    )
 
     bans: str = (
         "If you want to receive the best bans"
@@ -182,6 +156,11 @@ class Messages_Config:
     highlight_leaderboard_description: str = "Vote for the best highlights in {highlight_channel_mention}."
     highlight_leaderboard_footer: str = "Only the last {limit} highlights can be taken in account."
     place: str = "Place"
+
+    # deprecated but need to be manually deleted from config before deleting from this class
+    create_internal_play_request: str = ""
+    clash_create: str = ""
+    clash_full: str = ""
 
 
 @dataclasses.dataclass
@@ -233,12 +212,14 @@ class Channel_Ids:
     team_2: int = None
     play_request: int = None
 
-    create_team_voice: List[int] = dataclasses.field(default_factory=list)
     bot: List[int] = dataclasses.field(default_factory=list)
     member_only: List[int] = dataclasses.field(default_factory=list)
     commands_member: List[int] = dataclasses.field(default_factory=list)
     commands: List[int] = dataclasses.field(default_factory=list)
     highlights: List[int] = dataclasses.field(default_factory=list)
+
+    # deprecated but need to be manually deleted from config before deleting from this class
+    create_team_voice: List[int] = dataclasses.field(default_factory=list)
 
     def __post_init__(self):
         """
@@ -353,18 +334,17 @@ class GuildConfig:
         is_invalid = False
         channel_ids_dict = dataclasses.asdict(self.channel_ids)
 
-        # TODO Rewrite: A lot of copy paste
-        for key in channel_ids_dict:
-            if isinstance(channel_ids_dict[key], list):
-                for channel_id in channel_ids_dict[key]:
-                    if not check_if_channel_id_valid(channel_id, valid_ids):
+        for key, value in channel_ids_dict.items():
+            if isinstance(value, list):
+                for channel_id in value:
+                    if channel_id not in valid_ids:
                         is_invalid = True
+                        value.remove(channel_id)
                         yield (key, channel_id)
-                        channel_ids_dict[key].remove(channel_id)
-            elif not check_if_channel_id_valid(channel_ids_dict[key], valid_ids):
+            elif value not in valid_ids:
                 is_invalid = True
-                yield (key, channel_ids_dict[key])
                 channel_ids_dict[key] = None
+                yield (key, value)
 
         if is_invalid:
             self.channel_ids = Channel_Ids(**channel_ids_dict)
@@ -403,7 +383,6 @@ class GuildConfig:
             game = Game(**self.__games[game_name])
             if game.emoji == emoji:
                 return game
-
         raise LookupError("Game not found")
 
     def yield_all_games(self) -> Game:
@@ -472,7 +451,7 @@ class GuildConfig:
         for game in self.__games:
             role_ids[game] = self.get_game(game).role_id
 
-        for role_name in [_role_name for _role_name in role_ids]:
+        for role_name in role_ids.keys():
             if role_name not in role_names:
                 del role_ids[role_name]
 
