@@ -109,6 +109,12 @@ class Toggles:
     highlights: bool = False
     welcome_message: bool = False
 
+    # deprecated but need to be manually deleted from config before deleting from this class
+    auto_delete: bool = False
+    command_only: bool = False
+    auto_react: bool = False
+    auto_dm: bool = False
+
     def __post_init__(self):
         """
         Check if the type of the fields are valid and converts them if not.
@@ -325,6 +331,8 @@ class GuildConfig:
         self.toggles = Toggles(**new_config["toggles"])
         self.__games = new_config["games"]
         self.__commands = new_config["commands"]
+
+        
 
     def check_for_invalid_channel_ids(self, valid_ids: list):
         """
