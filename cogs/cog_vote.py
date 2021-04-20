@@ -5,7 +5,8 @@ import asyncio
 import discord
 from discord.ext import commands
 
-from core import checks, DiscordBot, converters
+from core import checks, converters
+from core.kraut_bot import KrautBot
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +24,7 @@ class Vote:
 class VoteCog(commands.Cog, name="Vote Commands"):
     """Commands and events for the vote command."""
 
-    def __init__(self, bot: DiscordBot.KrautBot):
+    def __init__(self, bot: KrautBot):
         self.bot = bot
         self.votes = {}
 
@@ -125,6 +126,6 @@ class VoteCog(commands.Cog, name="Vote Commands"):
         await self.end_vote(await message.channel.fetch_message(message.id))
 
 
-def setup(bot: DiscordBot.KrautBot):
+def setup(bot: KrautBot):
     bot.add_cog(VoteCog(bot))
     logger.info("Vote cog loaded")

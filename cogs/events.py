@@ -3,7 +3,8 @@ import logging
 import discord
 from discord.ext import commands
 
-from core import DiscordBot, config, exceptions
+from core import config, exceptions
+from core.kraut_bot import KrautBot
 
 
 logger = logging.getLogger(__name__)
@@ -15,7 +16,7 @@ class EventCog(commands.Cog):
     features like Auto-React, Auto-DM etc.
     """
 
-    def __init__(self, bot: DiscordBot.KrautBot):
+    def __init__(self, bot: KrautBot):
         self.bot = bot
 
     @commands.Cog.listener()
@@ -123,7 +124,7 @@ class EventCog(commands.Cog):
         guild_config = self.bot.config.get_guild_config(member.guild.id)
 
         await member.add_roles(
-            member.guild.get_role(guild_config.unsorted_config.guest_id), reason="Assing lowest role"
+            member.guild.get_role(guild_config.unsorted_config.guest_id), reason="Assign lowest role"
         )
 
     @commands.Cog.listener()
@@ -231,6 +232,6 @@ async def update_channels_visibility(
         )
 
 
-def setup(bot: DiscordBot.KrautBot):
+def setup(bot: KrautBot):
     bot.add_cog(EventCog(bot))
     logger.info("Event cogs loaded")

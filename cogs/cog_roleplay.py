@@ -4,7 +4,8 @@ import re
 
 from discord.ext import commands
 
-from core import checks, DiscordBot
+from core import checks
+from core.kraut_bot import KrautBot
 
 
 logger = logging.getLogger(__name__)
@@ -14,7 +15,7 @@ MIN_INFINITE_EXPLOSION_CHAIN_DICE_FACES = 4
 
 
 class RoleplayCog(commands.Cog, name="Roleplay Commands"):
-    def __init__(self, bot: DiscordBot.KrautBot):
+    def __init__(self, bot: KrautBot):
         self.bot = bot
 
     async def cog_check(self, ctx: commands.Context):
@@ -155,6 +156,6 @@ class RoleplayCog(commands.Cog, name="Roleplay Commands"):
         return output
 
 
-def setup(bot: DiscordBot.KrautBot):
+def setup(bot: KrautBot):
     bot.add_cog(RoleplayCog(bot))
     logger.info("Debug cogs loaded")
