@@ -363,7 +363,9 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
     @commands.command(name="purge", hidden=True)
     @commands.check(checks.is_super_user)
     async def purge_(self, ctx: commands.Context, count: int):
-        logger.info(f"{self.bot.get_command_prefix(ctx.guild.id)}purge {count} called in channel {ctx.message.channel.name}")
+        logger.info(
+            f"{self.bot.get_command_prefix(ctx.guild.id)}purge {count} called in channel {ctx.message.channel.name}"
+        )
         last_count_messages = await ctx.message.channel.history(limit=count + 1).flatten()
         for message_ in last_count_messages:
             if not message_.pinned:
