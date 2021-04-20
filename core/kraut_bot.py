@@ -108,7 +108,7 @@ class KrautBot(commands.Bot):
 
     async def logout(self, exit_status_input: int):
         """Abort the bot and sets exit_status to exit_status_input."""
-        await super().logout()
+        await super().close()
         logger.info("Logout")
         self.exit_status = exit_status_input
 

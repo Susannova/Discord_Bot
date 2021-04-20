@@ -95,7 +95,7 @@ def plot_all_summoners_data(summoners_data: dict, filename, enable_xkcd: bool = 
     fig.savefig(filename)
 
 
-class LoopCog(commands.Cog, name="Plot Commands:"):
+class LoopCog(commands.Cog, name="Plot Commands"):
     """A class for background tasks."""
 
     def __init__(self, bot: KrautBot):
