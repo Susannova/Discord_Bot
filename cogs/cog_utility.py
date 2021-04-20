@@ -6,15 +6,16 @@ from typing import List, Optional, Union
 import discord
 from discord.ext import commands
 
-from core import checks, exceptions, timers, DiscordBot
 
+from core import checks, exceptions, timers, help_text
+from core.kraut_bot import KrautBot
 from riot import riot_commands
 
 logger = logging.getLogger(__name__)
 
 
 class UtilityCog(commands.Cog, name="Utility Commands"):
-    def __init__(self, bot: DiscordBot.KrautBot):
+    def __init__(self, bot: KrautBot):
         self.bot = bot
 
     async def cog_check(self, ctx: commands.Context):
@@ -232,7 +233,9 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
 
     @channel.command(name="create")
     @discord.ext.commands.cooldown(rate=3, per=30)
-    async def create_chnnel(self, ctx: commands.Context, kind: str, channel_name: str, user_limit: Optional[int] = 99):
+    async def create_channel(
+        self, ctx: commands.Context, kind: str, channel_name: str, user_limit: Optional[int] = 99
+    ):
         """
         Create a temporary channel.
 
@@ -363,6 +366,6 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
             )
 
 
-def setup(bot: DiscordBot.KrautBot):
+def setup(bot: KrautBot):
     bot.add_cog(UtilityCog(bot))
     logger.info("Utility cogs loaded")
