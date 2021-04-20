@@ -25,9 +25,9 @@ class RiotCog(commands.Cog, name="Riot Commands"):
     @commands.command(name="player")
     async def player_(self, ctx, *summoner_name):
         """
-        Gibt Infos über LoL-Account aus.
+        Returns info about lol account.
 
-        Gibt den Rang und die Winrate eines LoL-Spielers in EUW aus.
+        Returns the rank and winrate of a player on the EUW server.
         """
         logger.debug("!player command called")
         if len(list(summoner_name)) == 0:
@@ -46,7 +46,7 @@ class RiotCog(commands.Cog, name="Riot Commands"):
 
     @commands.command(name="smurf")
     async def smurf_(self, ctx, summoner_name: str):
-        """Überprüft ob ein Spieler ein Smurf ist."""
+        """Checks if a player is a smurf."""
         logger.debug("!smurf command called")
         await ctx.send(
             riot_commands.get_smurf(
@@ -61,11 +61,7 @@ class RiotCog(commands.Cog, name="Riot Commands"):
     @commands.command(name="bans")
     @discord.ext.commands.cooldown(rate=1, per=5)
     async def bans_(self, ctx: commands.Context, team_names: commands.Greedy[str]):
-        """
-        Bestimmt Bans für LoL-Team.
-
-        Bestimmt die besten Bans für ein 5er LoL-Team
-        """
+        """Determines the five best champion bans against a 5-man lol team."""
         logger.debug("!bans command called")
         folder_name = self.bot.config.get_guild_config(ctx.guild.id).folders_and_files.folder_champ_spliced.format(
             guild_id=ctx.guild.id
@@ -78,10 +74,11 @@ class RiotCog(commands.Cog, name="Riot Commands"):
     @commands.command(name="clash")
     async def clash_(self, ctx: commands.Context):
         """
-        Gibt die op.gg Namen des Clashteams aus.
+        Returns the op.gg names of all clash team members.
 
-        Liest aus einen Screenshot die Namen des Clashteams aus und gibt ihre op.gg-Links aus.
-        Der Screenshot muss sich im Anhang befinden.
+
+        Reads a screenshot and returns the names and the op.gg links of all clash team members.
+        The screenshot has to be attached to the command messsage.
         """
         logger.debug("!clash command called")
 
