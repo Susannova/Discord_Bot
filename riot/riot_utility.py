@@ -3,12 +3,18 @@ import logging
 import shelve
 import time
 import requests
+import random
+import statistics
+from typing import List
+from scipy.stats import norm
+from numpy.random import default_rng
 import urllib.request
 from urllib.error import HTTPError
 
 from core import exceptions, timers
 from core.config import GeneralConfig, GuildConfig
 from core.state import GeneralState
+from riot.summoner import Summoner
 
 logger = logging.getLogger(__name__)
 
@@ -153,3 +159,65 @@ def download_champ_icons(LoL_patch: str, config: GeneralConfig):
         with open(f"{config.folder_champ_icon}{champ}.png", "wb") as file:
             file.write(image.content)
     logger.info("All champ icons were downloaded.")
+
+def fair_teams(players: List[Summoner], iterations: int):
+
+    # Use mean of players as scale of the gaussian distribution
+    # This may be not optimal and needs to be tested!
+    scale = statistics.mean(Summoner)
+
+    # Creat teams
+    team_1 = random.sample(players, int(len(players) / 2))
+    team_2 = [player for player in players if player not in team_1]
+
+    # init random generator and densitiy function
+    rng = default_rng()
+    gaussian_density_function = norm(loc=0, scale=scale)
+
+    # Get mean rank of the teams
+    mean_rank_1 = statistics.mean((summoner.get_rank_value() for summoner in team_1))
+    mean_rank_2 = statistics.mean((summoner.get_rank_value() for summoner in team_2))
+
+    # Get the diff of the mean rank of the teams. This value will be optimized by the function.
+    # A optimal value would be 0.
+    delta_mean = mean_rank_2 - mean_rank_1
+
+    for iteration in range(iterations):
+        # Chose to players from the teams
+        player_1 = random.choice(team_1)
+        player_2 = random.choice(team_2)
+
+        # Calculate rank diff
+        delta_rank = player_2.get_rank_value() - player_1.get_rank_value()
+        # Is this right?
+        delta_mean_swapped = delta_mean - 2 * delta_rank
+        
+        # Calculate probability to swap and compare it to the probability density function
+        # Allow always swaps that decrease the rank diff
+        if(delta_mean_swapped < delta_mean or rng.normal(loc=0, scale=scale) < gaussian_density_function.pdf(delta_mean_swapped)):
+            # Swap players
+            team_2.append(player_1)
+            team_1.remove(player_1)
+            
+            team_1.append(player_2)
+            team_2.remove(player_2)
+            
+            delta_mean = delta_mean_swapped
+        
+    return (team_1, team_2)
+
+if __name__ == "__main__":
+    from riot.summoner import dict_rank
+    
+    rng = default_rng()
+    summoners = []
+    for i in range(10):
+        rank = random.choice(dict_rank.keys())
+        summoners.append(Summoner("Test"))
+        summoners[i].data_league["RANKED_SOLO_5x5"] = {
+            "tier": rank.split("-")[0],
+            "rank":  rank.split("-")[1],
+            "leaguePoints": random.randint(0, 100)
+            }
+    
+    fair_teams(summoners, 20)
