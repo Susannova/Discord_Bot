@@ -76,8 +76,8 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
         if isinstance(error, commands.CommandNotFound):
-            await ctx.send("The command was not found. Avaible commands are:")
-            await ctx.send_help()
+            await ctx.author.send("The command was not found. Available commands are:")
+            await ctx.author.send_help()
         elif isinstance(error, exceptions.FalseChannel):
             text = "This command is not allowed here."
             if error.valid_channels is not None:
