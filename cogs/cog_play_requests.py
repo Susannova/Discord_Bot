@@ -46,7 +46,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
 
         if should_be_empty is not None:
             logger.warning("Something went wrong. Was able to interpret the play request until: %s.", should_be_empty)
-            await ctx.send(
+            await ctx.author.send(
                 f"Something went wrong. I was able to interpret the command until '{should_be_empty}'."
                 f"Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`."
             )
@@ -76,7 +76,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         else:
             play_time = datetime.now()
 
-        message = self.__get_play_request_message(guild_config, games, play_time, is_now, player_needed_num)
+        message = self.__get_play_request_message(ctx, guild_config, games, play_time, is_now, player_needed_num)
         play_request_channel = self.bot.get_channel(guild_config.channel_ids.play_request)
         play_request_message = await play_request_channel.send(
             message, delete_after=guild_config.unsorted_config.auto_delete_after_seconds
