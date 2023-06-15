@@ -96,7 +96,7 @@ class EventCog(commands.Cog):
             await ctx.author.send("Sorry, you are not allowed to use this command.")
         else:
             await ctx.author.send("Sorry, an unknown error has occurred...")
-        await ctx.send(f"Try using ``{self.bot.get_command_prefix(ctx.guild.id)}help`` for available commands.")
+        await ctx.author.send(f"Try using ``{self.bot.get_command_prefix(ctx.guild.id)}help`` for available commands.")
         raise error
 
     @commands.Cog.listener()
