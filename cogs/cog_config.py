@@ -130,6 +130,6 @@ class ConfigCog(commands.Cog, name="Configuration commands"):
         await ctx.send("Done.")
 
 
-def setup(bot: KrautBot):
-    bot.add_cog(ConfigCog(bot))
+async def setup(bot: KrautBot):
+    await bot.add_cog(ConfigCog(bot))
     logger.info("Config cog loaded")

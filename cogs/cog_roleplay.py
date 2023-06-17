@@ -156,6 +156,6 @@ class RoleplayCog(commands.Cog, name="Roleplay Commands"):
         return output
 
 
-def setup(bot: KrautBot):
-    bot.add_cog(RoleplayCog(bot))
+async def setup(bot: KrautBot):
+    await bot.add_cog(RoleplayCog(bot))
     logger.info("Debug cogs loaded")

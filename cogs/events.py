@@ -95,8 +95,9 @@ class EventCog(commands.Cog):
             await ctx.author.send("Sorry, you are not allowed to use this command.")
         else:
             await ctx.author.send("Sorry, an unknown error has occurred...")
+            raise error
         await ctx.author.send(f"Try using ``{self.bot.get_command_prefix(ctx.guild.id)}help`` for available commands.")
-        raise error
+
 
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
@@ -231,6 +232,6 @@ async def update_channels_visibility(
         )
 
 
-def setup(bot: KrautBot):
-    bot.add_cog(EventCog(bot))
+async def setup(bot: KrautBot):
+    await bot.add_cog(EventCog(bot))
     logger.info("Event cogs loaded")
