@@ -6,7 +6,6 @@ Start and define the Discord Bot (`KrautBot`).
 import logging
 import os
 import sys
-import asyncio
 
 logging.basicConfig(
     filename="log/log",
@@ -19,7 +18,6 @@ logger = logging.getLogger("main")
 os.environ["TZ"] = "Europe/Berlin"
 
 import discord
-from discord.ext import commands
 
 from core.kraut_bot import KrautBot
 

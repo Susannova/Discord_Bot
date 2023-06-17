@@ -378,7 +378,7 @@ class GuildConfig:
             Game(name_short=game, name_long=long_name, role_id=role_id, emoji=emoji, category_id=category_id, cog=cog)
         )
 
-    def get_all_game_emojis(self):
+    def yield_all_game_emojis(self):
         """Yield all game emojis."""
         for game in self.__games:
             yield Game(**self.__games[game]).emoji

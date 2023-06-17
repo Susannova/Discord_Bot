@@ -5,6 +5,7 @@ from typing import List, Optional
 
 import discord
 from discord.ext import commands
+from discord import app_commands
 
 from core import checks, converters
 from core.kraut_bot import KrautBot
@@ -22,14 +23,13 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
     async def cog_check(self, ctx: commands.Context):
         return await checks.command_is_allowed(ctx)
 
-    @commands.group()
+    @app_commands.command(name="play")
     async def play(
         self,
-        ctx: commands.Context,
-        games: commands.Greedy[converters.StrToGame],
-        play_time: Optional[converters.StrToTime],
-        player_needed_num: Optional[int] = 0,
-        should_be_empty: Optional[str] = None,
+        interaction: discord.Interaction,
+        games: Optional[str],
+        play_time: Optional[app_commands.Transform[str, converters.StrToTimeTransformer]],
+        players_wanted: Optional[app_commands.Range[int, 1]]
     ):
         """
         Create a play request.
@@ -37,21 +37,11 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         Other players can react to the play request which will notify the other players.
         Five Minutes before the play time, all players will be notified too.
         `play_time` is either a time in the format hh:mm or +xm where x are the minutes relative to now.
-        `player_needed_num` is the amount of players still needed to fill the play-request.
+        `players_wanted` is the amount of players still needed to fill the play-request.
         `should_be_empty` is a string to check if everything worked. Leave this always empty please.
         """
         logger.info("Trying to create a play request")
-        if ctx.invoked_subcommand is not None:
-            return
-
-        if should_be_empty is not None:
-            logger.warning("Something went wrong. Was able to interpret the play request until: %s.", should_be_empty)
-            await ctx.author.send(
-                f"Something went wrong. I was able to interpret the command until '{should_be_empty}'."
-                f" Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`."
-            )
-            raise commands.CommandNotFound("Was not able to interpret the command")
-
+        ctx = await self.bot.get_context(interaction)
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
 
         if not games:
@@ -74,20 +64,23 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
                 return
         else:
             play_time = datetime.now()
+        new_games: List[Game] = []
+        for game_name in games.split(","):
+            new_games.append(ctx.bot.config.get_guild_config(ctx.guild.id).get_game(game_name.strip().upper()))
 
-        message = self.__get_play_request_message(ctx, guild_config, games, play_time, is_now, player_needed_num)
+        message = self.__get_play_request_message(ctx, guild_config, new_games, play_time, is_now, players_wanted)
         play_request_channel = self.bot.get_channel(guild_config.channel_ids.play_request)
         play_request_message = await play_request_channel.send(
             message, delete_after=guild_config.unsorted_config.auto_delete_after_seconds
         )
 
-        _category = [game.name_short for game in games]
+        _category = [game.name_short for game in new_games]
         play_request = PlayRequest(
             play_request_message.id, ctx.message.author.id, category=_category, play_time=play_time
         )
 
         self.bot.state.get_guild_state(ctx.guild.id).add_play_request(play_request)
-        await self.add_auto_reaction(play_request_message, games)
+        await self.add_auto_reaction(play_request_message, new_games)
         await ctx.message.delete(delay=3)
 
         if not is_now:
@@ -136,8 +129,9 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             time=play_time.strftime("%H:%M"),
             date_str=date_str,
         )
-        if player_needed_num > 0 and player_needed_num < 20:
-            message = f"{message} {guild_config.messages.players_needed.format(player_needed_num=player_needed_num)}"
+        if player_needed_num is not None:
+            if player_needed_num > 0 and player_needed_num < 20:
+                message = f"{message} {guild_config.messages.players_needed.format(player_needed_num=player_needed_num)}"
         return message
 
     async def add_auto_reaction(self, play_request_message: discord.Message, games: List[Game]):
@@ -205,7 +199,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             logger.info("Remove reaction from a play_request_author")
             await reaction.remove(user)
         elif (
-            emoji_id in guild_config.get_all_game_emojis()
+            emoji_id in guild_config.yield_all_game_emojis()
             and guild_config.emoji_to_game(emoji_id).name_short in play_request.category
         ):
             play_request.add_subscriber_id(user.id)
