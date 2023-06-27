@@ -212,8 +212,8 @@ class EventCog(commands.Cog):
             await update_channels_visibility(everyone_role, after.channel, guild_config, True)
 
     async def create_channel(
-            self,
-            member: commands.Context,
+        self,
+        member: commands.Context,
     ):
         """
         Create a temporary channel.
@@ -236,16 +236,26 @@ class EventCog(commands.Cog):
                     guild_state.tmp_channel_ids[tmp_channels]["name"],
                     tmp_channels,
                 )
-                logger.warning(exceptions.LimitReachedException("Der Autor hat schon einen temporären Channel erstellt."))
+                logger.warning(
+                    exceptions.LimitReachedException("Der Autor hat schon einen temporären Channel erstellt.")
+                )
                 return
 
         tmp_channel_category = self.bot.get_channel(
             self.bot.config.get_guild_config(member.guild.id).channel_ids.category_temporary
         )
 
-        channel_names = ['Grotte der Freundschaft', 'Peninsula der Begeisterung', 'Archipel der Dankbarkeit', 'Mündung der Gütigkeit', 'Höhle der Leidenschaft']
+        channel_names = [
+            "Grotte der Freundschaft",
+            "Peninsula der Begeisterung",
+            "Archipel der Dankbarkeit",
+            "Mündung der Gütigkeit",
+            "Höhle der Leidenschaft",
+        ]
         channel_name = channel_names[random.randint(0, len(channel_names) - 1)]
-        tmp_channel = await member.guild.create_voice_channel(channel_name, category=tmp_channel_category, user_limit=99)
+        tmp_channel = await member.guild.create_voice_channel(
+            channel_name, category=tmp_channel_category, user_limit=99
+        )
 
         guild_state.tmp_channel_ids[tmp_channel.id] = {
             "timer": timers.start_timer(hrs=12),

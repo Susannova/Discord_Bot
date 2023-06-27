@@ -101,7 +101,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         interaction: discord.Interaction,
         games: Optional[str],
         play_time: Optional[app_commands.Transform[str, converters.StrToTimeTransformer]],
-        players_wanted: Optional[app_commands.Range[int, 1]]
+        players_wanted: Optional[app_commands.Range[int, 1]],
     ):
         """
         Create a play request.
@@ -203,7 +203,9 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         )
         if player_needed_num is not None:
             if player_needed_num > 0 and player_needed_num < 20:
-                message = f"{message} {guild_config.messages.players_needed.format(player_needed_num=player_needed_num)}"
+                message = (
+                    f"{message} {guild_config.messages.players_needed.format(player_needed_num=player_needed_num)}"
+                )
         return message
 
     async def add_auto_reaction(self, play_request_message: discord.Message, games: List[Game]):

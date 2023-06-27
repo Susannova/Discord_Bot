@@ -1,10 +1,9 @@
 import logging
-from typing import Optional, List
+from typing import Optional
 
 
 import discord
 from discord.ext import commands
-from discord import app_commands
 
 from core import checks, converters
 from core.kraut_bot import KrautBot
