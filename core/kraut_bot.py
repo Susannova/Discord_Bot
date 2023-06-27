@@ -7,7 +7,6 @@ import sys
 
 import discord
 from discord.ext import commands
-from discord import app_commands
 
 from core.config import BotConfig
 from core.state import GeneralState
@@ -76,7 +75,7 @@ class KrautBot(commands.Bot):
 
     async def on_ready(self):
         await self.wait_until_ready()
-        
+
     def get_command_prefix(self, guild_id: int):
         """Return the command prefix for the guild."""
         return self.config.get_guild_config(guild_id).unsorted_config.command_prefix

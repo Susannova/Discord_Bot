@@ -23,8 +23,80 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
     async def cog_check(self, ctx: commands.Context):
         return await checks.command_is_allowed(ctx)
 
-    @app_commands.command(name="play")
+    @commands.group()
     async def play(
+        self,
+        ctx: commands.Context,
+        games: commands.Greedy[converters.StrToGame],
+        play_time: Optional[converters.StrToTime],
+        player_needed_num: Optional[int] = 0,
+        should_be_empty: Optional[str] = None,
+    ):
+        """
+        Create a play request.
+
+        Other players can react to the play request which will notify the other players.
+        Five Minutes before the play time, all players will be notified too.
+        `play_time` is either a time in the format hh:mm or +xm where x are the minutes relative to now.
+        `player_needed_num` is the amount of players still needed to fill the play-request.
+        `should_be_empty` is a string to check if everything worked. Leave this always empty please.
+        """
+        logger.info("Trying to create a play request")
+        if ctx.invoked_subcommand is not None:
+            return
+
+        if should_be_empty is not None:
+            logger.warning("Something went wrong. Was able to interpret the play request until: %s.", should_be_empty)
+            await ctx.author.send(
+                f"Something went wrong. I was able to interpret the command until '{should_be_empty}'."
+                f"Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`."
+            )
+            raise ValueError("Was not able to interpret the command")
+
+        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
+
+        if not games:
+            logger.debug("Play request created without a game. Create list of games based on author")
+            games = self.__get_assinged_games(ctx, guild_config)
+            if len(games) == 0:
+                await ctx.send("There were no games given in the play request.")
+                raise ValueError("There were no games given in the play request.")
+
+        is_now = True if play_time is None else False
+
+        if not is_now:
+            if (
+                play_time - datetime.now()
+            ).total_seconds() / 60 > guild_config.unsorted_config.play_now_time_add_limit:
+                logger.warning("Play request denied because of time")
+                await ctx.send(
+                    f"Play requests that are going more than {guild_config.unsorted_config.play_now_time_add_limit}"
+                    f"minutes in the future are not allowed."
+                )
+                return
+        else:
+            play_time = datetime.now()
+
+        message = self.__get_play_request_message(ctx, guild_config, games, play_time, is_now, player_needed_num)
+        play_request_channel = self.bot.get_channel(guild_config.channel_ids.play_request)
+        play_request_message = await play_request_channel.send(
+            message, delete_after=guild_config.unsorted_config.auto_delete_after_seconds
+        )
+
+        _category = [game.name_short for game in games]
+        play_request = PlayRequest(
+            play_request_message.id, ctx.message.author.id, category=_category, play_time=play_time
+        )
+
+        self.bot.state.get_guild_state(ctx.guild.id).add_play_request(play_request)
+        await self.add_auto_reaction(play_request_message, games)
+        await ctx.message.delete(delay=3)
+
+        if not is_now:
+            await play_request.auto_reminder(guild_config=guild_config, bot=self.bot)
+
+    @app_commands.command(name="play")
+    async def slash_play(
         self,
         interaction: discord.Interaction,
         games: Optional[str],
@@ -65,7 +137,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         else:
             play_time = datetime.now()
         new_games: List[Game] = []
-        for game_name in games.split(","):
+        for game_name in games.split(" "):
             new_games.append(ctx.bot.config.get_guild_config(ctx.guild.id).get_game(game_name.strip().upper()))
 
         message = self.__get_play_request_message(ctx, guild_config, new_games, play_time, is_now, players_wanted)
