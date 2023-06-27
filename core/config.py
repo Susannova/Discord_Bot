@@ -225,7 +225,7 @@ class Channel_Ids:
     highlights: List[int] = dataclasses.field(default_factory=list)
 
     # deprecated but need to be manually deleted from config before deleting from this class
-    create_team_voice: List[int] = dataclasses.field(default_factory=list)
+    create_tmp_voice: List[int] = dataclasses.field(default_factory=list)
 
     def __post_init__(self):
         """
@@ -378,7 +378,7 @@ class GuildConfig:
             Game(name_short=game, name_long=long_name, role_id=role_id, emoji=emoji, category_id=category_id, cog=cog)
         )
 
-    def get_all_game_emojis(self):
+    def yield_all_game_emojis(self):
         """Yield all game emojis."""
         for game in self.__games:
             yield Game(**self.__games[game]).emoji

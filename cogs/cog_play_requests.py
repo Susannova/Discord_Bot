@@ -5,6 +5,7 @@ from typing import List, Optional
 
 import discord
 from discord.ext import commands
+from discord import app_commands
 
 from core import checks, converters
 from core.kraut_bot import KrautBot
@@ -58,8 +59,8 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             logger.debug("Play request created without a game. Create list of games based on author")
             games = self.__get_assinged_games(ctx, guild_config)
             if len(games) == 0:
-                raise ValueError("There were no games given in the play request.")
                 await ctx.send("There were no games given in the play request.")
+                raise ValueError("There were no games given in the play request.")
 
         is_now = True if play_time is None else False
 
@@ -89,6 +90,69 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
 
         self.bot.state.get_guild_state(ctx.guild.id).add_play_request(play_request)
         await self.add_auto_reaction(play_request_message, games)
+        await ctx.message.delete(delay=3)
+
+        if not is_now:
+            await play_request.auto_reminder(guild_config=guild_config, bot=self.bot)
+
+    @app_commands.command(name="play")
+    async def slash_play(
+        self,
+        interaction: discord.Interaction,
+        games: Optional[str],
+        play_time: Optional[app_commands.Transform[str, converters.StrToTimeTransformer]],
+        players_wanted: Optional[app_commands.Range[int, 1]],
+    ):
+        """
+        Create a play request.
+
+        Other players can react to the play request which will notify the other players.
+        Five Minutes before the play time, all players will be notified too.
+        `play_time` is either a time in the format hh:mm or +xm where x are the minutes relative to now.
+        `players_wanted` is the amount of players still needed to fill the play-request.
+        `should_be_empty` is a string to check if everything worked. Leave this always empty please.
+        """
+        logger.info("Trying to create a play request")
+        ctx = await self.bot.get_context(interaction)
+        guild_config = self.bot.config.get_guild_config(ctx.guild.id)
+
+        if not games:
+            logger.debug("Play request created without a game. Create list of games based on author")
+            games = self.__get_assinged_games(ctx, guild_config)
+            if len(games) == 0:
+                raise ValueError("There were no games given in the play request.")
+
+        is_now = True if play_time is None else False
+
+        if not is_now:
+            if (
+                play_time - datetime.now()
+            ).total_seconds() / 60 > guild_config.unsorted_config.play_now_time_add_limit:
+                logger.warning("Play request denied because of time")
+                await ctx.send(
+                    f"Play requests that are going more than {guild_config.unsorted_config.play_now_time_add_limit}"
+                    f"minutes in the future are not allowed."
+                )
+                return
+        else:
+            play_time = datetime.now()
+        new_games: List[Game] = []
+        for game_name in games.split(" "):
+            new_games.append(ctx.bot.config.get_guild_config(ctx.guild.id).get_game(game_name.strip().upper()))
+
+        message = self.__get_play_request_message(ctx, guild_config, new_games, play_time, is_now, players_wanted)
+        play_request_channel = self.bot.get_channel(guild_config.channel_ids.play_request)
+        play_request_message = await play_request_channel.send(
+            message, delete_after=guild_config.unsorted_config.auto_delete_after_seconds
+        )
+
+        _category = [game.name_short for game in new_games]
+        play_request = PlayRequest(
+            play_request_message.id, ctx.message.author.id, category=_category, play_time=play_time
+        )
+
+        self.bot.state.get_guild_state(ctx.guild.id).add_play_request(play_request)
+        await self.add_auto_reaction(play_request_message, new_games)
         await ctx.message.delete(delay=3)
 
         if not is_now:
@@ -137,8 +201,11 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             time=play_time.strftime("%H:%M"),
             date_str=date_str,
         )
-        if player_needed_num > 0 and player_needed_num < 20:
-            message = f"{message} {guild_config.messages.players_needed.format(player_needed_num=player_needed_num)}"
+        if player_needed_num is not None:
+            if player_needed_num > 0 and player_needed_num < 20:
+                message = (
+                    f"{message} {guild_config.messages.players_needed.format(player_needed_num=player_needed_num)}"
+                )
         return message
 
     async def add_auto_reaction(self, play_request_message: discord.Message, games: List[Game]):
@@ -157,7 +224,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         guild_id = message.guild.id
         guild_config = self.bot.config.get_guild_config(guild_id)
         if message.channel.id == guild_config.channel_ids.play_request:
-            self.__handle_bot_sent_message(message)
+            await self.__handle_bot_sent_message(message)
             if not message.pinned:
                 delay = guild_config.unsorted_config.auto_delete_after_seconds
                 guild_state = self.bot.state.get_guild_state(message.guild.id)
@@ -206,7 +273,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             logger.info("Remove reaction from a play_request_author")
             await reaction.remove(user)
         elif (
-            emoji_id in guild_config.get_all_game_emojis()
+            emoji_id in guild_config.yield_all_game_emojis()
             and guild_config.emoji_to_game(emoji_id).name_short in play_request.category
         ):
             play_request.add_subscriber_id(user.id)
@@ -271,6 +338,6 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             play_request.remove_subscriber_id(user.id)
 
 
-def setup(bot: KrautBot):
-    bot.add_cog(PlayRequestsCog(bot))
+async def setup(bot: KrautBot):
+    await bot.add_cog(PlayRequestsCog(bot))
     logger.info("Play request cogs loaded")
