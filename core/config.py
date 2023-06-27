@@ -225,7 +225,7 @@ class Channel_Ids:
     highlights: List[int] = dataclasses.field(default_factory=list)
 
     # deprecated but need to be manually deleted from config before deleting from this class
-    create_team_voice: List[int] = dataclasses.field(default_factory=list)
+    create_tmp_voice: List[int] = dataclasses.field(default_factory=list)
 
     def __post_init__(self):
         """

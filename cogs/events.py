@@ -6,6 +6,7 @@ from discord.ext import commands
 from core import config, exceptions
 from core import timers
 from core.kraut_bot import KrautBot
+import random
 
 
 logger = logging.getLogger(__name__)
@@ -99,7 +100,6 @@ class EventCog(commands.Cog):
             raise error
         await ctx.author.send(f"Try using ``{self.bot.get_command_prefix(ctx.guild.id)}help`` for available commands.")
 
-
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
         logger.info("Joined to new server %s with id %s!", guild.name, guild.id)
@@ -120,7 +120,6 @@ class EventCog(commands.Cog):
         Automatically assign the lowest role to
         anyone that joins the server.
         """
-
         logger.info("New member joined: %s", member.name)
         guild_config = self.bot.config.get_guild_config(member.guild.id)
 
@@ -203,7 +202,7 @@ class EventCog(commands.Cog):
         guild_config = self.bot.config.get_guild_config(member.guild.id)
         # Checks if the user changed the channel and returns if the user didn't
         if after.channel is not None:
-            if after.channel.id == 1119761596487577720:
+            if after.channel.id in self.bot.config.get_guild_config(member.guild.id).channel_ids.create_tmp_voice:
                 await self.create_channel(member)
         if before.channel == after.channel:
             return
@@ -237,17 +236,15 @@ class EventCog(commands.Cog):
                     guild_state.tmp_channel_ids[tmp_channels]["name"],
                     tmp_channels,
                 )
-                # for voice_client in self.bot.voice_clients:
-                #     if voice_client.user.id == member.id:
-                #         await voice_client.disconnect()
-                logger.warning(exceptions.LimitReachedException("Der Autor hat schon einen temprorären Channel erstellt."))
+                logger.warning(exceptions.LimitReachedException("Der Autor hat schon einen temporären Channel erstellt."))
                 return
 
         tmp_channel_category = self.bot.get_channel(
             self.bot.config.get_guild_config(member.guild.id).channel_ids.category_temporary
         )
 
-        channel_name = f'voice_{len(guild_state.tmp_channel_ids)+1}'
+        channel_names = ['Grotte der Freundschaft', 'Peninsula der Begeisterung', 'Archipel der Dankbarkeit', 'Mündung der Gütigkeit', 'Höhle der Leidenschaft']
+        channel_name = channel_names[random.randint(0, len(channel_names) - 1)]
         tmp_channel = await member.guild.create_voice_channel(channel_name, category=tmp_channel_category, user_limit=99)
 
         guild_state.tmp_channel_ids[tmp_channel.id] = {
@@ -257,7 +254,6 @@ class EventCog(commands.Cog):
             "name": channel_name,
         }
         await member.move_to(tmp_channel)
-       
 
 
 async def update_channels_visibility(
