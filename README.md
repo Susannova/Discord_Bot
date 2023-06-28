@@ -77,7 +77,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     restart: unless-stopped
     build:
-      context: https://github.com/Susannova/Discord_Bot.git#Beta
+      context: https://github.com/Susannova/Discord_Bot.git#docker
 ```
 
 In this example, the config of the bot must be copied to the directory /etc/Discord_bot/config/!
