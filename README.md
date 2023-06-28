@@ -61,3 +61,23 @@ Not all commands are listed here.
 - `?version`
 - `?reload-ext extension`
 - `?end [abort]`
+
+## Docker
+You can use the following docker-compose.yaml file:
+
+```yaml
+version: '3'
+services:
+  discordbot:
+    container_name: discordbot
+    volumes:
+      - /etc/Discord_Bot/config:/usr/src/Discord_Bot/config
+      - /etc/Discord_Bot/log:/usr/src/Discord_Bot/log
+      - /etc/Discord_Bot/db:/usr/src/Discord_Bot/db
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    build:
+      context: https://github.com/Susannova/Discord_Bot.git#Beta
+```
+
+In this example, the config of the bot must be copied to the directory /etc/Discord_bot/config/!
