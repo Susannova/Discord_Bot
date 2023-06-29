@@ -538,6 +538,8 @@ class BotConfig:
         if filename is None:
             filename = self.general_config.config_file
 
+        config_dict = BotConfig(update_config=False).asdict()
+
         try:
             config_dict = json.load(open(filename, "r"))
         except FileNotFoundError:
