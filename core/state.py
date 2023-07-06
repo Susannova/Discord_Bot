@@ -113,7 +113,11 @@ class GeneralState:
 
     def get_version(self):
         """Return the git master head."""
-        version_file = open("./.git/refs/heads/master", "r")
+        try:
+            version_file = open("./.git/refs/heads/master", "r")
+        except:
+            logger.warning("Can't get git commit id")
+            return "???"
         return version_file.read()[:7]
 
     def write_state_to_file(self):
