@@ -243,9 +243,10 @@ class EventCog(commands.Cog):
             self.bot.config.get_guild_config(member.guild.id).channel_ids.category_temporary
         )
 
-        channel_names = ['Grotte der Freundschaft', 'Peninsula der Begeisterung', 'Archipel der Dankbarkeit', 'Mündung der Gütigkeit', 'Höhle der Leidenschaft']
-        channel_name = channel_names[random.randint(0, len(channel_names) - 1)]
-        tmp_channel = await member.guild.create_voice_channel(channel_name, category=tmp_channel_category, user_limit=99)
+        channel_name = self.get_random_channel_name()
+        tmp_channel = await member.guild.create_voice_channel(
+            channel_name, category=tmp_channel_category, user_limit=99
+        )
 
         guild_state.tmp_channel_ids[tmp_channel.id] = {
             "timer": timers.start_timer(hrs=12),
@@ -254,6 +255,12 @@ class EventCog(commands.Cog):
             "name": channel_name,
         }
         await member.move_to(tmp_channel)
+
+    def get_random_channel_name(self):
+        prefix = ["Grotte", "Peninsula", "Archipel", "Mündung", "Höhle"]
+        suffix = ["der Freundschaft", "der Begeisterung", "des Danks", "der Güte", "der Passion"]
+        channel_name = f"{prefix[random.randint(0, len(prefix) - 1)]} {suffix[random.randint(0, len(suffix) - 1)]}"
+        return channel_name
 
 
 async def update_channels_visibility(
