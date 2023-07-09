@@ -217,12 +217,15 @@ class Channel_Ids:
     team_1: int = None
     team_2: int = None
     play_request: int = None
-    create_tmp_voice: int = None
+
     bot: List[int] = dataclasses.field(default_factory=list)
     member_only: List[int] = dataclasses.field(default_factory=list)
     commands_member: List[int] = dataclasses.field(default_factory=list)
     commands: List[int] = dataclasses.field(default_factory=list)
     highlights: List[int] = dataclasses.field(default_factory=list)
+
+    # deprecated but need to be manually deleted from config before deleting from this class
+    create_tmp_voice: List[int] = dataclasses.field(default_factory=list)
 
     def __post_init__(self):
         """

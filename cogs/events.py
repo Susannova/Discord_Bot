@@ -202,7 +202,7 @@ class EventCog(commands.Cog):
         guild_config = self.bot.config.get_guild_config(member.guild.id)
         # Checks if the user changed the channel and returns if the user didn't
         if after.channel is not None:
-            if after.channel.id == self.bot.config.get_guild_config(member.guild.id).channel_ids.create_tmp_voice:
+            if after.channel.id in self.bot.config.get_guild_config(member.guild.id).channel_ids.create_tmp_voice:
                 await self.create_channel(member)
         if before.channel == after.channel:
             return
