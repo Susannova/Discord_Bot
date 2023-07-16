@@ -17,6 +17,7 @@ class KrautBot(commands.Bot):
 
     config = BotConfig()
     BOT_TOKEN = config.general_config.discord_token
+
     exit_status = 1
 
     sending_message = False
@@ -26,9 +27,9 @@ class KrautBot(commands.Bot):
         Set the Command Prefix and then
         call the `__init__` method of the `commands.Bot` class.
         """
-        intents = discord.Intents.all()
+        intents = discord.Intents.default()
         intents.members = True
-        intents.message_content = True
+
         super().__init__(command_prefix=get_command_prefix, intents=intents)
 
         help_command_ = commands.DefaultHelpCommand()
@@ -50,31 +51,6 @@ class KrautBot(commands.Bot):
             self.state = GeneralState(self.config)
             for guild in self.guilds:
                 self.state.add_guild_state(guild.id)
-
-    async def setup_hook(self):
-        try:
-            await self.load_extension("cogs.cog_config")
-            await self.load_extension("cogs.cog_debug")
-            await self.load_extension("cogs.cog_play_requests")
-            await self.load_extension("cogs.cog_vote")
-            await self.load_extension("cogs.cog_utility")
-            await self.load_extension("cogs.events")
-            await self.load_extension("cogs.cog_tasks")
-            await self.load_extension("cogs.cog_roleplay")
-            await self.tree.sync()
-
-            for guild_id in self.config.get_all_guild_ids():
-                for cog in self.config.get_guild_config(guild_id=guild_id).yield_game_cogs():
-                    try:
-                        await self.load_extension(cog)
-                    except commands.ExtensionAlreadyLoaded:
-                        pass
-        except discord.LoginFailure:
-            logger.exception("Failed to login due to improper Token.")
-            self.exit_status = 2
-
-    async def on_ready(self):
-        await self.wait_until_ready()
 
     def get_command_prefix(self, guild_id: int):
         """Return the command prefix for the guild."""

@@ -126,6 +126,6 @@ class VoteCog(commands.Cog, name="Vote Commands"):
         await self.end_vote(await message.channel.fetch_message(message.id))
 
 
-async def setup(bot: KrautBot):
-    await bot.add_cog(VoteCog(bot))
+def setup(bot: KrautBot):
+    bot.add_cog(VoteCog(bot))
     logger.info("Vote cog loaded")

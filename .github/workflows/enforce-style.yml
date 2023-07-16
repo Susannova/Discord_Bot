@@ -15,16 +15,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-python@v4
-
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.7.6
+      uses: actions/setup-python@v2
       with:
-        python-version: '3.9.17' 
-        cache: 'pip' # caching pip dependencies
-
+        python-version: 3.7.6
     - name: Install dependencies
       run: |
-        pip install -r requirements.txt
+        python -m pip install --upgrade pip
+        pip install flake8 pytest black
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
     - name: Lint with flake8
       run: |
         # stop the build if there are Python syntax errors or undefined names

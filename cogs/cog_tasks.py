@@ -314,6 +314,6 @@ class LoopCog(commands.Cog, name="Plot Commands"):
         return summoners_data
 
 
-async def setup(bot: KrautBot):
-    await bot.add_cog(LoopCog(bot))
+def setup(bot: KrautBot):
+    bot.add_cog(LoopCog(bot))
     logger.info("Loop cogs loaded")

@@ -1,7 +1,6 @@
 import logging
 from typing import Optional
 
-
 import discord
 from discord.ext import commands
 
@@ -110,6 +109,6 @@ class DebugCog(commands.Cog, name="Debug commands"):
             self.bot.sending_message = False
 
 
-async def setup(bot: KrautBot):
-    await bot.add_cog(DebugCog(bot))
+def setup(bot: KrautBot):
+    bot.add_cog(DebugCog(bot))
     logger.info("Debug cogs loaded")

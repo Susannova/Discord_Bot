@@ -178,6 +178,6 @@ class RiotCog(commands.Cog, name="Riot Commands"):
         await message_wait.delete()
 
 
-async def setup(bot: KrautBot):
-    await bot.add_cog(RiotCog(bot))
+def setup(bot: KrautBot):
+    bot.add_cog(RiotCog(bot))
     logger.info("Riot cogs loaded")

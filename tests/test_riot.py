@@ -42,6 +42,7 @@ class TestRiot(unittest.TestCase):
         self.assertEqual(riot.get_champion_name_by_id(555), "Pyke")
 
     def test_update_player(self):
+
         riot.update_player("test", self.data_set_name, self.data)
         self.assertEqual(getattr(self.players[0], self.data_set_name), self.data)
 

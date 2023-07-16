@@ -369,6 +369,6 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
             )
 
 
-async def setup(bot: KrautBot):
-    await bot.add_cog(UtilityCog(bot))
+def setup(bot: KrautBot):
+    bot.add_cog(UtilityCog(bot))
     logger.info("Utility cogs loaded")
