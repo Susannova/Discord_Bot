@@ -1,3 +1,5 @@
+[![Code Style Check](https://github.com/Susannova/Discord_Bot/actions/workflows/enforce-style.yml/badge.svg?branch=style-black)](https://github.com/Susannova/Discord_Bot/actions/workflows/enforce-style.yml)
+
 # Discord Bot
 
 The discord bot can run on multiple servers at the same time. Every server has it's own config, that can be set with ``config``.

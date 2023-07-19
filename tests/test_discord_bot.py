@@ -1,12 +1,9 @@
-import sys
-import os
 import unittest
-import discord_bot
+
 
 class TestRiot(unittest.TestCase):
+    pass
 
-    # def test_
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
