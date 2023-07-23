@@ -76,8 +76,7 @@ class EventCog(commands.Cog):
     @commands.Cog.listener()
     async def on_command_error(self, ctx: commands.Context, error: commands.CommandError):
         if isinstance(error, commands.CommandNotFound):
-            await ctx.send("The command was not found. Avaible commands are:")
-            await ctx.send_help()
+            await ctx.author.send("The command was not found.")
         elif isinstance(error, exceptions.FalseChannel):
             text = "This command is not allowed here."
             if error.valid_channels is not None:
@@ -89,14 +88,14 @@ class EventCog(commands.Cog):
                         if ctx.author in self.bot.get_channel(channel_id).members
                     )
                 )
-            await ctx.send(text)
+            await ctx.author.send(text)
         elif isinstance(error, commands.DisabledCommand):
-            await ctx.send("This command is currently disabled.")
+            await ctx.author.send("This command is currently disabled.")
         elif isinstance(error, commands.MissingAnyRole):
-            await ctx.send("Sorry, you are not allowed to use this command.")
+            await ctx.author.send("Sorry, you are not allowed to use this command.")
         else:
-            await ctx.send("Sorry, an unknown error has occurred...")
-        await ctx.send(f"Try ``{self.bot.get_command_prefix(ctx.guild.id)}help`` for avaible commands.")
+            await ctx.author.send("Sorry, an unknown error has occurred...")
+        await ctx.author.send(f"Try using ``{self.bot.get_command_prefix(ctx.guild.id)}help`` for available commands.")
         raise error
 
     @commands.Cog.listener()
