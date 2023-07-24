@@ -80,8 +80,8 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         message = self.__get_play_request_message(ctx, guild_config, games, play_time, is_now, player_needed_num)
         play_request_channel = self.bot.get_channel(guild_config.channel_ids.play_request)
         await play_request_channel.send(
-            "Please use the slash command instead: \"/play\".",
-            delete_after=guild_config.unsorted_config.auto_delete_after_seconds
+            'Please use the slash command instead: "/play".',
+            delete_after=guild_config.unsorted_config.auto_delete_after_seconds,
         )
         play_request_message = await play_request_channel.send(
             message, delete_after=guild_config.unsorted_config.auto_delete_after_seconds
@@ -105,7 +105,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         interaction: discord.Interaction,
         games: Optional[str],
         play_time: Optional[app_commands.Transform[str, converters.StrToTimeTransformer]],
-        players_wanted: Optional[app_commands.Range[int, 1]]
+        players_wanted: Optional[app_commands.Range[int, 1]],
     ):
         """
         Create a play request.
@@ -207,7 +207,9 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         )
         if player_needed_num is not None:
             if player_needed_num > 0 and player_needed_num < 20:
-                message = f"{message} {guild_config.messages.players_needed.format(player_needed_num=player_needed_num)}"
+                message = (
+                    f"{message} {guild_config.messages.players_needed.format(player_needed_num=player_needed_num)}"
+                )
         return message
 
     async def add_auto_reaction(self, play_request_message: discord.Message, games: List[Game]):
