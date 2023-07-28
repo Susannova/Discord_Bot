@@ -98,7 +98,6 @@ class EventCog(commands.Cog):
             raise error
         await ctx.author.send(f"Try using ``{self.bot.get_command_prefix(ctx.guild.id)}help`` for available commands.")
 
-
     @commands.Cog.listener()
     async def on_guild_join(self, guild: discord.Guild):
         logger.info("Joined to new server %s with id %s!", guild.name, guild.id)
