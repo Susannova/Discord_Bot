@@ -48,9 +48,9 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             logger.warning("Something went wrong. Was able to interpret the play request until: %s.", should_be_empty)
             await ctx.author.send(
                 f"Something went wrong. I was able to interpret the command until '{should_be_empty}'."
-                f"Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`."
+                f" Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`."
             )
-            raise ValueError("Was not able to interpret the command")
+            raise commands.CommandNotFound("Was not able to interpret the command")
 
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
 
@@ -59,7 +59,6 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             games = self.__get_assinged_games(ctx, guild_config)
             if len(games) == 0:
                 raise ValueError("There were no games given in the play request.")
-                await ctx.send("There were no games given in the play request.")
 
         is_now = True if play_time is None else False
 
@@ -157,7 +156,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         guild_id = message.guild.id
         guild_config = self.bot.config.get_guild_config(guild_id)
         if message.channel.id == guild_config.channel_ids.play_request:
-            self.__handle_bot_sent_message(message)
+            await self.__handle_bot_sent_message(message)
             if not message.pinned:
                 delay = guild_config.unsorted_config.auto_delete_after_seconds
                 guild_state = self.bot.state.get_guild_state(message.guild.id)
@@ -271,6 +270,6 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             play_request.remove_subscriber_id(user.id)
 
 
-def setup(bot: KrautBot):
-    bot.add_cog(PlayRequestsCog(bot))
+async def setup(bot: KrautBot):
+    await bot.add_cog(PlayRequestsCog(bot))
     logger.info("Play request cogs loaded")

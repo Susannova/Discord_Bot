@@ -3,8 +3,10 @@ __pycache__
 
 env
 .env
+.venv/
 
 log/log
 db/*
+config/configuration.json
 
 local_token.txt
