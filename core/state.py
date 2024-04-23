@@ -172,12 +172,12 @@ class GeneralState:
         """
         Return the guild state.
 
-        Raises a `KeyError` if guild does not exist.
+        Creates and returns a new guild state if it doesnt exist.
         """
         if not self.check_if_guild_exists(guild_id):
-            raise KeyError(f"{guild_id} does not exists!.")
-        else:
-            return self.__guilds_state[guild_id]
+            self.add_guild_state(guild_id)
+
+        return self.__guilds_state[guild_id]
 
     def check_if_guild_exists(self, guild_id: int) -> bool:
         if guild_id in self.__guilds_state:

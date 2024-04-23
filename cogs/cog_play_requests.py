@@ -79,10 +79,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
 
         message = self.__get_play_request_message(ctx, guild_config, games, play_time, is_now, player_needed_num)
         play_request_channel = self.bot.get_channel(guild_config.channel_ids.play_request)
-        await play_request_channel.send(
-            'Please use the slash command instead: "/play".',
-            delete_after=guild_config.unsorted_config.auto_delete_after_seconds,
-        )
+
         play_request_message = await play_request_channel.send(
             message, delete_after=guild_config.unsorted_config.auto_delete_after_seconds
         )
@@ -120,7 +117,7 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
         ctx = await self.bot.get_context(interaction)
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
 
-        if not games:
+        if not games or games == "ALL":
             logger.debug("Play request created without a game. Create list of games based on author")
             games = self.__get_assinged_games(ctx, guild_config)
             if len(games) == 0:
