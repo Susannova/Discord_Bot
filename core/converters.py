@@ -4,7 +4,7 @@ import datetime
 from discord.ext import commands
 from discord import app_commands, Interaction
 
-from core.config import Game
+from core.config.config_models.game import Game
 
 
 class ArgsToDict(commands.Converter):
@@ -23,9 +23,11 @@ class ArgsToDict(commands.Converter):
         # The value is either a string or a list. Short but really ugly..
         dict_list = (
             (
-                key_val_str
-                if re.fullmatch(r"[\[].*[\]]", key_val_str) is None
-                else [item for item in re.findall(r"[^,\[\]]+", key_val_str)]
+                (
+                    key_val_str
+                    if re.fullmatch(r"[\[].*[\]]", key_val_str) is None
+                    else [item for item in re.findall(r"[^,\[\]]+", key_val_str)]
+                )
                 for key_val_str in arg.split(":")
             )
             for arg in re.findall(r"[^,]*?:[\[].*?[\]]|[^,]*?:[^\[\],]*", args_formatted)

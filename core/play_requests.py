@@ -4,7 +4,7 @@ import datetime
 import asyncio
 from typing import Generator, List
 
-from core.config import GuildConfig
+from core.config.guild_config import GuildConfig
 
 logger = logging.getLogger(__name__)
 

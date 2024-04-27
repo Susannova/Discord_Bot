@@ -9,7 +9,8 @@ from discord import app_commands
 
 from core import checks, converters
 from core.kraut_bot import KrautBot
-from core.config import Game, GuildConfig
+from core.config.guild_config import GuildConfig
+from core.config.config_models.game import Game
 
 from core.play_requests import PlayRequest
 

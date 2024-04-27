@@ -1,7 +1,7 @@
 import os
 from PIL import Image
 
-from core.config import BotConfig
+from core.config.bot_config import BotConfig
 
 
 def get_files(champs: tuple, config: BotConfig):

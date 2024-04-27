@@ -7,7 +7,9 @@ import urllib.request
 from urllib.error import HTTPError
 
 from core import exceptions, timers
-from core.config import GeneralConfig, GuildConfig
+from core.config.guild_config import GuildConfig
+from core.config.config_models.general_config import GeneralConfig
+
 from core.state import GeneralState
 
 logger = logging.getLogger(__name__)

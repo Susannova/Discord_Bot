@@ -8,7 +8,7 @@ import sys
 import discord
 from discord.ext import commands
 
-from core.config import BotConfig
+from core.config.bot_config import BotConfig
 from core.state import GeneralState
 
 
@@ -61,6 +61,9 @@ class KrautBot(commands.Bot):
             await self.load_extension("cogs.events")
             await self.load_extension("cogs.cog_tasks")
             await self.load_extension("cogs.cog_roleplay")
+            self.tree.remove_command("play")
+            # await self.tree.a
+            # self.tree.remove_command("test123")
             await self.tree.sync()
 
             for guild_id in self.config.get_all_guild_ids():
@@ -112,6 +115,7 @@ class KrautBot(commands.Bot):
     async def check_channels_id_in_config(self, guild_id: int):
         """Check if the channels set in the config are part of the guild and removes it if not."""
         guild_channel_ids = [channel.id for channel in self.get_guild(guild_id).channels]
+        guild_channel_ids.extend([channel.id for channel in self.get_guild(guild_id).categories])
         guild_config = self.config.get_guild_config(guild_id)
         deleted_channels = [channel for channel in guild_config.check_for_invalid_channel_ids(guild_channel_ids)]
 
@@ -119,7 +123,7 @@ class KrautBot(commands.Bot):
             for deleted_channel in deleted_channels:
                 await self.get_channel(bot_channel_id).send(
                     f"The channel id {deleted_channel[1]} which is a {deleted_channel[0]} channel"
-                    "was removed from the config because the channel does not exist."
+                    " was removed from the config because the channel does not exist."
                 )
 
     def run(self):

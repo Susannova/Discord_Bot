@@ -3,9 +3,10 @@ import logging
 import discord
 from discord.ext import commands
 
-from core import config, exceptions
+from core import exceptions
 from core import timers
 from core.kraut_bot import KrautBot
+from core.config.guild_config import GuildConfig
 import random
 
 
@@ -266,7 +267,10 @@ class EventCog(commands.Cog):
 
 
 async def update_channels_visibility(
-    role: discord.Role, channel: discord.VoiceChannel, guild_config: config.GuildConfig, bool_after_channel=False
+    role: discord.Role,
+    channel: discord.VoiceChannel,
+    guild_config: GuildConfig,
+    bool_after_channel=False,
 ):
     if channel is not None and channel.category.id in guild_config.get_all_category_ids():
         category_channel = channel.category

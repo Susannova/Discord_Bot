@@ -3,7 +3,7 @@ import pickle
 import asyncio
 from typing import List, Dict
 
-from core.config import BotConfig
+from core.config.bot_config import BotConfig
 from core.play_requests import PlayRequest
 
 
@@ -115,7 +115,7 @@ class GeneralState:
         """Return the git master head."""
         try:
             version_file = open("./.git/refs/heads/master", "r")
-        except:
+        except Exception:
             logger.warning("Can't get git commit id")
             return "???"
         return version_file.read()[:7]

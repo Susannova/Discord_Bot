@@ -3,6 +3,7 @@ Module that interacts with the Riot API
 and transforms the received data in
 a user readable way.
 """
+
 import logging
 import shelve
 from concurrent.futures import ThreadPoolExecutor
@@ -13,8 +14,10 @@ import pandas as pd
 from discord.ext import commands
 from riotwatcher import LolWatcher as RiotWatcher
 
-from core import config, exceptions
-from core.config import GeneralConfig, GuildConfig
+from core import exceptions
+from core.config.config_models.general_config import GeneralConfig
+from core.config.guild_config import GuildConfig
+from core.config.bot_config import BotConfig
 from core.state import GeneralState
 from .image_transformation import create_new_image
 from .summoner import Summoner
@@ -59,8 +62,8 @@ def get_best_bans_for_team(team) -> list:
 def get_player_stats(
     discord_user_name,
     summoner_name,
-    guild_config: config.GuildConfig,
-    general_config: config.GeneralConfig,
+    guild_config: GuildConfig,
+    general_config: GeneralConfig,
     guild_id: int,
     queue_type="RANKED_SOLO_5x5",
 ) -> str:
@@ -73,8 +76,8 @@ def get_player_stats(
 def get_smurf(
     discord_user_name,
     summoner_name,
-    guild_config: config.GuildConfig,
-    general_config: config.GeneralConfig,
+    guild_config: GuildConfig,
+    general_config: GeneralConfig,
     guild_id: int,
 ) -> str:
     summoner = get_or_create_summoner(discord_user_name, summoner_name, guild_config, general_config, guild_id)
@@ -87,7 +90,7 @@ def get_smurf(
     )
 
 
-def calculate_bans_for_team(bot_config: config.BotConfig, *names) -> str:
+def calculate_bans_for_team(bot_config: BotConfig, *names) -> str:
     utility.update_champion_json()
     if len(names[0]) != 5:
         logger.exception("Check Failure")
@@ -105,8 +108,8 @@ def calculate_bans_for_team(bot_config: config.BotConfig, *names) -> str:
 def link_account(
     discord_user_name,
     summoner_name,
-    guild_config: config.GuildConfig,
-    general_config: config.GeneralConfig,
+    guild_config: GuildConfig,
+    general_config: GeneralConfig,
     guild_id: int,
 ):
     summoner = create_summoner(summoner_name, general_config, guild_config=guild_config)
@@ -127,7 +130,10 @@ def link_account(
 
 
 def update_linked_account_data_by_discord_user_name(
-    discord_user_name, guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id: int
+    discord_user_name,
+    guild_config: GuildConfig,
+    general_config: GeneralConfig,
+    guild_id: int,
 ):
     summoner = create_summoner(
         utility.read_account(discord_user_name, general_config, guild_id).name,
@@ -141,9 +147,7 @@ def update_linked_account_data_by_discord_user_name(
     return summoner
 
 
-def update_linked_summoners_data(
-    summoners, guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id: int
-):
+def update_linked_summoners_data(summoners, guild_config: GuildConfig, general_config: GeneralConfig, guild_id: int):
     for summoner in summoners:
         yield update_linked_account_data_by_discord_user_name(
             summoner.discord_user_name, guild_config, general_config, guild_id
@@ -153,8 +157,8 @@ def update_linked_summoners_data(
 def get_or_create_summoner(
     discord_user_name,
     summoner_name,
-    guild_config: config.GuildConfig,
-    general_config: config.GeneralConfig,
+    guild_config: GuildConfig,
+    general_config: GeneralConfig,
     guild_id: int,
 ):
     if summoner_name is None:
@@ -166,7 +170,7 @@ def get_or_create_summoner(
         return create_summoner(summoner_name, general_config, guild_config=guild_config)
 
 
-def unlink_account(discord_user_name, guild_config: config.GuildConfig, guild_id: int):
+def unlink_account(discord_user_name, guild_config: GuildConfig, guild_id: int):
     folder_name = guild_config.folders_and_files.database_directory_summoners.format(guild_id=guild_id)
     with shelve.open(f"{folder_name}/{guild_config.folders_and_files.database_name_summoners}", "rc") as database:
         for key in database.keys():
@@ -174,7 +178,7 @@ def unlink_account(discord_user_name, guild_config: config.GuildConfig, guild_id
                 del database[key]
 
 
-def create_leaderboard_embed(guild_config: config.GuildConfig, general_config: config.GeneralConfig, guild_id):
+def create_leaderboard_embed(guild_config: GuildConfig, general_config: GeneralConfig, guild_id):
     summoners = list(utility.read_all_accounts(general_config, guild_config.unsorted_config.guild_id))
     old_summoners = summoners.copy()
     summoners = list(update_linked_summoners_data(summoners, guild_config, general_config, guild_id))
@@ -247,7 +251,7 @@ def create_leaderboard_embed(guild_config: config.GuildConfig, general_config: c
     return _embed
 
 
-def update_state_clash_dates(state: GeneralState, general_config: config.GeneralConfig):
+def update_state_clash_dates(state: GeneralState, general_config: GeneralConfig):
     clash_dates = utility.get_upcoming_clash_dates(general_config, state)
     for clash_date in clash_dates:
         if clash_date not in state.clash_dates:
