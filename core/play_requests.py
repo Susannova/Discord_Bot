@@ -55,7 +55,10 @@ class PlayRequest:
 
         if time_difference > 0:
             await asyncio.sleep(time_difference)
-            for player_id in self.generate_all_players():
+            all_players = list(self.generate_all_players())
+            if len(all_players) <= 1:
+                return
+            for player_id in all_players:
                 player = bot.get_user(player_id)
                 await player.send(
                     guild_config.messages.play_request_reminder.format(
