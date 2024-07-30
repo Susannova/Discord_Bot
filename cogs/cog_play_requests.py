@@ -50,9 +50,9 @@ class PlayRequestsCog(commands.Cog, name="Play-Request Commands"):
             logger.warning("Something went wrong. Was able to interpret the play request until: %s.", should_be_empty)
             await ctx.author.send(
                 f"Something went wrong. I was able to interpret the command until '{should_be_empty}'."
-                f"Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`."
+                f" Try `{self.bot.get_command_prefix(ctx.guild.id)}help play`."
             )
-            raise ValueError("Was not able to interpret the command")
+            raise commands.CommandNotFound("Was not able to interpret the command")
 
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
 
