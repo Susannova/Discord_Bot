@@ -110,6 +110,11 @@ class GuildConfig:
             Game(name_short=game, name_long=long_name, role_id=role_id, emoji=emoji, category_id=category_id, cog=cog)
         )
 
+    def remove_game(self, name_short: str):
+        for game in self.yield_all_games():
+            if name_short == game.name_short:
+                return self.__games.pop(name_short, None)
+
     def yield_all_game_emojis(self):
         """Yield all game emojis."""
         for game in self.__games:

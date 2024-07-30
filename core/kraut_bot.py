@@ -61,6 +61,7 @@ class KrautBot(commands.Bot):
             await self.load_extension("cogs.events")
             await self.load_extension("cogs.cog_tasks")
             await self.load_extension("cogs.cog_roleplay")
+            await self.load_extension("cogs.cog_games")
             self.tree.remove_command("play")
             # await self.tree.a
             # self.tree.remove_command("test123")

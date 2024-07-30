@@ -1,5 +1,7 @@
+from asyncio.log import logger
 import dataclasses
-from core.config.config_utility import auto_conversion
+from typing import List
+from core.config.config_utility import auto_conversion, error_handling_auto_conversion
 
 
 @dataclasses.dataclass
@@ -25,11 +27,5 @@ class UnsortedConfig:
     # TODO Move this stuff in an own class
     game_selector_id: int = None
 
-    def __post_init__(self):
-        """
-        Try to convert false types to the right type.
-
-        Raises a `TypeError` if conversion fails.
-        """
-        for field in dataclasses.fields(self):
-            auto_conversion(self, field)
+    temp_channel_prefix: List[str] = dataclasses.field(default_factory=list)
+    temp_channel_suffix: List[str] = dataclasses.field(default_factory=list)
