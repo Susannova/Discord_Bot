@@ -71,18 +71,22 @@ class GameCog(commands.Cog, name="Game Commands"):
             return
         guild_config.add_game(name_short, name_long, role_id, emoji.id)
         self.bot.config.write_config_to_file()
-        await ctx.send("Game added. Adding reaction to game-selection.")
 
+        game_selection_message = self.get_game_selection_message(ctx, guild_config)
+        await ctx.send(f"Adding reaction to {game_selection_message.channel.mention}.")
+        await game_selection_message.add_reaction(emoji)
+        await ctx.send(f"Game reaction added.")
+
+    async def get_game_selection_message(self, ctx, guild_config):
         channel = discord.utils.get(ctx.guild.channels, id=guild_config.channel_ids.game_selection)
         if not channel:
             await ctx.send("Game selection channel not found.")
-            return
+            return None
         pins = await channel.pins()
         if len(pins) > 0:
-            await pins[0].add_reaction(emoji)
-            await ctx.send(f"Game reaction added in channel {channel.mention}")
-        else:
-            ctx.send("Game reaction could not be added. Pin game selection message.")
+            return pins[0]
+        await ctx.send("Game selection message not found. Please pin it **only**.")
+        return None
 
     @commands.command(name="rm-game")
     @commands.check(checks.is_super_user)
@@ -106,17 +110,10 @@ class GameCog(commands.Cog, name="Game Commands"):
         game = guild_config.get_game(game_name)
 
         if guild_config.remove_game(game_name):
-            channel = discord.utils.get(ctx.guild.channels, id=guild_config.channel_ids.game_selection)
-            if not channel:
-                await ctx.send("Game selection channel not found.")
-                return
-            pins = await channel.pins()
-            if len(pins) > 0:
-                emoji_to_remove = emoji_manager.find_emoji(game.emoji)
-                await pins[0].clear_reaction(emoji_to_remove)
-                await ctx.send(f"Game reaction removed from channel {channel.mention}")
-            else:
-                ctx.send("Game reaction could not be removed. Pin game selection message.")
+            game_selection_message = self.get_game_selection_message(ctx, guild_config)
+            emoji_to_remove = emoji_manager.find_emoji(game.emoji)
+            await game_selection_message.clear_reaction(emoji_to_remove)
+            await ctx.send(f"Game reaction removed from channel {game_selection_message.channel.mention}")
 
             await role_manager.remove_role_by_id(game.role_id)
             await emoji_manager.remove_emoji(game.emoji)
