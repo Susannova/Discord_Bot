@@ -23,6 +23,7 @@ class Channel_Ids:
     play_request: int = None
     create_tmp_voice: int = None
     game_category: int = None
+    game_selection: int = None
     bot: List[int] = dataclasses.field(default_factory=list)
     member_only: List[int] = dataclasses.field(default_factory=list)
     commands_member: List[int] = dataclasses.field(default_factory=list)

@@ -10,3 +10,7 @@ db/*
 config/configuration.json
 
 local_token.txt
+
+data/
+config/configuration.json
+

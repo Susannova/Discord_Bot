@@ -29,6 +29,7 @@ class KrautBot(commands.Bot):
         intents = discord.Intents.all()
         intents.members = True
         intents.message_content = True
+
         super().__init__(command_prefix=get_command_prefix, intents=intents)
 
         help_command_ = commands.DefaultHelpCommand()
@@ -61,10 +62,11 @@ class KrautBot(commands.Bot):
             await self.load_extension("cogs.events")
             await self.load_extension("cogs.cog_tasks")
             await self.load_extension("cogs.cog_roleplay")
+
+            await self.load_extension("cogs.cog_games")
             self.tree.remove_command("play")
-            # await self.tree.a
-            # self.tree.remove_command("test123")
             await self.tree.sync()
+
 
             for guild_id in self.config.get_all_guild_ids():
                 for cog in self.config.get_guild_config(guild_id=guild_id).yield_game_cogs():
@@ -75,6 +77,7 @@ class KrautBot(commands.Bot):
         except discord.LoginFailure:
             logger.exception("Failed to login due to improper Token.")
             self.exit_status = 2
+
 
     async def on_ready(self):
         await self.wait_until_ready()

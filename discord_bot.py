@@ -6,6 +6,7 @@ Start and define the Discord Bot (`KrautBot`).
 import logging
 import os
 import sys
+import asyncio
 
 logging.basicConfig(
     filename="log/log",
