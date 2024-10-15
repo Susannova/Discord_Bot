@@ -7,5 +7,3 @@ numpy
 matplotlib
 pandas
 bs4
-black
-audioop-lts
