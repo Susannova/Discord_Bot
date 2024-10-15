@@ -1,10 +1,11 @@
-discord.py==2.*
+discord.py==2.3
 requests==2.31.0
 riotwatcher==3.1.0
 pytesseract==0.3.2
-Pillow==9.3.0
-numpy==1.18.2
-matplotlib==3.2.1
-pandas==1.0.3
+Pillow
+numpy
+matplotlib
+pandas
 bs4
 black
+audioop-lts
