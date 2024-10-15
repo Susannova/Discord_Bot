@@ -11,7 +11,7 @@ from discord.ext import commands
 
 from core.kraut_bot import KrautBot
 from . import exceptions as _exceptions
-from core.config import GuildConfig
+from core.config.guild_config import GuildConfig
 
 
 async def command_in_bot_channel_and_used_by_admin(ctx: commands.Context) -> bool:

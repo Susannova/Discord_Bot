@@ -19,7 +19,6 @@ logger = logging.getLogger("main")
 os.environ["TZ"] = "Europe/Berlin"
 
 import discord
-from discord.ext import commands
 
 from core.kraut_bot import KrautBot
 

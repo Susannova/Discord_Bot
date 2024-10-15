@@ -3,8 +3,11 @@ import logging
 import discord
 from discord.ext import commands
 
-from core import config, exceptions
+from core import exceptions
+from core import timers
 from core.kraut_bot import KrautBot
+from core.config.guild_config import GuildConfig
+import random
 
 
 logger = logging.getLogger(__name__)
@@ -118,7 +121,6 @@ class EventCog(commands.Cog):
         Automatically assign the lowest role to
         anyone that joins the server.
         """
-
         logger.info("New member joined: %s", member.name)
         guild_config = self.bot.config.get_guild_config(member.guild.id)
 
@@ -200,6 +202,9 @@ class EventCog(commands.Cog):
     ):
         guild_config = self.bot.config.get_guild_config(member.guild.id)
         # Checks if the user changed the channel and returns if the user didn't
+        if after.channel is not None:
+            if after.channel.id == self.bot.config.get_guild_config(member.guild.id).channel_ids.create_tmp_voice:
+                await self.create_channel(member)
         if before.channel == after.channel:
             return
         else:
@@ -207,9 +212,65 @@ class EventCog(commands.Cog):
             await update_channels_visibility(everyone_role, before.channel, guild_config, False)
             await update_channels_visibility(everyone_role, after.channel, guild_config, True)
 
+    async def create_channel(
+        self,
+        member: commands.Context,
+    ):
+        """
+        Create a temporary channel.
+        """
+        guild_state = self.bot.state.get_guild_state(member.guild.id)
+        for tmp_channels in guild_state.tmp_channel_ids:
+            logger.debug(
+                "Check if channel %s with id %s is already created by user %s.",
+                guild_state.tmp_channel_ids[tmp_channels]["name"],
+                tmp_channels,
+                member.name,
+            )
+            if (
+                not guild_state.tmp_channel_ids[tmp_channels]["deleted"]
+                and guild_state.tmp_channel_ids[tmp_channels]["author"] == member.id
+            ):
+                logger.info(
+                    "%s wanted to create a new temporary channel but already has created channel %s with id %s.",
+                    member.name,
+                    guild_state.tmp_channel_ids[tmp_channels]["name"],
+                    tmp_channels,
+                )
+                logger.warning(
+                    exceptions.LimitReachedException("Der Autor hat schon einen temporären Channel erstellt.")
+                )
+                return
+
+        tmp_channel_category = self.bot.get_channel(
+            self.bot.config.get_guild_config(member.guild.id).channel_ids.category_temporary
+        )
+
+        channel_name = self.get_random_channel_name()
+        tmp_channel = await member.guild.create_voice_channel(
+            channel_name, category=tmp_channel_category, user_limit=99
+        )
+
+        guild_state.tmp_channel_ids[tmp_channel.id] = {
+            "timer": timers.start_timer(hrs=12),
+            "author": member.id,
+            "deleted": False,
+            "name": channel_name,
+        }
+        await member.move_to(tmp_channel)
+
+    def get_random_channel_name(self):
+        prefix = ["Grotte", "Peninsula", "Archipel", "Mündung", "Höhle"]
+        suffix = ["der Freundschaft", "der Begeisterung", "des Danks", "der Güte", "der Passion"]
+        channel_name = f"{prefix[random.randint(0, len(prefix) - 1)]} {suffix[random.randint(0, len(suffix) - 1)]}"
+        return channel_name
+
 
 async def update_channels_visibility(
-    role: discord.Role, channel: discord.VoiceChannel, guild_config: config.GuildConfig, bool_after_channel=False
+    role: discord.Role,
+    channel: discord.VoiceChannel,
+    guild_config: GuildConfig,
+    bool_after_channel=False,
 ):
     if channel is not None and channel.category.id in guild_config.get_all_category_ids():
         category_channel = channel.category

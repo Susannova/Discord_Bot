@@ -49,7 +49,8 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         """
         if ctx.author.voice is not None:
             current_voice_channel = ctx.author.voice.channel
-            players_list += current_voice_channel.members
+            players_list = []
+            players_list.append(current_voice_channel.members)
             self.bot.state.get_guild_state(ctx.guild.id).last_channel = current_voice_channel
 
         team1_message, team2_message = self.__get_team_messages(ctx, players_list)
@@ -66,14 +67,15 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         """
         guild_state = self.bot.state.get_guild_state(ctx.guild.id)
 
-        guild_state.team1 = random.sample(players, math.ceil(len(players) / 2))
-        guild_state.team2 = [player for player in players if player not in guild_state.team1]
+        guild_state.team1 = random.sample(players[0], math.ceil(len(players[0]) / 2))
+        guild_state.team2 = [player for player in players[0] if player not in guild_state.team1]
 
         team1_message = (
             [player.mention if isinstance(player, discord.Member) else player for player in guild_state.team1]
             if len(guild_state.team1) > 0
             else ["-"]
         )
+
         team2_message = (
             [player.mention if isinstance(player, discord.Member) else player for player in guild_state.team2]
             if len(guild_state.team2) > 0
@@ -83,7 +85,7 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         return team1_message, team2_message
 
     def __get_create_team_embed(
-        self, ctx: commands.Context, team1_message: str, team2_message: str, has_roles: bool
+        self, ctx: commands.Context, team1_message: List[str], team2_message: List[str], has_roles: bool
     ) -> discord.Embed:
         guild_config = self.bot.config.get_guild_config(ctx.guild.id)
         embed_title = guild_config.messages.team_header
@@ -94,21 +96,22 @@ class UtilityCog(commands.Cog, name="Utility Commands"):
         embed = discord.Embed(title=embed_title, colour=discord.Color.from_rgb(62, 221, 22))
 
         emoji = [
-            self.bot.get_emoji(id=644252873672359946),
-            self.bot.get_emoji(id=644254018377482255),
-            self.bot.get_emoji(id=644252861827514388),
-            self.bot.get_emoji(id=644252853644296227),
-            self.bot.get_emoji(id=644252146023530506),
+            self.bot.get_emoji(644252873672359946),
+            self.bot.get_emoji(644254018377482255),
+            self.bot.get_emoji(644252861827514388),
+            self.bot.get_emoji(644252853644296227),
+            self.bot.get_emoji(644252146023530506),
         ]
-        if has_roles and (len(team1_message) + len(team2_message)) <= 10:
-            team1_message = "\n".join(f"{member} [{emoji[idx]}]" for idx, member in enumerate(team1_message))
-            team2_message = "\n".join(f"{member} [{emoji[idx]}]" for idx, member in enumerate(team2_message))
-        else:
-            team1_message = "\n".join(member for member in team1_message)
-            team2_message = "\n".join(member for member in team2_message)
 
-        embed.add_field(name=team1_title, value=team1_message, inline=True)
-        embed.add_field(name=team2_title, value=team2_message, inline=True)
+        if has_roles and (len(team1_message) + len(team2_message)) <= 10:
+            team1_string = "\n".join(f"{member} [{emoji[idx]}]" for idx, member in enumerate(team1_message))
+            team2_string = "\n".join(f"{member} [{emoji[idx]}]" for idx, member in enumerate(team2_message))
+        else:
+            team1_string = "\n".join(f"{member}" for member in team1_message)
+            team2_string = "\n".join(f"{member}" for member in team2_message)
+
+        embed.add_field(name=team1_title, value=team1_string, inline=True)
+        embed.add_field(name=team2_title, value=team2_string, inline=True)
 
         embed.set_footer(text=f"Move teams into their respective channels and back with: '{command_prefix}team move'")
         return embed

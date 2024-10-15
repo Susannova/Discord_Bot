@@ -3,7 +3,7 @@ import pickle
 import asyncio
 from typing import List, Dict
 
-from core.config import BotConfig
+from core.config.bot_config import BotConfig
 from core.play_requests import PlayRequest
 
 
@@ -113,7 +113,11 @@ class GeneralState:
 
     def get_version(self):
         """Return the git master head."""
-        version_file = open("./.git/refs/heads/master", "r")
+        try:
+            version_file = open("./.git/refs/heads/master", "r")
+        except Exception:
+            logger.warning("Can't get git commit id")
+            return "???"
         return version_file.read()[:7]
 
     def write_state_to_file(self):
@@ -168,12 +172,12 @@ class GeneralState:
         """
         Return the guild state.
 
-        Raises a `KeyError` if guild does not exist.
+        Creates and returns a new guild state if it doesnt exist.
         """
         if not self.check_if_guild_exists(guild_id):
-            raise KeyError(f"{guild_id} does not exists!.")
-        else:
-            return self.__guilds_state[guild_id]
+            self.add_guild_state(guild_id)
+
+        return self.__guilds_state[guild_id]
 
     def check_if_guild_exists(self, guild_id: int) -> bool:
         if guild_id in self.__guilds_state:
