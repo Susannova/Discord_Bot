@@ -63,7 +63,7 @@ def format_summoner_name(name):
 
 def get_current_patch_url(guild_config: GuildConfig):
     current_patch_list = get_current_patch().split(".")
-    return guild_config.messages.patch_notes.format(current_patch_list[0], current_patch_list[1])
+    return guild_config.messages.patch_notes.format(current_patch_list[0] + 10, current_patch_list[1])
 
 
 def get_current_patch() -> str:
